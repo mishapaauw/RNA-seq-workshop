@@ -1,1 +1,1 @@
-{"headings":["quality-control-fastqc","trimming-trimmomatic","mapping-star","bam-and-sam-files","inspecting-the-mapping-on-a-genome-browser","counting-featurecounts","a-note-on-the-specific-tools-used-here","streamlining-read-mapping-procedure"],"entries":[]}
+{"entries":[],"headings":["quality-control-fastqc","trimming-fastp","mapping-star","bam-and-sam-files","inspecting-the-mapping-on-a-genome-browser","counting-featurecounts","a-note-on-the-specific-tools-used-here","streamlining-read-mapping-procedure"]}

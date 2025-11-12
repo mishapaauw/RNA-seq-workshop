@@ -14,7 +14,7 @@ Any bioinformatics project requires setting up the required software. Let's go t
 
 This part is the 'hardcore' bioinformatics part of this workshop. These steps are nearly always performed using **command-line programs**, which can be accessed via the Terminal (macOS, Linux) or WSL (Windows). For this workshop, we prepared a Google Colab environment where we will run the commands. Access to the Google Colab environment requires a Google account.
     
-* [Find the google colab here](https://github.com/maschon0/scPlants_practical0?tab=readme-ov-file) (**TODO**: this is a placeholder from a workshop I followed, I plan to make a similar one for our workshop)
+* [Find the google colab here](https://colab.research.google.com/drive/1jR2Og_qrUVg-VXNsfqJc5eEILcqHJYAC?usp=share_link) 
 
 In reality, you will often have so many samples and reads that you will need access to a compute cluster with more compute power (CPUs), working memory (RAM), and storage space. At the University of Amsterdam, we use [Crunchomics](https://crunchomics-documentation.readthedocs.io/en/latest/). Crunchomics comes with many popular bioinformatics pre-installed, additional programs can be installed using `conda`.
 
@@ -53,4 +53,4 @@ During the workshop, we will **not** have time to install the packages, or to tr
 
 ## Getting the data
 
-**TODO**: for the bioinformatics part, we will use the [following Zenodo archive](https://zenodo.org/records/6325891) 
+The data that will be used in this workshop can be found in the  [following Github repository](https://github.com/mishapaauw/RNA-seq-workshop-materials).

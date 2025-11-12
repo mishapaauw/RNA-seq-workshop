@@ -187,7 +187,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
    
   <ul>
   <li><a href="#quality-control-fastqc" id="toc-quality-control-fastqc" class="nav-link active" data-scroll-target="#quality-control-fastqc">Quality control: <code>fastqc</code></a></li>
-  <li><a href="#trimming-trimmomatic" id="toc-trimming-trimmomatic" class="nav-link" data-scroll-target="#trimming-trimmomatic">Trimming: <code>trimmomatic</code></a></li>
+  <li><a href="#trimming-fastp" id="toc-trimming-fastp" class="nav-link" data-scroll-target="#trimming-fastp">Trimming: <code>fastp</code></a></li>
   <li><a href="#mapping-star" id="toc-mapping-star" class="nav-link" data-scroll-target="#mapping-star">Mapping: <code>STAR</code></a>
   <ul class="collapse">
   <li><a href="#bam-and-sam-files" id="toc-bam-and-sam-files" class="nav-link" data-scroll-target="#bam-and-sam-files">BAM and SAM files</a></li>
@@ -221,7 +221,15 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 </header>
 
 
-<p>The moment is there: you received the FASTQ files from your sequencing provider! Now what?</p>
+<p>The moment is there: you received the FASTQ files from your sequencing provider! …. now what?</p>
+<p>The <code>.fastq</code> files contain your RNA sequencing reads. Our goal is to find out from which genes these reads originate, and whether there are differentially expressed genes between your experimental factors. Before doing that, we need to make sure that the sequencing reads are of good quality, a process called quality control (QC). Additionally, no matter how good the overall quality of the sequencing data is, we will also ‘trim’ our reads to remove bad quality reads and sequencing adapters that may still be present in the sample. So, to summarize, we will do the following steps in this episode:</p>
+<ol type="1">
+<li>Quality control: is my sequencing data of <em>good quality</em>?</li>
+<li>Trimming: removing bad quality reads and sequencing adapters</li>
+<li>Mapping: where in the genome do these reads come from?</li>
+<li>Counting: how many reach originate from each gene?</li>
+</ol>
+<p>The commands in this episode are to be executed in the <a href="https://colab.research.google.com/drive/1jR2Og_qrUVg-VXNsfqJc5eEILcqHJYAC?usp=share_link">associated Google Colab notebook</a>. We will use some basic terminal commands. You don’t need to understand every command, rather, the goal is to become familiar with RNA-seq concepts and steps.</p>
 <section id="quality-control-fastqc" class="level2">
 <h2 class="anchored" data-anchor-id="quality-control-fastqc">Quality control: <code>fastqc</code></h2>
 <p>The first step in the RNA-seq workflow is to assess the quality of the sequencing reads. Sequence reads generated from next-generation sequencing technologies come in the FASTQ file format. This file format evolved from FASTA: it contains sequence data, but also contains quality information. For a single record (sequence read) there are four lines, each of which are described below:</p>
@@ -255,69 +263,111 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 </tr>
 </tbody>
 </table>
+<p>Let’s look at one read. Note that our <code>.fastq</code> files are compressed: they have extension <code>.fastq.gz</code>. Most bioinformatics programs can deal with compressed file, so we don’t need to uncompress them. To have a look at a compressed file on the command line, we can use <code>zcat</code> and then pipe (<code>|</code>) the result into the <code>head</code> function to display the first 4 lines:</p>
+<div class="cell">
+<div class="code-with-filename">
+<div class="code-with-filename-file">
+<pre><strong>bash</strong></pre>
+</div>
+<div class="sourceCode cell-code" id="cb1"><pre class="sourceCode bash code-with-copy"><code class="sourceCode bash"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="fu">zcat</span> reads/sample1.fastq.gz <span class="kw">|</span> <span class="fu">head</span> <span class="at">-n</span> 4</span>
+<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a><span class="ex">@ERR1406259.2</span> HWI-ST1034:108:D1HW4ACXX:1:1101:1627:2208/1</span>
+<span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a><span class="ex">CCGAAACAATCTCTCTCTCGTCGCCGGAAGCAAAAGAAGAATTAAGATAAGCCTCATCCATCCAGTGATGCAAATCACCAACCCATATGGTTTTATTCTCA</span></span>
+<span id="cb1-5"><a href="#cb1-5" aria-hidden="true" tabindex="-1"></a><span class="ex">+</span></span>
+<span id="cb1-6"><a href="#cb1-6" aria-hidden="true" tabindex="-1"></a><span class="ex">CCCFFFFFHHHHHJJJIJJGIIIJJJFJJJJJJJIJIIGIIIJJJHIJJJHGHHHFFEFFFEDEEACDDDDDDDDDDDDDDDDDDDDDED4@BDDDDDEDC</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+</div>
+<p>The fourth line of each read represent the quality score of each basecall, see <a href="https://en.wikipedia.org/wiki/Phred_quality_score#Symbols">Wikipedia</a> for more info. <code>fastqc</code> will use these characters to quantify the quality your read set.</p>
 <p>Let’s run <code>fastqc</code> on one sample:</p>
 <div class="cell">
 <div class="code-with-filename">
 <div class="code-with-filename-file">
 <pre><strong>bash</strong></pre>
 </div>
-<div class="sourceCode cell-code" id="cb1"><pre class="sourceCode bash code-with-copy"><code class="sourceCode bash"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="ex">fastqc</span> <span class="at">-o</span> fastqc /datasets/Arabidopsis_sample1.fq.gz</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="annotated-cell-2"><pre class="sourceCode bash code-annotation-code code-with-copy code-annotated"><code class="sourceCode bash"><button class="code-annotation-anchor" data-target-cell="annotated-cell-2" data-target-annotation="1">1</button><span id="annotated-cell-2-1" class="code-annotation-target"><a href="#annotated-cell-2-1" aria-hidden="true" tabindex="-1"></a><span class="ex">!mkdir</span> fastqc_reports</span>
+<button class="code-annotation-anchor" data-target-cell="annotated-cell-2" data-target-annotation="2">2</button><span id="annotated-cell-2-2" class="code-annotation-target"><a href="#annotated-cell-2-2" aria-hidden="true" tabindex="-1"></a><span class="ex">fastqc</span> <span class="at">-o</span> fastqc_reports reads/sample1.fastq.gz</span><div class="code-annotation-gutter-bg"></div><div class="code-annotation-gutter"></div></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<div class="cell-annotation">
+<dl class="code-annotation-container-hidden code-annotation-container-grid">
+<dt data-target-cell="annotated-cell-2" data-target-annotation="1">1</dt>
+<dd>
+<span data-code-cell="annotated-cell-2" data-code-lines="1" data-code-annotation="1">First we <code>m</code>a<code>k</code>e a <code>dir</code>ectory to store the <code>fastqc</code> reports.</span>
+</dd>
+<dt data-target-cell="annotated-cell-2" data-target-annotation="2">2</dt>
+<dd>
+<span data-code-cell="annotated-cell-2" data-code-lines="2" data-code-annotation="2">We call the <code>fastqc</code> program, tell it to store the output in the fastqc_reports directory, and tell it which sample to use.</span>
+</dd>
+</dl>
 </div>
 </div>
+<p>You’ll see that <code>fastqc</code> created a <code>.html</code> page</p>
 <p>Doing this manually for every sample would be quite tiring, especially when we would have many samples. Let’s write a <code>bash</code> for loop to take care of this for us:</p>
 <div class="cell">
 <div class="code-with-filename">
 <div class="code-with-filename-file">
 <pre><strong>bash</strong></pre>
 </div>
-<div class="sourceCode cell-code" id="annotated-cell-2"><pre class="sourceCode bash code-annotation-code code-with-copy code-annotated"><code class="sourceCode bash"><button class="code-annotation-anchor" data-target-cell="annotated-cell-2" data-target-annotation="1">1</button><span id="annotated-cell-2-1" class="code-annotation-target"><a href="#annotated-cell-2-1" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> filename <span class="kw">in</span>  /datasets/<span class="pp">*</span>.fq.gz</span>
-<span id="annotated-cell-2-2"><a href="#annotated-cell-2-2" aria-hidden="true" tabindex="-1"></a>  <span class="cf">do</span></span>
-<button class="code-annotation-anchor" data-target-cell="annotated-cell-2" data-target-annotation="2">2</button><span id="annotated-cell-2-3" class="code-annotation-target"><a href="#annotated-cell-2-3" aria-hidden="true" tabindex="-1"></a>    <span class="ex">fastqc</span> <span class="at">-o</span> fastqc <span class="va">$filename</span></span>
-<span id="annotated-cell-2-4"><a href="#annotated-cell-2-4" aria-hidden="true" tabindex="-1"></a>  <span class="cf">done</span></span><div class="code-annotation-gutter-bg"></div><div class="code-annotation-gutter"></div></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="annotated-cell-3"><pre class="sourceCode bash code-annotation-code code-with-copy code-annotated"><code class="sourceCode bash"><button class="code-annotation-anchor" data-target-cell="annotated-cell-3" data-target-annotation="1">1</button><span id="annotated-cell-3-1" class="code-annotation-target"><a href="#annotated-cell-3-1" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> sample <span class="kw">in</span> reads/<span class="pp">*</span>.fastq.gz</span>
+<button class="code-annotation-anchor" data-target-cell="annotated-cell-3" data-target-annotation="2">2</button><span id="annotated-cell-3-2" class="code-annotation-target"><a href="#annotated-cell-3-2" aria-hidden="true" tabindex="-1"></a><span class="cf">do</span></span>
+<button class="code-annotation-anchor" data-target-cell="annotated-cell-3" data-target-annotation="3">3</button><span id="annotated-cell-3-3" class="code-annotation-target"><a href="#annotated-cell-3-3" aria-hidden="true" tabindex="-1"></a>  <span class="ex">fastqc</span> <span class="at">-o</span> fastqc_reports <span class="va">${sample}</span></span>
+<span id="annotated-cell-3-4"><a href="#annotated-cell-3-4" aria-hidden="true" tabindex="-1"></a><span class="cf">done</span></span><div class="code-annotation-gutter-bg"></div><div class="code-annotation-gutter"></div></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
 <div class="cell-annotation">
 <dl class="code-annotation-container-hidden code-annotation-container-grid">
-<dt data-target-cell="annotated-cell-2" data-target-annotation="1">1</dt>
+<dt data-target-cell="annotated-cell-3" data-target-annotation="1">1</dt>
 <dd>
-<span data-code-cell="annotated-cell-2" data-code-lines="1" data-code-annotation="1">Here we define a variable <code>filename</code> that will subsequently get the values of all datasets matching the <code>/datasets/*.fq.gz</code> statement, where <code>*</code> acts as a wildcard.</span>
+<span data-code-cell="annotated-cell-3" data-code-lines="1" data-code-annotation="1">Here we define a variable <code>sample</code> that will subsequently get the values of all datasets matching the <code>reads/*.fastq.gz</code> statement, where <code>*</code> acts as a wildcard.</span>
 </dd>
-<dt data-target-cell="annotated-cell-2" data-target-annotation="2">2</dt>
+<dt data-target-cell="annotated-cell-3" data-target-annotation="2">2</dt>
 <dd>
-<span data-code-cell="annotated-cell-2" data-code-lines="3" data-code-annotation="2">Here we add the actual command, where <code>$filename</code> will subsequently be filled in with all of our four filenames.</span>
+<span data-code-cell="annotated-cell-3" data-code-lines="2" data-code-annotation="2"><code>do</code>, and later <code>done</code> define the start and the end of the for loop, respectively.</span>
+</dd>
+<dt data-target-cell="annotated-cell-3" data-target-annotation="3">3</dt>
+<dd>
+<span data-code-cell="annotated-cell-3" data-code-lines="3" data-code-annotation="3">Here we add the actual command that will be repeated for each sample, where <code>$sample</code> will subsequently be filled in with all of our four filenames.</span>
 </dd>
 </dl>
 </div>
 </div>
-<p><code>fastq</code> generates reports of each sample in <code>.html</code> format:</p>
+<p><code>fastq</code> generates reports of each sample in <code>.html</code> and <code>.zip</code> format:</p>
 <div class="cell">
 <div class="code-with-filename">
 <div class="code-with-filename-file">
 <pre><strong>bash</strong></pre>
 </div>
-<div class="sourceCode cell-code" id="cb2"><pre class="sourceCode bash code-with-copy"><code class="sourceCode bash"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="fu">ls</span> ... <span class="co"># </span><span class="al">TODO</span><span class="co">: add ls outcome here to show that we have 4 .html files now</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="annotated-cell-4"><pre class="sourceCode bash code-annotation-code code-with-copy code-annotated"><code class="sourceCode bash"><button class="code-annotation-anchor" data-target-cell="annotated-cell-4" data-target-annotation="1">1</button><span id="annotated-cell-4-1" class="code-annotation-target"><a href="#annotated-cell-4-1" aria-hidden="true" tabindex="-1"></a><span class="fu">ls</span> fastqc_reports</span>
+<span id="annotated-cell-4-2"><a href="#annotated-cell-4-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="annotated-cell-4-3"><a href="#annotated-cell-4-3" aria-hidden="true" tabindex="-1"></a><span class="ex">sample1_fastqc.html</span>  sample2_fastqc.zip   sample4_fastqc.html</span>
+<span id="annotated-cell-4-4"><a href="#annotated-cell-4-4" aria-hidden="true" tabindex="-1"></a><span class="ex">sample1_fastqc.zip</span>   sample3_fastqc.html  sample4_fastqc.zip</span>
+<span id="annotated-cell-4-5"><a href="#annotated-cell-4-5" aria-hidden="true" tabindex="-1"></a><span class="ex">sample2_fastqc.html</span>  sample3_fastqc.zip</span><div class="code-annotation-gutter-bg"></div><div class="code-annotation-gutter"></div></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<div class="cell-annotation">
+<dl class="code-annotation-container-hidden code-annotation-container-grid">
+<dt data-target-cell="annotated-cell-4" data-target-annotation="1">1</dt>
+<dd>
+<span data-code-cell="annotated-cell-4" data-code-lines="1" data-code-annotation="1"><code>ls</code> is a command to ‘list’ all the files present in a directory.</span>
+</dd>
+</dl>
 </div>
 </div>
-<p>Let’s download one of them, and inspect the results:</p>
-<div class="cell">
-<div class="code-with-filename">
-<div class="code-with-filename-file">
-<pre><strong>bash</strong></pre>
-</div>
-<div class="sourceCode cell-code" id="cb3"><pre class="sourceCode bash code-with-copy"><code class="sourceCode bash"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="co"># </span><span class="al">TODO</span><span class="co">: download to local instructions here (if you are working on a server)</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-</div>
-</div>
-<p><code>fastqc</code> gives the reads of each sample a score (Pass, Warning, or Fail) on several different modules and this is reported in the <strong>Summary</strong>. The next section contains basic statistics like the number of reads, average sequence length, and the GC content. Generally it is a good idea to keep track of the total number of reads sequenced for each sample and to make sure the read length and %GC content is as expected. One of the most important analysis modules is the <strong>“Per base sequence quality”</strong> plot. This plot provides the distribution of quality scores at each position in the read across all reads. This plot can alert us to whether there were any problems occuring during sequencing and whether we might need to contact the sequencing facility. Other modules are discussed in detail <a href="https://hbctraining.github.io/Intro-to-rnaseq-hpc-salmon/lessons/qc_fastqc_assessment.html">here</a>. Note that nearly all sequencing datasets will show yellow warnings or red fails: <code>fastqc</code> is quite conservative. Your experiment is not lost if you get warnings or fails, but it warrants additional inspection of the reads.</p>
+<p>If you are working in the Google Colab, you can browse the files in the workspace by clicking the directory symbol. Find <code>fastqc_reports</code> and download the <code>.html</code> files. You can open these in any browser.</p>
+<p><code>fastqc</code> gives the reads of each sample a score (Pass, Warning, or Fail) on several different modules and this is reported in the <strong>Summary</strong>. The next section contains basic statistics like the number of reads, average sequence length, and the GC content. Generally it is a good idea to keep track of the total number of reads sequenced for each sample and to make sure the read length and %GC content is as expected. One of the most important analysis modules is the <strong>“Per base sequence quality”</strong> plot. This plot provides the distribution of quality scores at each position in the read across all reads. This plot can alert us to whether there were any problems occuring during sequencing and whether we might need to contact the sequencing facility. Other modules are discussed in detail <a href="https://hbctraining.github.io/Intro-to-rnaseq-hpc-salmon/lessons/qc_fastqc_assessment.html">here</a>. Note that nearly all sequencing datasets will show yellow warnings or red fails: <code>fastqc</code> is quite conservative. Your experiment is not lost if you get warnings or fails, but it warrants additional inspection of the reads. If you suspect something is wrong, don’t hesitate to contact the sequencing provider or your favorite bioinformatician.</p>
 <p><strong>TODO: add screenshots of good/bad fastqc results</strong></p>
 </section>
-<section id="trimming-trimmomatic" class="level2">
-<h2 class="anchored" data-anchor-id="trimming-trimmomatic">Trimming: <code>trimmomatic</code></h2>
-<p>A common anomaly detected by <code>fastqc</code> is sequencing adapters still being present some of the the reads (shown in <strong>Overrepresented sequences</strong> table). This is known as ‘adapter contamination’, and the presence of these adapter sequences in the reads might affect how the reads map to the genome of interest. So, we need to get rid of them. We will <code>trimmomatic</code> to do this. In addition, we can ask <code>trimmomatic</code> to trim low quality bases from the reads.</p>
+<section id="trimming-fastp" class="level2">
+<h2 class="anchored" data-anchor-id="trimming-fastp">Trimming: <code>fastp</code></h2>
+<p>A common anomaly detected by <code>fastqc</code> is sequencing adapters still being present some of the the reads (shown in <strong>Overrepresented sequences</strong> table). This is known as ‘adapter contamination’, and the presence of these adapter sequences in the reads might affect how the reads map to the genome of interest. So, we need to get rid of them. We will use <code>fastp</code> to do this. In addition, <code>fastp</code> will trim low quality bases from the reads, and remove reads that are overall of low quality.</p>
 <div class="cell">
 <div class="code-with-filename">
 <div class="code-with-filename-file">
 <pre><strong>bash</strong></pre>
 </div>
-<div class="sourceCode cell-code" id="cb4"><pre class="sourceCode bash code-with-copy"><code class="sourceCode bash"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a><span class="co"># </span><span class="al">TODO</span><span class="co">: add trimmomatic command here</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb2"><pre class="sourceCode bash code-with-copy"><code class="sourceCode bash"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="fu">mkdir</span> fastp_reports</span>
+<span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a><span class="ex">fastp</span> <span class="dt">\ </span></span>
+<span id="cb2-3"><a href="#cb2-3" aria-hidden="true" tabindex="-1"></a>  <span class="ex">-i</span> reads/sample1.fastq.gz <span class="dt">\</span></span>
+<span id="cb2-4"><a href="#cb2-4" aria-hidden="true" tabindex="-1"></a>  <span class="at">-o</span> reads/sample1.trimmed.fastq.gz <span class="dt">\</span></span>
+<span id="cb2-5"><a href="#cb2-5" aria-hidden="true" tabindex="-1"></a>  <span class="at">--thread</span> 2 <span class="dt">\</span></span>
+<span id="cb2-6"><a href="#cb2-6" aria-hidden="true" tabindex="-1"></a>  <span class="at">--html</span> fastp_reports/sample1_fastp_report.html</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
 </div>
 <div class="callout callout-style-default callout-tip no-icon callout-titled" title="Exercise">
@@ -330,9 +380,9 @@ Exercise
 </div>
 </div>
 <div class="callout-body-container callout-body">
-<p>After running <code>trimmomatic</code>, the adapter contamination should be gone.</p>
+<p>After running <code>fastp</code>, the adapter contamination should be gone.</p>
 <ol type="1">
-<li>How could you check whether <code>trimmomatic</code> indeed did it’s job?</li>
+<li>How could you check whether <code>fastp</code> indeed did it’s job?</li>
 <li>Write a command to check this.</li>
 </ol>
 </div>
@@ -358,7 +408,7 @@ Solution
 <div class="code-with-filename-file">
 <pre><strong>bash</strong></pre>
 </div>
-<div class="sourceCode cell-code" id="cb5"><pre class="sourceCode bash code-with-copy"><code class="sourceCode bash"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a><span class="ex">fastqc</span> <span class="at">-o</span> /workspace/fastqc /datasets/Arabidopsis_sample1.trimmed.fq.gz</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb3"><pre class="sourceCode bash code-with-copy"><code class="sourceCode bash"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="ex">fastqc</span> <span class="at">-o</span> fastqc_reports reads/sample1.trimmed.fastq.gz</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
 </div>
 <p>By inspecting the <code>.html</code> report of the trimmed reads, we should see that the quality of the read sets has now improved.</p>
@@ -399,47 +449,45 @@ Solution
 </div>
 </div>
 </div>
-<p>To use an aligner, we must first get the <strong>reference genome</strong> and then <em>index</em> the reference genome. Indexing the genome prepares the genome in a way that allows a computer to search it efficiently. The genome, a multi-million basepair long string of text, is encoded into a different, computer-friendly datastructure such as a suffix tree. The details of this procedure are beyond the scope of this workshop, but it’s important to do it. So, let’s go ahead and download the <em>Arabidopsis thaliana</em> reference genome, and index it:</p>
+<p>To use an aligner, we must first get the <strong>reference genome</strong> and then <em>index</em> the reference genome. Indexing the genome prepares the genome in a way that allows a computer to search it efficiently. The genome, a multi-million basepair long string of text, is encoded into a different, computer-friendly datastructure such as a suffix tree. The details of this procedure are beyond the scope of this workshop, but it’s important to do it. The <em>Arabidopsis thaliana</em> genome is already present in the notebook. We make the index using <code>STAR</code>:</p>
 <div class="cell">
 <div class="code-with-filename">
 <div class="code-with-filename-file">
 <pre><strong>bash</strong></pre>
 </div>
-<div class="sourceCode cell-code" id="cb6"><pre class="sourceCode bash code-with-copy"><code class="sourceCode bash"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a><span class="co"># </span><span class="al">TODO</span><span class="co">: Add download command here (via wget), OR already have the genome in the github repo</span></span>
-<span id="cb6-2"><a href="#cb6-2" aria-hidden="true" tabindex="-1"></a><span class="co"># </span><span class="al">TODO</span><span class="co">: Add STAR index command here</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb4"><pre class="sourceCode bash code-with-copy"><code class="sourceCode bash"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a><span class="ex">software/STAR</span> <span class="at">--runMode</span> genomeGenerate <span class="dt">\</span></span>
+<span id="cb4-2"><a href="#cb4-2" aria-hidden="true" tabindex="-1"></a>  <span class="at">--genomeFastaFiles</span> genome/TAIR10.fasta <span class="dt">\</span></span>
+<span id="cb4-3"><a href="#cb4-3" aria-hidden="true" tabindex="-1"></a>  <span class="at">--genomeDir</span> TAIR10_STAR_index</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
 </div>
-<p>Allright, let’s finally run <code>STAR</code>:</p>
+<p>Allright, let’s finally run <code>STAR</code>. This tool requires quite some parameters to be set: how many threads to use (<code>--runThreadN</code>), where to find the index (<code>--genomeDir</code>), where to find the reads (<code>--readFilesIn</code>), that the reads are compressed (<code>--readFilesCommand</code>), where to store the results (<code>--outFileNamePrefix</code>), and which output file format we want (<code>--outSAMtype</code>). Pfew.</p>
 <div class="cell">
 <div class="code-with-filename">
 <div class="code-with-filename-file">
 <pre><strong>bash</strong></pre>
 </div>
-<div class="sourceCode cell-code" id="cb7"><pre class="sourceCode bash code-with-copy"><code class="sourceCode bash"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a><span class="co"># </span><span class="al">TODO</span><span class="co">: Add STAR command here</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb5"><pre class="sourceCode bash code-with-copy"><code class="sourceCode bash"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a><span class="ex">software/STAR</span> <span class="dt">\ </span>  </span>
+<span id="cb5-2"><a href="#cb5-2" aria-hidden="true" tabindex="-1"></a>  <span class="ex">--runThreadN</span> 2 <span class="dt">\ </span></span>
+<span id="cb5-3"><a href="#cb5-3" aria-hidden="true" tabindex="-1"></a>  <span class="ex">--genomeDir</span> TAIR10_STAR_index <span class="dt">\</span></span>
+<span id="cb5-4"><a href="#cb5-4" aria-hidden="true" tabindex="-1"></a>  <span class="at">--readFilesIn</span> reads/sample1.trimmed.fastq.gz <span class="dt">\</span></span>
+<span id="cb5-5"><a href="#cb5-5" aria-hidden="true" tabindex="-1"></a>  <span class="at">--readFilesCommand</span> zcat <span class="dt">\</span></span>
+<span id="cb5-6"><a href="#cb5-6" aria-hidden="true" tabindex="-1"></a>  <span class="at">--outFileNamePrefix</span> mapped_reads/sample1_ <span class="dt">\</span></span>
+<span id="cb5-7"><a href="#cb5-7" aria-hidden="true" tabindex="-1"></a>  <span class="at">--outSAMtype</span> BAM SortedByCoordinate</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
 </div>
-<p>We can inspect a mapping summary in a file generated by STAR called <code>final.out</code>:</p>
+<p>Let’s look at a mapping summary in a file generated by STAR that ends with <code>.final.out</code>. We can do that on the command line (using <code>cat</code>), or you can download the file and open it in a text editor.</p>
 <div class="cell">
 <div class="code-with-filename">
 <div class="code-with-filename-file">
 <pre><strong>bash</strong></pre>
 </div>
-<div class="sourceCode cell-code" id="cb8"><pre class="sourceCode bash code-with-copy"><code class="sourceCode bash"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a><span class="co"># </span><span class="al">TODO</span><span class="co">: Add cat final.out output</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb6"><pre class="sourceCode bash code-with-copy"><code class="sourceCode bash"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a><span class="fu">cat</span> mapped_reads/sample1_Log.final.out</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
 </div>
-<p>It’s important to check how many reads did not map to the reference genome. A high proportion of unmapped reads can be a warning sign that something went wrong in your experiment or analysis. The explanations may be technical (bad read quality), bioinformatical (perhaps you used the wrong reference genome!), or biological — it has been well documented that around 11% of primate and rodent cell-line RNA-seq datasets available on NCBI in 2015 were contaminated with mycoplasma RNA (<a href="https://pmc.ncbi.nlm.nih.gov/articles/PMC4357728/">Olarerin-George &amp; Hogenesch, 2015</a>). Likewise, 8,5% of all <em>Arabidopsis thaliana</em> NCBI RNA-seq datasets are contaminated with a virus that does not cause any disease symptoms, but can cover up to 80% of all reads generated in an RNA-seq experiment (<a href="https://nph.onlinelibrary.wiley.com/doi/full/10.1111/nph.18466">Verhoeven et al., 2022</a>). That said, we don’t need to aim for 100% reads mapped to the reference genome. There will always be some contamination, or your studied individual possesses genetic information not present in the reference genome.</p>
-<p><strong>TODO: (Maybe as an additional exercise?) Add one subsetted dataset to demonstrate this, from the verhoeven paper.</strong></p>
+<p>It’s important to check how many reads did not map to the reference genome. In our case, it looks like more than 95% of the reads mapped to the reference genome. That’s good! A high proportion of unmapped reads can be a warning sign that something went wrong in your experiment or analysis. The explanations may be technical (bad read quality), bioinformatical (perhaps you used the wrong reference genome!), or biological — it has been well documented that around 11% of primate and rodent cell-line RNA-seq datasets available on NCBI in 2015 were contaminated with mycoplasma RNA (<a href="https://pmc.ncbi.nlm.nih.gov/articles/PMC4357728/">Olarerin-George &amp; Hogenesch, 2015</a>). Likewise, 8,5% of all <em>Arabidopsis thaliana</em> NCBI RNA-seq datasets are contaminated with a virus that does not cause any disease symptoms, but can cover up to 80% of all reads generated in an RNA-seq experiment (<a href="https://nph.onlinelibrary.wiley.com/doi/full/10.1111/nph.18466">Verhoeven et al., 2022</a>). That said, we don’t need to aim for 100% reads mapped to the reference genome. There will always be some contamination, or your studied individual possesses genetic information not present in the reference genome.</p>
 <section id="bam-and-sam-files" class="level3">
 <h3 class="anchored" data-anchor-id="bam-and-sam-files">BAM and SAM files</h3>
-<p>The mapped reads are stored in a <code>.bam</code> file by <code>STAR</code>. <code>.bam</code> and <code>.sam</code> files keep information for each individual read and its alignment to the genome. <code>.sam</code> files do this in a tab-seperated, human readable format, while <code>.bam</code> files store the same information in a binary file format that’s not readable for humans, but is much more efficient to process and store by computers. <code>samtools</code> is a widely used program to inspect and manipulate <code>.sam</code> and <code>.bam</code> files. Like many command line programs, <code>samtools</code> commands can be connected to each other via the pipe symbol <code>|</code>, and the results can be stored in a new file using the <code>&gt;</code> symbol.</p>
-<div class="cell">
-<div class="code-with-filename">
-<div class="code-with-filename-file">
-<pre><strong>bash</strong></pre>
-</div>
-<div class="sourceCode cell-code" id="cb9"><pre class="sourceCode bash code-with-copy"><code class="sourceCode bash"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a><span class="fu">head</span> xyz.sam <span class="co"># </span><span class="al">TODO</span><span class="co">: add correct filename here</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-</div>
-</div>
+<p>The mapped reads are stored in a sorted <code>.bam</code> file by <code>STAR</code>. <code>.sam</code> (and <code>.bam</code>) files keep information for each individual read and its alignment to the genome. <code>.sam</code> files do this in a tab-seperated, human readable format, while <code>.bam</code> files store the same information in a binary file format that’s not readable for humans, but is much more efficient to process and store by computers. <code>samtools</code> is a widely used program to inspect and manipulate <code>.sam</code> and <code>.bam</code> files. Like many command line programs, <code>samtools</code> commands can be connected to each other via the pipe symbol <code>|</code>, and the results can be stored in a new file using the <code>&gt;</code> symbol.</p>
 <div class="callout callout-style-default callout-tip no-icon callout-titled" title="Exercise">
 <div class="callout-header d-flex align-content-center">
 <div class="callout-icon-container">
@@ -469,21 +517,27 @@ Solution
 </div>
 <div id="callout-6" class="callout-6-contents callout-collapse collapse">
 <div class="callout-body-container callout-body">
+<ol type="1">
+<li></li>
+</ol>
 <div class="cell">
 <div class="code-with-filename">
 <div class="code-with-filename-file">
 <pre><strong>bash</strong></pre>
 </div>
-<div class="sourceCode cell-code" id="cb10"><pre class="sourceCode bash code-with-copy"><code class="sourceCode bash"><span id="cb10-1"><a href="#cb10-1" aria-hidden="true" tabindex="-1"></a><span class="fu">head</span> xyz.bam <span class="co"># </span><span class="al">TODO</span><span class="co">: add correct filename here</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb7"><pre class="sourceCode bash code-with-copy"><code class="sourceCode bash"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a><span class="fu">head</span> mapped_reads/sample1_Aligned.sortedByCoord.out.bam</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
 </div>
-<p>The output looks like gibberish, because <code>.bam</code> files are a binary file format. You can use <code>samtools view</code> to make samtools read the binary file, and then pipe that result into the <code>head</code> function to show the first 10 lines:</p>
+<p>The output looks like gibberish, because <code>.bam</code> files are a binary file format.</p>
+<ol start="2" type="1">
+<li>You can use <code>samtools view</code> to make samtools read the binary file, and then pipe that result into the <code>head</code> function to show the first 10 lines:</li>
+</ol>
 <div class="cell">
 <div class="code-with-filename">
 <div class="code-with-filename-file">
 <pre><strong>bash</strong></pre>
 </div>
-<div class="sourceCode cell-code" id="cb11"><pre class="sourceCode bash code-with-copy"><code class="sourceCode bash"><span id="cb11-1"><a href="#cb11-1" aria-hidden="true" tabindex="-1"></a><span class="ex">samtools</span> view xyz.bam <span class="kw">|</span> <span class="fu">head</span> <span class="co"># </span><span class="al">TODO</span><span class="co">: add correct filename here</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb8"><pre class="sourceCode bash code-with-copy"><code class="sourceCode bash"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a><span class="ex">software/samtools</span> view mapped_reads/sample1_Aligned.sortedByCoord.out.bam <span class="kw">|</span> <span class="fu">head</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
 </div>
 </div>
@@ -502,7 +556,7 @@ Exercise
 <p>Use the two following commands on a <code>.bam</code> file, and interpret the output.</p>
 <ol type="1">
 <li><code>samtools flagstat</code></li>
-<li><code>samtools idxstats</code> (Note: before running this command, you need to index the <code>.bam</code> file using <code>samtools index xyz.bam</code>)</li>
+<li><code>samtools idxstats</code> (Note: before running this command, you need to index the <code>.bam</code> file using <code>samtools index mapped_reads/sample1_Aligned.sortedByCoord.out.bam</code>)</li>
 </ol>
 </div>
 </div>
@@ -535,7 +589,7 @@ Exercise
 </div>
 </div>
 <div class="callout-body-container callout-body">
-<p>So far, we only trimmed and mapped one sample. Write a <code>bash</code> for loop to process all four samples.</p>
+<p>So far, we only trimmed and mapped one sample. Write two <code>bash</code> for loops to process all four samples.</p>
 </div>
 </div>
 <div class="callout callout-style-default callout-caution no-icon callout-titled" title="Solution">
@@ -550,16 +604,47 @@ Solution
 </div>
 <div id="callout-10" class="callout-10-contents callout-collapse collapse">
 <div class="callout-body-container callout-body">
+<ol type="1">
+<li>For loop to trim:</li>
+</ol>
 <div class="cell">
 <div class="code-with-filename">
 <div class="code-with-filename-file">
 <pre><strong>bash</strong></pre>
 </div>
-<div class="sourceCode cell-code" id="cb12"><pre class="sourceCode bash code-with-copy"><code class="sourceCode bash"><span id="cb12-1"><a href="#cb12-1" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> filename <span class="kw">in</span>  /datasets/<span class="pp">*</span>.fq.gz </span>
-<span id="cb12-2"><a href="#cb12-2" aria-hidden="true" tabindex="-1"></a>  <span class="cf">do</span></span>
-<span id="cb12-3"><a href="#cb12-3" aria-hidden="true" tabindex="-1"></a>    <span class="co"># </span><span class="al">TODO</span><span class="co">: add trimmomatic command</span></span>
-<span id="cb12-4"><a href="#cb12-4" aria-hidden="true" tabindex="-1"></a>    <span class="co"># </span><span class="al">TODO</span><span class="co">: add STAR command</span></span>
-<span id="cb12-5"><a href="#cb12-5" aria-hidden="true" tabindex="-1"></a>  <span class="cf">done</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb9"><pre class="sourceCode bash code-with-copy"><code class="sourceCode bash"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> sample <span class="kw">in</span> reads/<span class="pp">*</span>.fastq.gz</span>
+<span id="cb9-2"><a href="#cb9-2" aria-hidden="true" tabindex="-1"></a><span class="cf">do</span></span>
+<span id="cb9-3"><a href="#cb9-3" aria-hidden="true" tabindex="-1"></a>  <span class="va">name</span><span class="op">=</span><span class="va">$(</span><span class="fu">basename</span> <span class="st">"</span><span class="va">$sample</span><span class="st">"</span> .fastq.gz<span class="va">)</span></span>
+<span id="cb9-4"><a href="#cb9-4" aria-hidden="true" tabindex="-1"></a>  <span class="bu">echo</span> <span class="st">"processing </span><span class="va">${name}</span><span class="st">"</span></span>
+<span id="cb9-5"><a href="#cb9-5" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb9-6"><a href="#cb9-6" aria-hidden="true" tabindex="-1"></a>  <span class="ex">fastp</span> <span class="dt">\</span></span>
+<span id="cb9-7"><a href="#cb9-7" aria-hidden="true" tabindex="-1"></a>  <span class="at">-i</span> reads/<span class="va">${name}</span>.fastq.gz <span class="dt">\</span></span>
+<span id="cb9-8"><a href="#cb9-8" aria-hidden="true" tabindex="-1"></a>  <span class="at">-o</span> reads/<span class="va">${name}</span>.trimmed.fastq.gz <span class="dt">\</span></span>
+<span id="cb9-9"><a href="#cb9-9" aria-hidden="true" tabindex="-1"></a>  <span class="at">--thread</span> 2 <span class="dt">\</span></span>
+<span id="cb9-10"><a href="#cb9-10" aria-hidden="true" tabindex="-1"></a>  <span class="at">--html</span> fastp_reports/<span class="va">${name}</span>_fastp_report.html</span>
+<span id="cb9-11"><a href="#cb9-11" aria-hidden="true" tabindex="-1"></a><span class="cf">done</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+</div>
+<ol start="2" type="1">
+<li>For loop to map:</li>
+</ol>
+<div class="cell">
+<div class="code-with-filename">
+<div class="code-with-filename-file">
+<pre><strong>bash</strong></pre>
+</div>
+<div class="sourceCode cell-code" id="cb10"><pre class="sourceCode bash code-with-copy"><code class="sourceCode bash"><span id="cb10-1"><a href="#cb10-1" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> sample <span class="kw">in</span> reads/<span class="pp">*</span>.trimmed.fastq.gz</span>
+<span id="cb10-2"><a href="#cb10-2" aria-hidden="true" tabindex="-1"></a><span class="cf">do</span></span>
+<span id="cb10-3"><a href="#cb10-3" aria-hidden="true" tabindex="-1"></a>  <span class="va">name</span><span class="op">=</span><span class="va">$(</span><span class="fu">basename</span> <span class="st">"</span><span class="va">$sample</span><span class="st">"</span> .trimmed.fastq.gz<span class="va">)</span></span>
+<span id="cb10-4"><a href="#cb10-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb10-5"><a href="#cb10-5" aria-hidden="true" tabindex="-1"></a>  <span class="ex">software/STAR</span> <span class="dt">\</span></span>
+<span id="cb10-6"><a href="#cb10-6" aria-hidden="true" tabindex="-1"></a>    <span class="at">--runThreadN</span> 2 <span class="dt">\</span></span>
+<span id="cb10-7"><a href="#cb10-7" aria-hidden="true" tabindex="-1"></a>    <span class="at">--genomeDir</span> TAIR10_STAR_index <span class="dt">\</span></span>
+<span id="cb10-8"><a href="#cb10-8" aria-hidden="true" tabindex="-1"></a>    <span class="at">--readFilesIn</span> reads/<span class="va">${name}</span>.trimmed.fastq.gz <span class="dt">\</span></span>
+<span id="cb10-9"><a href="#cb10-9" aria-hidden="true" tabindex="-1"></a>    <span class="at">--readFilesCommand</span> zcat <span class="dt">\</span></span>
+<span id="cb10-10"><a href="#cb10-10" aria-hidden="true" tabindex="-1"></a>    <span class="at">--outFileNamePrefix</span> mapped_reads/<span class="va">${name}</span>_ <span class="dt">\</span></span>
+<span id="cb10-11"><a href="#cb10-11" aria-hidden="true" tabindex="-1"></a>    <span class="at">--outSAMtype</span> BAM SortedByCoordinate</span>
+<span id="cb10-12"><a href="#cb10-12" aria-hidden="true" tabindex="-1"></a><span class="cf">done</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
 </div>
 </div>
@@ -568,13 +653,17 @@ Solution
 </section>
 <section id="inspecting-the-mapping-on-a-genome-browser" class="level3">
 <h3 class="anchored" data-anchor-id="inspecting-the-mapping-on-a-genome-browser">Inspecting the mapping on a genome browser</h3>
-<p><strong>TODO</strong>:</p>
-<ul>
-<li>download one bam + bai file and inspect mapping in genome browser</li>
-<li>observe: only (or at least majority) reads map in genes (if this is not the case, something is wrong! either gDNA contamination, or bad annotation)</li>
-<li>observe split reads across introns</li>
-<li>we can’t inspect all samples manually like this, so we will need to count reads, which we will do in the next section.</li>
-</ul>
+<p>So far, these steps may have been quite abstract. Let’s make it more visual. We will look at our mapped reads in a genome browser.</p>
+<ol type="1">
+<li>Download a <code>.bam</code> file with accompanying <code>.bam.bai</code> index file</li>
+<li>Go to <a href="https://phytozome-next.jgi.doe.gov/info/Athaliana_TAIR10">Phytozome Arabidopsis</a></li>
+<li>Click <code>JBrowse</code></li>
+<li>Go to <code>File</code> &gt; <code>Open track file or URL</code> &gt; <code>Select Files...</code> to find your files</li>
+<li>Click on <code>Open</code>!</li>
+</ol>
+<p>That’s wonderful! You should see red and blue (forward and reverse) blocks aligning with the exons of the annotated gene models of <em>A. thaliana</em>. Also notice that some reads will be beautifully split over two or more introns. Good RNA-seq mapping should align predominantly to exons. If this is not the case, something might be wrong. For example, your RNA sample could have been contaminated with genomic DNA. Another option that could explain mappings to non-annotated regions of the genome, is that the annotation may not be complete.</p>
+<p><strong>TODO</strong>: add a screenshot here.</p>
+<p>Obviously, we can’t manually inspect all samples and all genes like this, so we will need to count the number of reads in each in gene in each sample. We will do that in the next and final step of today.</p>
 </section>
 </section>
 <section id="counting-featurecounts" class="level2">
@@ -584,7 +673,7 @@ Solution
 <div class="code-with-filename-file">
 <pre><strong>bash</strong></pre>
 </div>
-<div class="sourceCode cell-code" id="cb13"><pre class="sourceCode bash code-with-copy"><code class="sourceCode bash"><span id="cb13-1"><a href="#cb13-1" aria-hidden="true" tabindex="-1"></a><span class="co"># </span><span class="al">TODO</span><span class="co">: add featureCounts command here</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb11"><pre class="sourceCode bash code-with-copy"><code class="sourceCode bash"><span id="cb11-1"><a href="#cb11-1" aria-hidden="true" tabindex="-1"></a><span class="co"># </span><span class="al">TODO</span><span class="co">: add featureCounts command here</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
 </div>
 </section>
@@ -602,8 +691,8 @@ Solution
 <tbody>
 <tr class="odd">
 <td>Trimming</td>
-<td><code>Trimmomatic</code></td>
-<td><code>cutadapt</code>, <code>fastp</code></td>
+<td><code>fastp</code></td>
+<td><code>cutadapt</code>, <code>trimmomoatic</code></td>
 </tr>
 <tr class="even">
 <td>Mapping</td>
@@ -624,6 +713,7 @@ Solution
 <ul>
 <li><a href="https://github.com/BleekerLab/snakemake_rnaseq">snakemake_rnaseq</a>, developed at the Bleeker Lab (UvA).</li>
 <li><a href="https://nf-co.re/rnaseq/3.19.0">nf-core/rnaseq</a>, developed and maintained by the Nextflow community.</li>
+<li><strong>TODO</strong>: GALAXY server information here</li>
 </ul>
 <p>A full instruction of these pipelines is beyond the scope of this workshop. Also, we wish to highlight that it is <em>very insightful</em> to have run all the steps by yourself rather than in a pipeline.</p>
 

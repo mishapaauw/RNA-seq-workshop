@@ -8,7 +8,16 @@ format:
         code-annotations: hover
 ---
 
-The moment is there: you received the FASTQ files from your sequencing provider! Now what?
+The moment is there: you received the FASTQ files from your sequencing provider! .... now what?
+
+The `.fastq` files contain your RNA sequencing reads. Our goal is to find out from which genes these reads originate, and whether there are differentially expressed genes between your experimental factors. Before doing that, we need to make sure that the sequencing reads are of good quality, a process called quality control (QC). Additionally, no matter how good the overall quality of the sequencing data is, we will also 'trim' our reads to remove bad quality reads and sequencing adapters that may still be present in the sample. So, to summarize, we will do the following steps in this episode:
+
+1. Quality control: is my sequencing data of *good quality*?
+2. Trimming: removing bad quality reads and sequencing adapters
+3. Mapping: where in the genome do these reads come from? 
+4. Counting: how many reach originate from each gene?
+
+The commands in this episode are to be executed in the [associated Google Colab notebook](https://colab.research.google.com/drive/1jR2Og_qrUVg-VXNsfqJc5eEILcqHJYAC?usp=share_link). We will use some basic terminal commands. You don't need to understand every command, rather, the goal is to become familiar with RNA-seq concepts and steps.
 
 ## Quality control: `fastqc`
 
@@ -21,57 +30,83 @@ The first step in the RNA-seq workflow is to assess the quality of the sequencin
 |3|Always begins with a '+' and sometimes the same info in line 1|
 |4|Has a string of characters which represent the quality scores; must have same number of characters as line 2|
 
+Let's look at one read. Note that our `.fastq` files are compressed: they have extension `.fastq.gz`. Most bioinformatics programs can deal with compressed file, so we don't need to uncompress them. To have a look at a compressed file on the command line, we can use `zcat` and then pipe (`|`) the result into the `head` function to display the first 4 lines:
+
+```{bash filename="bash"}
+#| eval: false
+zcat reads/sample1.fastq.gz | head -n 4
+
+@ERR1406259.2 HWI-ST1034:108:D1HW4ACXX:1:1101:1627:2208/1
+CCGAAACAATCTCTCTCTCGTCGCCGGAAGCAAAAGAAGAATTAAGATAAGCCTCATCCATCCAGTGATGCAAATCACCAACCCATATGGTTTTATTCTCA
++
+CCCFFFFFHHHHHJJJIJJGIIIJJJFJJJJJJJIJIIGIIIJJJHIJJJHGHHHFFEFFFEDEEACDDDDDDDDDDDDDDDDDDDDDED4@BDDDDDEDC
+```
+
+The fourth line of each read represent the quality score of each basecall, see [Wikipedia](https://en.wikipedia.org/wiki/Phred_quality_score#Symbols) for more info. `fastqc` will use these characters to quantify the quality your read set.
+
 Let's run `fastqc` on one sample:
 
 ```{bash filename="bash"}
 #| eval: false
-fastqc -o fastqc /datasets/Arabidopsis_sample1.fq.gz
+!mkdir fastqc_reports # <1>
+fastqc -o fastqc_reports reads/sample1.fastq.gz # <2>
 ```
+
+1. First we `m`a`k`e a `dir`ectory to store the `fastqc` reports.
+2. We call the `fastqc` program, tell it to store the output in the fastqc_reports directory, and tell it which sample to use.
+
+You'll see that `fastqc` created a `.html` page 
 
 Doing this manually for every sample would be quite tiring, especially when we would have many samples. Let's write a `bash` for loop to take care of this for us:
 
 ```{bash filename="bash"}
 #| eval: false
-for filename in  /datasets/*.fq.gz # <1>
-  do
-    fastqc -o fastqc $filename # <2>
-  done
+for sample in reads/*.fastq.gz # <1>
+do # <2>
+  fastqc -o fastqc_reports ${sample} # <3>
+done
 ```
 
-1. Here we define a variable `filename` that will subsequently get the values of all datasets matching the `/datasets/*.fq.gz` statement, where `*` acts as a wildcard.
-2. Here we add the actual command, where `$filename` will subsequently be filled in with all of our four filenames.
+1. Here we define a variable `sample` that will subsequently get the values of all datasets matching the `reads/*.fastq.gz` statement, where `*` acts as a wildcard.
+2. `do`, and later `done` define the start and the end of the for loop, respectively.
+2. Here we add the actual command that will be repeated for each sample, where `$sample` will subsequently be filled in with all of our four filenames.
 
-`fastq` generates reports of each sample in `.html` format:
+`fastq` generates reports of each sample in `.html` and `.zip` format:
 
 ```{bash filename="bash"}
 #| eval: false
-ls ... # TODO: add ls outcome here to show that we have 4 .html files now
+ls fastqc_reports # <1>
+
+sample1_fastqc.html  sample2_fastqc.zip   sample4_fastqc.html
+sample1_fastqc.zip   sample3_fastqc.html  sample4_fastqc.zip
+sample2_fastqc.html  sample3_fastqc.zip
 ```
+1. `ls` is a command to 'list' all the files present in a directory.
 
-Let's download one of them, and inspect the results:
+If you are working in the Google Colab, you can browse the files in the workspace by clicking the directory symbol. Find `fastqc_reports` and download the `.html` files. You can open these in any browser.
 
-```{bash filename="bash"}
-#| eval: false
-# TODO: download to local instructions here (if you are working on a server)
-```
-
-`fastqc` gives the reads of each sample a score (Pass, Warning, or Fail) on several different modules and this is reported in the **Summary**. The next section contains basic statistics like the number of reads, average sequence length, and the GC content. Generally it is a good idea to keep track of the total number of reads sequenced for each sample and to make sure the read length and %GC content is as expected. One of the most important analysis modules is the **“Per base sequence quality”** plot. This plot provides the distribution of quality scores at each position in the read across all reads. This plot can alert us to whether there were any problems occuring during sequencing and whether we might need to contact the sequencing facility.  Other modules are discussed in detail [here](https://hbctraining.github.io/Intro-to-rnaseq-hpc-salmon/lessons/qc_fastqc_assessment.html). Note that nearly all sequencing datasets will show yellow warnings or red fails: `fastqc` is quite conservative. Your experiment is not lost if you get warnings or fails, but it warrants additional inspection of the reads.
+`fastqc` gives the reads of each sample a score (Pass, Warning, or Fail) on several different modules and this is reported in the **Summary**. The next section contains basic statistics like the number of reads, average sequence length, and the GC content. Generally it is a good idea to keep track of the total number of reads sequenced for each sample and to make sure the read length and %GC content is as expected. One of the most important analysis modules is the **“Per base sequence quality”** plot. This plot provides the distribution of quality scores at each position in the read across all reads. This plot can alert us to whether there were any problems occuring during sequencing and whether we might need to contact the sequencing facility. Other modules are discussed in detail [here](https://hbctraining.github.io/Intro-to-rnaseq-hpc-salmon/lessons/qc_fastqc_assessment.html). Note that nearly all sequencing datasets will show yellow warnings or red fails: `fastqc` is quite conservative. Your experiment is not lost if you get warnings or fails, but it warrants additional inspection of the reads. If you suspect something is wrong, don't hesitate to contact the sequencing provider or your favorite bioinformatician.
 
 **TODO: add screenshots of good/bad fastqc results**
 
-## Trimming: `trimmomatic`
+## Trimming: `fastp`
 
-A common anomaly detected by `fastqc` is sequencing adapters still being present some of the the reads (shown in **Overrepresented sequences** table). This is known as 'adapter contamination', and the presence of these adapter sequences in the reads might affect how the reads map to the genome of interest. So, we need to get rid of them. We will `trimmomatic` to do this. In addition, we can ask `trimmomatic` to trim low quality bases from the reads.
+A common anomaly detected by `fastqc` is sequencing adapters still being present some of the the reads (shown in **Overrepresented sequences** table). This is known as 'adapter contamination', and the presence of these adapter sequences in the reads might affect how the reads map to the genome of interest. So, we need to get rid of them. We will use `fastp` to do this. In addition, `fastp` will trim low quality bases from the reads, and remove reads that are overall of low quality.
 
 ```{bash filename="bash"}
 #| eval: false
-# TODO: add trimmomatic command here
+mkdir fastp_reports
+fastp \ 
+  -i reads/sample1.fastq.gz \
+  -o reads/sample1.trimmed.fastq.gz \
+  --thread 2 \
+  --html fastp_reports/sample1_fastp_report.html
 ```
 
 ::: {.callout-tip title="Exercise" icon="false"}
-After running `trimmomatic`, the adapter contamination should be gone.
+After running `fastp`, the adapter contamination should be gone.
 
-1. How could you check whether `trimmomatic` indeed did it's job?
+1. How could you check whether `fastp` indeed did it's job?
 2. Write a command to check this.
 :::
 
@@ -80,7 +115,7 @@ After running `trimmomatic`, the adapter contamination should be gone.
 2. 
 ```{bash filename="bash"}
 #| eval: false
-fastqc -o /workspace/fastqc /datasets/Arabidopsis_sample1.trimmed.fq.gz
+fastqc -o fastqc_reports reads/sample1.trimmed.fastq.gz
 ```
 By inspecting the `.html` report of the trimmed reads, we should see that the quality of the read sets has now improved.
 :::
@@ -99,40 +134,40 @@ So, for RNA-seq we need splice-aware aligners. Can you come up with an experimen
 In experiments where we don't need to think about exon-intron boundaries. This is the case when the reads originate from genomic DNA, for example for whole genome sequencing experiments, or enrichment sequencing experiments like Chip-Seq. 
 :::
 
-To use an aligner, we must first get the **reference genome** and then *index* the reference genome. Indexing the genome prepares the genome in a way that allows a computer to search it efficiently. The genome, a multi-million basepair long string of text, is encoded into a different, computer-friendly datastructure such as a suffix tree. The details of this procedure are beyond the scope of this workshop, but it's important to do it. So, let's go ahead and download the *Arabidopsis thaliana* reference genome, and index it:
+To use an aligner, we must first get the **reference genome** and then *index* the reference genome. Indexing the genome prepares the genome in a way that allows a computer to search it efficiently. The genome, a multi-million basepair long string of text, is encoded into a different, computer-friendly datastructure such as a suffix tree. The details of this procedure are beyond the scope of this workshop, but it's important to do it. The *Arabidopsis thaliana* genome is already present in the notebook. We make the index using `STAR`:
 
 ```{bash filename="bash"}
 #| eval: false
-# TODO: Add download command here (via wget), OR already have the genome in the github repo
-# TODO: Add STAR index command here
+software/STAR --runMode genomeGenerate \
+  --genomeFastaFiles genome/TAIR10.fasta \
+  --genomeDir TAIR10_STAR_index
 ```
 
-Allright, let's finally run `STAR`: 
+Allright, let's finally run `STAR`. This tool requires quite some parameters to be set: how many threads to use (`--runThreadN`), where to find the index (`--genomeDir`), where to find the reads (`--readFilesIn`), that the reads are compressed (`--readFilesCommand`), where to store the results (`--outFileNamePrefix`), and which output file format we want (`--outSAMtype`). Pfew.
 
 ```{bash filename="bash"}
 #| eval: false
-# TODO: Add STAR command here
+software/STAR \   
+  --runThreadN 2 \ 
+  --genomeDir TAIR10_STAR_index \
+  --readFilesIn reads/sample1.trimmed.fastq.gz \
+  --readFilesCommand zcat \
+  --outFileNamePrefix mapped_reads/sample1_ \
+  --outSAMtype BAM SortedByCoordinate
 ```
 
-We can inspect a mapping summary in a file generated by STAR called `final.out`:
+Let's look at a mapping summary in a file generated by STAR that ends with `.final.out`. We can do that on the command line (using `cat`), or you can download the file and open it in a text editor. 
 
 ```{bash filename="bash"}
 #| eval: false
-# TODO: Add cat final.out output
+cat mapped_reads/sample1_Log.final.out
 ```
 
-It's important to check how many reads did not map to the reference genome. A high proportion of unmapped reads can be a warning sign that something went wrong in your experiment or analysis. The explanations may be technical (bad read quality), bioinformatical (perhaps you used the wrong reference genome!), or biological --- it has been well documented that around 11% of primate and rodent cell-line RNA-seq datasets available on NCBI in 2015 were contaminated with mycoplasma RNA ([Olarerin-George & Hogenesch, 2015](https://pmc.ncbi.nlm.nih.gov/articles/PMC4357728/)). Likewise, 8,5% of all *Arabidopsis thaliana* NCBI RNA-seq datasets are contaminated with a virus that does not cause any disease symptoms, but can cover up to 80% of all reads generated in an RNA-seq experiment ([Verhoeven et al., 2022](https://nph.onlinelibrary.wiley.com/doi/full/10.1111/nph.18466)). That said, we don't need to aim for 100% reads mapped to the reference genome. There will always be some contamination, or your studied individual possesses genetic information not present in the reference genome. 
-
-**TODO: (Maybe as an additional exercise?) Add one subsetted dataset to demonstrate this, from the verhoeven paper.**
+It's important to check how many reads did not map to the reference genome. In our case, it looks like more than 95% of the reads mapped to the reference genome. That's good! A high proportion of unmapped reads can be a warning sign that something went wrong in your experiment or analysis. The explanations may be technical (bad read quality), bioinformatical (perhaps you used the wrong reference genome!), or biological --- it has been well documented that around 11% of primate and rodent cell-line RNA-seq datasets available on NCBI in 2015 were contaminated with mycoplasma RNA ([Olarerin-George & Hogenesch, 2015](https://pmc.ncbi.nlm.nih.gov/articles/PMC4357728/)). Likewise, 8,5% of all *Arabidopsis thaliana* NCBI RNA-seq datasets are contaminated with a virus that does not cause any disease symptoms, but can cover up to 80% of all reads generated in an RNA-seq experiment ([Verhoeven et al., 2022](https://nph.onlinelibrary.wiley.com/doi/full/10.1111/nph.18466)). That said, we don't need to aim for 100% reads mapped to the reference genome. There will always be some contamination, or your studied individual possesses genetic information not present in the reference genome. 
 
 ### BAM and SAM files
 
-The mapped reads are stored in a `.bam` file by `STAR`. `.bam` and `.sam` files keep information for each individual read and its alignment to the genome. `.sam` files do this in a tab-seperated, human readable format, while `.bam` files store the same information in a binary file format that's not readable for humans, but is much more efficient to process and store by computers. `samtools` is a widely used program to inspect and manipulate `.sam` and `.bam` files. Like many command line programs, `samtools` commands can be connected to each other via the pipe symbol `|`, and the results can be stored in a new file using the `>` symbol. 
-
-```{bash filename="bash"}
-#| eval: false
-head xyz.sam # TODO: add correct filename here
-```
+The mapped reads are stored in a sorted `.bam` file by `STAR`. `.sam` (and `.bam`) files keep information for each individual read and its alignment to the genome. `.sam` files do this in a tab-seperated, human readable format, while `.bam` files store the same information in a binary file format that's not readable for humans, but is much more efficient to process and store by computers. `samtools` is a widely used program to inspect and manipulate `.sam` and `.bam` files. Like many command line programs, `samtools` commands can be connected to each other via the pipe symbol `|`, and the results can be stored in a new file using the `>` symbol. 
 
 ::: {.callout-tip title="Exercise" icon="false"}
 Use the `head` command to inspect a `.bam` file. 
@@ -142,16 +177,20 @@ Use the `head` command to inspect a `.bam` file.
 :::
 
 ::: {.callout-caution title="Solution" collapse="true" icon="false"}
+
+1. 
 ```{bash filename="bash"}
 #| eval: false
-head xyz.bam # TODO: add correct filename here
+head mapped_reads/sample1_Aligned.sortedByCoord.out.bam
 ```
 
-The output looks like gibberish, because `.bam` files are a binary file format. You can use `samtools view` to make samtools read the binary file, and then pipe that result into the `head` function to show the first 10 lines:
+The output looks like gibberish, because `.bam` files are a binary file format. 
+
+2. You can use `samtools view` to make samtools read the binary file, and then pipe that result into the `head` function to show the first 10 lines:
 
 ```{bash filename="bash"}
 #| eval: false
-samtools view xyz.bam | head # TODO: add correct filename here
+software/samtools view mapped_reads/sample1_Aligned.sortedByCoord.out.bam | head
 ```
 :::
 
@@ -159,7 +198,7 @@ samtools view xyz.bam | head # TODO: add correct filename here
 Use the two following commands on a `.bam` file, and interpret the output.
 
 1. `samtools flagstat`
-2. `samtools idxstats` (Note: before running this command, you need to index the `.bam` file using `samtools index xyz.bam`) 
+2. `samtools idxstats` (Note: before running this command, you need to index the `.bam` file using `samtools index mapped_reads/sample1_Aligned.sortedByCoord.out.bam`) 
 :::
 
 ::: {.callout-caution title="Solution" collapse="true" icon="false"}
@@ -169,28 +208,62 @@ Use the two following commands on a `.bam` file, and interpret the output.
 :::
 
 ::: {.callout-tip title="Exercise" icon="false"}
-So far, we only trimmed and mapped one sample. Write a `bash` for loop to process all four samples.
+So far, we only trimmed and mapped one sample. Write two `bash` for loops to process all four samples.
 :::
 
 ::: {.callout-caution title="Solution" collapse="true" icon="false"}
+
+1. For loop to trim:
+
 ```{bash filename="bash"}
 #| eval: false
-for filename in  /datasets/*.fq.gz 
-  do
-    # TODO: add trimmomatic command
-    # TODO: add STAR command
-  done
+for sample in reads/*.fastq.gz
+do
+  name=$(basename "$sample" .fastq.gz)
+  echo "processing ${name}"
+
+  fastp \
+  -i reads/${name}.fastq.gz \
+  -o reads/${name}.trimmed.fastq.gz \
+  --thread 2 \
+  --html fastp_reports/${name}_fastp_report.html
+done
+```
+
+2. For loop to map:
+
+```{bash filename="bash"}
+#| eval: false
+for sample in reads/*.trimmed.fastq.gz
+do
+  name=$(basename "$sample" .trimmed.fastq.gz)
+
+  software/STAR \
+    --runThreadN 2 \
+    --genomeDir TAIR10_STAR_index \
+    --readFilesIn reads/${name}.trimmed.fastq.gz \
+    --readFilesCommand zcat \
+    --outFileNamePrefix mapped_reads/${name}_ \
+    --outSAMtype BAM SortedByCoordinate
+done
 ```
 :::
 
 ### Inspecting the mapping on a genome browser
 
-**TODO**:
+So far, these steps may have been quite abstract. Let's make it more visual. We will look at our mapped reads in a genome browser. 
 
-- download one bam + bai file and inspect mapping in genome browser
-- observe: only (or at least majority) reads map in genes (if this is not the case, something is wrong! either gDNA contamination, or bad annotation) 
-- observe split reads across introns
-- we can't inspect all samples manually like this, so we will need to count reads, which we will do in the next section.
+1. Download a `.bam` file with accompanying `.bam.bai` index file
+2. Go to [Phytozome Arabidopsis](https://phytozome-next.jgi.doe.gov/info/Athaliana_TAIR10)
+3. Click `JBrowse`
+4. Go to `File` > `Open track file or URL` > `Select Files...` to find your files
+5. Click on `Open`!
+
+That's wonderful! You should see red and blue (forward and reverse) blocks aligning with the exons of the annotated gene models of *A. thaliana*. Also notice that some reads will be beautifully split over two or more introns. Good RNA-seq mapping should align predominantly to exons. If this is not the case, something might be wrong. For example, your RNA sample could have been contaminated with genomic DNA. Another option that could explain mappings to non-annotated regions of the genome, is that the annotation may not be complete. 
+
+**TODO**: add a screenshot here.
+
+Obviously, we can't manually inspect all samples and all genes like this, so we will need to count the number of reads in each in gene in each sample. We will do that in the next and final step of today.
 
 
 ## Counting: `featureCounts`
@@ -206,7 +279,7 @@ In bioinformatics, there are often many ways to reach the same goal. Here we hav
 
 | Task | Tool used here | Alternative tools |
 | ---- | -------------- | ----------------- |
-| Trimming | `Trimmomatic` | `cutadapt`, `fastp` |
+| Trimming | `fastp` | `cutadapt`, `trimmomoatic` |
 | Mapping | `STAR` | `HISAT2` |
 | Counting | `featureCounts` | `StringTie` |
 
@@ -216,5 +289,6 @@ If you find this process quite cumbersome, then I have good news for you! There 
 
 - [snakemake_rnaseq](https://github.com/BleekerLab/snakemake_rnaseq), developed at the Bleeker Lab (UvA).
 - [nf-core/rnaseq](https://nf-co.re/rnaseq/3.19.0), developed and maintained by the Nextflow community.
+- **TODO**: GALAXY server information here
 
 A full instruction of these pipelines is beyond the scope of this workshop. Also, we wish to highlight that it is *very insightful* to have run all the steps by yourself rather than in a pipeline.
