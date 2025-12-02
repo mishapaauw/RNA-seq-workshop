@@ -322,9 +322,18 @@ mean of x mean of y
 <ul>
 <li><strong>The number of replicates</strong>: more samples results in a higher power</li>
 <li><strong>Size of the effect</strong>: bigger differences between groups are easier to detect</li>
-<li><strong>Variability of the data</strong>: less noise is more power</li>
+<li><strong>Variability of the data</strong>: less within-group variation makes it easier to detect differences</li>
 <li><strong>Confidence level threshold</strong>: usually, this is 0.05, but we can make our analysis more or less stringent by changing this to 0.01 or 0.1</li>
 </ul>
+<p>A fun tool to play with these parameters is the following <a href="https://rnaseq-power.serve.scilifelab.se/app/rnaseq-power">RNASeq Power calculator</a>. For example, with sequencing depth <code>50</code> and coefficient of variation <code>0.3</code>, you would need about 5 biological replicates to detect genes with 100% increase in gene expression with a power of 0.9:</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb4"><pre class="sourceCode bash code-with-copy"><code class="sourceCode bash"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a>             <span class="ex">0.8</span>          0.9</span>
+<span id="cb4-2"><a href="#cb4-2" aria-hidden="true" tabindex="-1"></a><span class="ex">1.25</span>   34.678609    46.424819</span>
+<span id="cb4-3"><a href="#cb4-3" aria-hidden="true" tabindex="-1"></a><span class="ex">1.5</span>    10.503242    14.060861</span>
+<span id="cb4-4"><a href="#cb4-4" aria-hidden="true" tabindex="-1"></a><span class="ex">1.75</span>    5.513793     7.381404</span>
+<span id="cb4-5"><a href="#cb4-5" aria-hidden="true" tabindex="-1"></a><span class="ex">2</span>       3.594011     4.811361</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<p>Try playing with the sequencing depth. Increase it 10-fold, and another 10-fold. Does it reduce the amount of biological replicates needed to detect differences in gene expression with the same power?</p>
 </section>
 </section>
 <section id="what-determines-the-power-of-an-rna-seq-experiment" class="level2">

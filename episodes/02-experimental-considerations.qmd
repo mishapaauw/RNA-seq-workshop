@@ -71,8 +71,21 @@ The power of an experiments is affected by several factors. We have seen so far:
 
 - **The number of replicates**: more samples results in a higher power
 - **Size of the effect**: bigger differences between groups are easier to detect
-- **Variability of the data**: less noise is more power
+- **Variability of the data**: less within-group variation makes it easier to detect differences
 - **Confidence level threshold**: usually, this is 0.05, but we can make our analysis more or less stringent by changing this to 0.01 or 0.1
+
+A fun tool to play with these parameters is the following [RNASeq Power calculator](https://rnaseq-power.serve.scilifelab.se/app/rnaseq-power). For example, with sequencing depth `50` and coefficient of variation `0.3`, you would need about 5 biological replicates to detect genes with 100% increase in gene expression with a power of 0.9:
+
+```{bash}
+#| eval: FALSE
+             0.8          0.9
+1.25   34.678609    46.424819
+1.5    10.503242    14.060861
+1.75    5.513793     7.381404
+2       3.594011     4.811361
+```
+
+Try playing with the sequencing depth. Increase it 10-fold, and another 10-fold. Does it reduce the amount of biological replicates needed to detect differences in gene expression with the same power?
 
 ## What determines the power of an RNA-seq experiment?
 
