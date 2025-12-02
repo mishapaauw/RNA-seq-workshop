@@ -229,7 +229,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <li>Mapping: where in the genome do these reads come from?</li>
 <li>Counting: how many reach originate from each gene?</li>
 </ol>
-<p>The commands in this episode are to be executed in the <a href="https://colab.research.google.com/drive/1jR2Og_qrUVg-VXNsfqJc5eEILcqHJYAC?usp=share_link">associated Google Colab notebook</a>. We will use some basic terminal commands. You don’t need to understand every command, rather, the goal is to become familiar with RNA-seq concepts and steps.</p>
+<p>The commands in this episode are to be executed in a <a href="https://colab.research.google.com/drive/1jR2Og_qrUVg-VXNsfqJc5eEILcqHJYAC?usp=share_link">Google Colab notebook</a> associated to this workshop. We will use some basic terminal commands. You don’t need to understand every command, rather, the goal is to become familiar with RNA-seq concepts and steps.</p>
 <section id="quality-control-fastqc" class="level2">
 <h2 class="anchored" data-anchor-id="quality-control-fastqc">Quality control: <code>fastqc</code></h2>
 <p>The first step in the RNA-seq workflow is to assess the quality of the sequencing reads. Sequence reads generated from next-generation sequencing technologies come in the FASTQ file format. This file format evolved from FASTA: it contains sequence data, but also contains quality information. For a single record (sequence read) there are four lines, each of which are described below:</p>
@@ -284,14 +284,14 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <div class="code-with-filename-file">
 <pre><strong>bash</strong></pre>
 </div>
-<div class="sourceCode cell-code" id="annotated-cell-2"><pre class="sourceCode bash code-annotation-code code-with-copy code-annotated"><code class="sourceCode bash"><button class="code-annotation-anchor" data-target-cell="annotated-cell-2" data-target-annotation="1">1</button><span id="annotated-cell-2-1" class="code-annotation-target"><a href="#annotated-cell-2-1" aria-hidden="true" tabindex="-1"></a><span class="ex">!mkdir</span> fastqc_reports</span>
+<div class="sourceCode cell-code" id="annotated-cell-2"><pre class="sourceCode bash code-annotation-code code-with-copy code-annotated"><code class="sourceCode bash"><button class="code-annotation-anchor" data-target-cell="annotated-cell-2" data-target-annotation="1">1</button><span id="annotated-cell-2-1" class="code-annotation-target"><a href="#annotated-cell-2-1" aria-hidden="true" tabindex="-1"></a><span class="fu">mkdir</span> fastqc_reports</span>
 <button class="code-annotation-anchor" data-target-cell="annotated-cell-2" data-target-annotation="2">2</button><span id="annotated-cell-2-2" class="code-annotation-target"><a href="#annotated-cell-2-2" aria-hidden="true" tabindex="-1"></a><span class="ex">fastqc</span> <span class="at">-o</span> fastqc_reports reads/sample1.fastq.gz</span><div class="code-annotation-gutter-bg"></div><div class="code-annotation-gutter"></div></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
 <div class="cell-annotation">
 <dl class="code-annotation-container-hidden code-annotation-container-grid">
 <dt data-target-cell="annotated-cell-2" data-target-annotation="1">1</dt>
 <dd>
-<span data-code-cell="annotated-cell-2" data-code-lines="1" data-code-annotation="1">First we <code>m</code>a<code>k</code>e a <code>dir</code>ectory to store the <code>fastqc</code> reports.</span>
+<span data-code-cell="annotated-cell-2" data-code-lines="1" data-code-annotation="1">First we make a directory (<code>mkdir</code>) to store the <code>fastqc</code> reports.</span>
 </dd>
 <dt data-target-cell="annotated-cell-2" data-target-annotation="2">2</dt>
 <dd>
@@ -300,8 +300,45 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 </dl>
 </div>
 </div>
-<p>You’ll see that <code>fastqc</code> created a <code>.html</code> page</p>
-<p>Doing this manually for every sample would be quite tiring, especially when we would have many samples. Let’s write a <code>bash</code> for loop to take care of this for us:</p>
+<p>You’ll see that <code>fastqc</code> created a <code>.html</code> page in the <code>fastqc_reports</code> directory. We’ll inspect it later.</p>
+<div class="callout callout-style-default callout-tip no-icon callout-titled" title="Exercise">
+<div class="callout-header d-flex align-content-center">
+<div class="callout-icon-container">
+<i class="callout-icon no-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+Exercise
+</div>
+</div>
+<div class="callout-body-container callout-body">
+<p>Run <code>fastqc</code> on another sample.</p>
+</div>
+</div>
+<div class="callout callout-style-default callout-caution no-icon callout-titled" title="Solution">
+<div class="callout-header d-flex align-content-center" data-bs-toggle="collapse" data-bs-target=".callout-2-contents" aria-controls="callout-2" aria-expanded="false" aria-label="Toggle callout">
+<div class="callout-icon-container">
+<i class="callout-icon no-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+Solution
+</div>
+<div class="callout-btn-toggle d-inline-block border-0 py-1 ps-1 pe-0 float-end"><i class="callout-toggle"></i></div>
+</div>
+<div id="callout-2" class="callout-2-contents callout-collapse collapse">
+<div class="callout-body-container callout-body">
+<p>To do this, we need to replace the input filename.</p>
+<div class="cell">
+<div class="code-with-filename">
+<div class="code-with-filename-file">
+<pre><strong>bash</strong></pre>
+</div>
+<div class="sourceCode cell-code" id="cb2"><pre class="sourceCode bash code-with-copy"><code class="sourceCode bash"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="ex">fastqc</span> <span class="at">-o</span> fastqc_reports reads/sample2.fastq.gz</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+</div>
+</div>
+</div>
+</div>
+<p>Doing this manually for every sample would be quite tiring, especially when we would have many samples. We will use a for loop, a fundamental programming concept, to automate this process for us:</p>
 <div class="cell">
 <div class="code-with-filename">
 <div class="code-with-filename-file">
@@ -320,7 +357,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 </dd>
 <dt data-target-cell="annotated-cell-3" data-target-annotation="2">2</dt>
 <dd>
-<span data-code-cell="annotated-cell-3" data-code-lines="2" data-code-annotation="2"><code>do</code>, and later <code>done</code> define the start and the end of the for loop, respectively.</span>
+<span data-code-cell="annotated-cell-3" data-code-lines="2" data-code-annotation="2"><code>do</code> (and later <code>done</code>) define the start and the end of the for loop, respectively.</span>
 </dd>
 <dt data-target-cell="annotated-cell-3" data-target-annotation="3">3</dt>
 <dd>
@@ -350,26 +387,9 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 </dl>
 </div>
 </div>
-<p>If you are working in the Google Colab, you can browse the files in the workspace by clicking the directory symbol. Find <code>fastqc_reports</code> and download the <code>.html</code> files. You can open these in any browser.</p>
-<p><code>fastqc</code> gives the reads of each sample a score (Pass, Warning, or Fail) on several different modules and this is reported in the <strong>Summary</strong>. The next section contains basic statistics like the number of reads, average sequence length, and the GC content. Generally it is a good idea to keep track of the total number of reads sequenced for each sample and to make sure the read length and %GC content is as expected. One of the most important analysis modules is the <strong>“Per base sequence quality”</strong> plot. This plot provides the distribution of quality scores at each position in the read across all reads. This plot can alert us to whether there were any problems occuring during sequencing and whether we might need to contact the sequencing facility. Other modules are discussed in detail <a href="https://hbctraining.github.io/Intro-to-rnaseq-hpc-salmon/lessons/qc_fastqc_assessment.html">here</a>. Note that nearly all sequencing datasets will show yellow warnings or red fails: <code>fastqc</code> is quite conservative. Your experiment is not lost if you get warnings or fails, but it warrants additional inspection of the reads. If you suspect something is wrong, don’t hesitate to contact the sequencing provider or your favorite bioinformatician.</p>
-<p><strong>TODO: add screenshots of good/bad fastqc results</strong></p>
-</section>
-<section id="trimming-fastp" class="level2">
-<h2 class="anchored" data-anchor-id="trimming-fastp">Trimming: <code>fastp</code></h2>
-<p>A common anomaly detected by <code>fastqc</code> is sequencing adapters still being present some of the the reads (shown in <strong>Overrepresented sequences</strong> table). This is known as ‘adapter contamination’, and the presence of these adapter sequences in the reads might affect how the reads map to the genome of interest. So, we need to get rid of them. We will use <code>fastp</code> to do this. In addition, <code>fastp</code> will trim low quality bases from the reads, and remove reads that are overall of low quality.</p>
-<div class="cell">
-<div class="code-with-filename">
-<div class="code-with-filename-file">
-<pre><strong>bash</strong></pre>
-</div>
-<div class="sourceCode cell-code" id="cb2"><pre class="sourceCode bash code-with-copy"><code class="sourceCode bash"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="fu">mkdir</span> fastp_reports</span>
-<span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a><span class="ex">fastp</span> <span class="dt">\ </span></span>
-<span id="cb2-3"><a href="#cb2-3" aria-hidden="true" tabindex="-1"></a>  <span class="ex">-i</span> reads/sample1.fastq.gz <span class="dt">\</span></span>
-<span id="cb2-4"><a href="#cb2-4" aria-hidden="true" tabindex="-1"></a>  <span class="at">-o</span> reads/sample1.trimmed.fastq.gz <span class="dt">\</span></span>
-<span id="cb2-5"><a href="#cb2-5" aria-hidden="true" tabindex="-1"></a>  <span class="at">--thread</span> 2 <span class="dt">\</span></span>
-<span id="cb2-6"><a href="#cb2-6" aria-hidden="true" tabindex="-1"></a>  <span class="at">--html</span> fastp_reports/sample1_fastp_report.html</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-</div>
-</div>
+<p>Finally, let’s inspect the QC results. If you are working in the Google Colab, you can browse the files in the workspace by clicking the directory symbol. Find <code>fastqc_reports</code> and download the <code>.html</code> files. You can open these in any browser. <code>fastqc</code> gives teach dataset a score (Pass, Warning, or Fail) on several different modules. All scores are reported in the <strong>Summary</strong>. The next section contains basic statistics like the number of reads, average sequence length, and the GC content. Generally it is a good idea to keep track of the total number of reads sequenced for each sample and to make sure the read length and GC content is as expected (based on what you know of your studied organism). One of the most important analysis modules is the <strong>“Per base sequence quality”</strong> plot. This plot provides the distribution of quality scores at each position in the read across all reads. This plot can alert us to whether there were any problems occuring during sequencing. For example, see a good and bad quality result below:</p>
+<p><img src="../images/fastqc-good-bad.png" class="img-fluid"></p>
+<p>Other modules are discussed in detail <a href="https://hbctraining.github.io/Intro-to-rnaseq-hpc-salmon/lessons/qc_fastqc_assessment.html">here</a>. Note that nearly all sequencing datasets will show yellow warnings or red fails: <code>fastqc</code> is quite conservative. Additionally, the module “Per base sequence content” very often fails for RNA-seq data, as a result of RNA-seq library prep. Your experiment is not lost if you get warnings or fails, but it might warrant additional inspection of the reads. If you suspect something is wrong, don’t hesitate to contact the sequencing provider or your favorite bioinformatician.</p>
 <div class="callout callout-style-default callout-tip no-icon callout-titled" title="Exercise">
 <div class="callout-header d-flex align-content-center">
 <div class="callout-icon-container">
@@ -380,57 +400,7 @@ Exercise
 </div>
 </div>
 <div class="callout-body-container callout-body">
-<p>After running <code>fastp</code>, the adapter contamination should be gone.</p>
-<ol type="1">
-<li>How could you check whether <code>fastp</code> indeed did it’s job?</li>
-<li>Write a command to check this.</li>
-</ol>
-</div>
-</div>
-<div class="callout callout-style-default callout-caution no-icon callout-titled" title="Solution">
-<div class="callout-header d-flex align-content-center" data-bs-toggle="collapse" data-bs-target=".callout-2-contents" aria-controls="callout-2" aria-expanded="false" aria-label="Toggle callout">
-<div class="callout-icon-container">
-<i class="callout-icon no-icon"></i>
-</div>
-<div class="callout-title-container flex-fill">
-Solution
-</div>
-<div class="callout-btn-toggle d-inline-block border-0 py-1 ps-1 pe-0 float-end"><i class="callout-toggle"></i></div>
-</div>
-<div id="callout-2" class="callout-2-contents callout-collapse collapse">
-<div class="callout-body-container callout-body">
-<ol type="1">
-<li>We can run <code>fastqc</code> again, this time on the trimmed reads.</li>
-<li></li>
-</ol>
-<div class="cell">
-<div class="code-with-filename">
-<div class="code-with-filename-file">
-<pre><strong>bash</strong></pre>
-</div>
-<div class="sourceCode cell-code" id="cb3"><pre class="sourceCode bash code-with-copy"><code class="sourceCode bash"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="ex">fastqc</span> <span class="at">-o</span> fastqc_reports reads/sample1.trimmed.fastq.gz</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-</div>
-</div>
-<p>By inspecting the <code>.html</code> report of the trimmed reads, we should see that the quality of the read sets has now improved.</p>
-</div>
-</div>
-</div>
-</section>
-<section id="mapping-star" class="level2">
-<h2 class="anchored" data-anchor-id="mapping-star">Mapping: <code>STAR</code></h2>
-<p>Our reads are now ready for mapping. Mapping reads means figuring out where each read from the RNA-seq experiment originally came from within the genome. For RNA-seq experiments, it’s important to pick a <strong>splice-aware</strong> aligner, since a RNA-seq read can span an exon-intron-exon boundary</p>
-<p><strong>TODO: add a figure here to demonstrate this, like the one found <a href="https://hbctraining.github.io/Intro-to-rnaseq-hpc-O2/lessons/03_alignment.html">here</a></strong>.</p>
-<div class="callout callout-style-default callout-tip no-icon callout-titled" title="Question">
-<div class="callout-header d-flex align-content-center">
-<div class="callout-icon-container">
-<i class="callout-icon no-icon"></i>
-</div>
-<div class="callout-title-container flex-fill">
-Question
-</div>
-</div>
-<div class="callout-body-container callout-body">
-<p>So, for RNA-seq we need splice-aware aligners. Can you come up with an experiment that would not require a splice-aware aligner program?</p>
+<p>Inspect all four QC reports, and discuss with your neighbour what you think about them.</p>
 </div>
 </div>
 <div class="callout callout-style-default callout-caution no-icon callout-titled" title="Solution">
@@ -445,19 +415,142 @@ Solution
 </div>
 <div id="callout-4" class="callout-4-contents callout-collapse collapse">
 <div class="callout-body-container callout-body">
-<p>In experiments where we don’t need to think about exon-intron boundaries. This is the case when the reads originate from genomic DNA, for example for whole genome sequencing experiments, or enrichment sequencing experiments like Chip-Seq.</p>
+<ul>
+<li>Sample 1, 2 and 3 are actually of good quality. Only the expected module (Per base sequence content) gives a FAIL, all other modules are green!</li>
+<li>For sample 4 this is not the case. The quality score of the bases is low, especially towards the end of the reads. Also, <code>fastqc</code> detected a TruSeq sequencing adapter in a small portion of the reads.</li>
+</ul>
 </div>
 </div>
 </div>
-<p>To use an aligner, we must first get the <strong>reference genome</strong> and then <em>index</em> the reference genome. Indexing the genome prepares the genome in a way that allows a computer to search it efficiently. The genome, a multi-million basepair long string of text, is encoded into a different, computer-friendly datastructure such as a suffix tree. The details of this procedure are beyond the scope of this workshop, but it’s important to do it. The <em>Arabidopsis thaliana</em> genome is already present in the notebook. We make the index using <code>STAR</code>:</p>
+</section>
+<section id="trimming-fastp" class="level2">
+<h2 class="anchored" data-anchor-id="trimming-fastp">Trimming: <code>fastp</code></h2>
+<p>A common anomaly detected by <code>fastqc</code> is sequencing adapters still being present some of the the reads (shown in <strong>Overrepresented sequences</strong> table). This is known as ‘adapter contamination’, and the presence of these adapter sequences in the reads might affect how the reads map to the genome of interest. So, we need to get rid of them. We will use <code>fastp</code> to do this. In addition, <code>fastp</code> will trim low quality bases from the reads. Finally, it will remove reads that are overall of low quality, or are too short after the trimming steps.</p>
 <div class="cell">
 <div class="code-with-filename">
 <div class="code-with-filename-file">
 <pre><strong>bash</strong></pre>
 </div>
-<div class="sourceCode cell-code" id="cb4"><pre class="sourceCode bash code-with-copy"><code class="sourceCode bash"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a><span class="ex">software/STAR</span> <span class="at">--runMode</span> genomeGenerate <span class="dt">\</span></span>
-<span id="cb4-2"><a href="#cb4-2" aria-hidden="true" tabindex="-1"></a>  <span class="at">--genomeFastaFiles</span> genome/TAIR10.fasta <span class="dt">\</span></span>
-<span id="cb4-3"><a href="#cb4-3" aria-hidden="true" tabindex="-1"></a>  <span class="at">--genomeDir</span> TAIR10_STAR_index</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb3"><pre class="sourceCode bash code-with-copy"><code class="sourceCode bash"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="fu">mkdir</span> fastp_reports</span>
+<span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a><span class="fu">mkdir</span> trimmed_reads</span>
+<span id="cb3-3"><a href="#cb3-3" aria-hidden="true" tabindex="-1"></a><span class="ex">fastp</span> <span class="dt">\ </span></span>
+<span id="cb3-4"><a href="#cb3-4" aria-hidden="true" tabindex="-1"></a>  <span class="ex">-i</span> reads/sample1.fastq.gz <span class="dt">\</span></span>
+<span id="cb3-5"><a href="#cb3-5" aria-hidden="true" tabindex="-1"></a>  <span class="at">-o</span> trimmed_reads/sample4.trimmed.fastq.gz <span class="dt">\</span></span>
+<span id="cb3-6"><a href="#cb3-6" aria-hidden="true" tabindex="-1"></a>  <span class="at">--thread</span> 2 <span class="dt">\</span></span>
+<span id="cb3-7"><a href="#cb3-7" aria-hidden="true" tabindex="-1"></a>  <span class="at">--html</span> fastp_reports/sample4_fastp_report.html</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+</div>
+<p><code>fastp</code> prints information about the trimming on the terminal, for example:</p>
+<div class="cell">
+<div class="code-with-filename">
+<div class="code-with-filename-file">
+<pre><strong>partial output</strong></pre>
+</div>
+<div class="sourceCode cell-code" id="cb4"><pre class="sourceCode bash code-with-copy"><code class="sourceCode bash"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a><span class="ex">Filtering</span> result:</span>
+<span id="cb4-2"><a href="#cb4-2" aria-hidden="true" tabindex="-1"></a><span class="ex">reads</span> passed filter: 39343</span>
+<span id="cb4-3"><a href="#cb4-3" aria-hidden="true" tabindex="-1"></a><span class="ex">reads</span> failed due to low quality: 10642</span>
+<span id="cb4-4"><a href="#cb4-4" aria-hidden="true" tabindex="-1"></a><span class="ex">reads</span> failed due to too many N: 15</span>
+<span id="cb4-5"><a href="#cb4-5" aria-hidden="true" tabindex="-1"></a><span class="ex">reads</span> failed due to too short: 0</span>
+<span id="cb4-6"><a href="#cb4-6" aria-hidden="true" tabindex="-1"></a><span class="ex">reads</span> with adapter trimmed: 0</span>
+<span id="cb4-7"><a href="#cb4-7" aria-hidden="true" tabindex="-1"></a><span class="ex">bases</span> trimmed due to adapters: 0</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+</div>
+<p>The same information is also saved as a nice <code>.html</code> page, you can download them and have a look.</p>
+<div class="callout callout-style-default callout-tip no-icon callout-titled" title="Exercise">
+<div class="callout-header d-flex align-content-center">
+<div class="callout-icon-container">
+<i class="callout-icon no-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+Exercise
+</div>
+</div>
+<div class="callout-body-container callout-body">
+<p>After running <code>fastp</code>, the adapter contamination of sample 4 should be gone.</p>
+<ol type="1">
+<li>How could you check whether <code>fastp</code> indeed did it’s job?</li>
+<li>Write a command to check this.</li>
+</ol>
+</div>
+</div>
+<div class="callout callout-style-default callout-caution no-icon callout-titled" title="Solution">
+<div class="callout-header d-flex align-content-center" data-bs-toggle="collapse" data-bs-target=".callout-6-contents" aria-controls="callout-6" aria-expanded="false" aria-label="Toggle callout">
+<div class="callout-icon-container">
+<i class="callout-icon no-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+Solution
+</div>
+<div class="callout-btn-toggle d-inline-block border-0 py-1 ps-1 pe-0 float-end"><i class="callout-toggle"></i></div>
+</div>
+<div id="callout-6" class="callout-6-contents callout-collapse collapse">
+<div class="callout-body-container callout-body">
+<ol type="1">
+<li>We can run <code>fastqc</code> again, this time on the trimmed reads.</li>
+<li></li>
+</ol>
+<div class="cell">
+<div class="code-with-filename">
+<div class="code-with-filename-file">
+<pre><strong>bash</strong></pre>
+</div>
+<div class="sourceCode cell-code" id="cb5"><pre class="sourceCode bash code-with-copy"><code class="sourceCode bash"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a><span class="ex">fastqc</span> <span class="at">-o</span> fastqc_reports_trimmed trimmed_reads/sample4.trimmed.fastq.gz</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+</div>
+<p>By inspecting the <code>.html</code> report of the trimmed reads, we should see that the quality of the read sets has now improved, and that it no longer detects the TruSeq adapters.</p>
+</div>
+</div>
+</div>
+</section>
+<section id="mapping-star" class="level2">
+<h2 class="anchored" data-anchor-id="mapping-star">Mapping: <code>STAR</code></h2>
+<p>Our reads are now ready for mapping. Mapping reads means figuring out where each read from the RNA-seq experiment originally came from within the genome. For RNA-seq experiments, it’s important to pick a <strong>splice-aware</strong> aligner, since a RNA-seq read can span an exon-intron-exon boundary. After all, the vast majority of RNA you sequenced is mature mRNA where introns have been spliced out.</p>
+<div class="quarto-figure quarto-figure-center">
+<figure class="figure">
+<p><img src="../images/HBC-spliced-alignment.png" class="img-fluid figure-img"></p>
+<figcaption>Splice-aware vs non-splice-aware alignment (image from Harvard Chan Bioinformatics Core)</figcaption>
+</figure>
+</div>
+<div class="callout callout-style-default callout-tip no-icon callout-titled" title="Question">
+<div class="callout-header d-flex align-content-center">
+<div class="callout-icon-container">
+<i class="callout-icon no-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+Question
+</div>
+</div>
+<div class="callout-body-container callout-body">
+<p>So, for RNA-seq we need splice-aware aligners. Can you come up with an experiment that would not require a splice-aware aligner program?</p>
+</div>
+</div>
+<div class="callout callout-style-default callout-caution no-icon callout-titled" title="Solution">
+<div class="callout-header d-flex align-content-center" data-bs-toggle="collapse" data-bs-target=".callout-8-contents" aria-controls="callout-8" aria-expanded="false" aria-label="Toggle callout">
+<div class="callout-icon-container">
+<i class="callout-icon no-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+Solution
+</div>
+<div class="callout-btn-toggle d-inline-block border-0 py-1 ps-1 pe-0 float-end"><i class="callout-toggle"></i></div>
+</div>
+<div id="callout-8" class="callout-8-contents callout-collapse collapse">
+<div class="callout-body-container callout-body">
+<p>In experiments where we don’t need to think about exon-intron boundaries. This is the case when the reads originate from genomic DNA, for example for whole genome sequencing experiments, or enrichment sequencing experiments like Chip-Seq.</p>
+</div>
+</div>
+</div>
+<p>To use an aligner, we must first get the <strong>reference genome</strong> (e.g.&nbsp;via <a href="https://www.ncbi.nlm.nih.gov/datasets/genome/">NCBI Genomes</a> or organism specific databases), in <code>.fa</code> or <code>.fasta</code> format. You will also need an annotation file with all the predicted gene models (<code>.gff</code> or <code>.gtf</code>format). For this workshop, the <em>A. thaliana</em> reference genome was included in the workshop materials.</p>
+<p>Before we start mapping we need to <em>index</em> the reference genome. Indexing the genome prepares the genome in a way that allows a computer to search it efficiently. The genome, a multi-million basepair long string of text, is encoded into a different, computer-friendly datastructure such as a suffix tree. The details of this procedure are beyond the scope of this workshop, but it’s important to do it. The <em>Arabidopsis thaliana</em> genome is already present in the notebook. We make the index using <code>STAR</code>:</p>
+<div class="cell">
+<div class="code-with-filename">
+<div class="code-with-filename-file">
+<pre><strong>bash</strong></pre>
+</div>
+<div class="sourceCode cell-code" id="cb6"><pre class="sourceCode bash code-with-copy"><code class="sourceCode bash"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a><span class="ex">STAR</span> <span class="at">--runMode</span> genomeGenerate <span class="dt">\</span></span>
+<span id="cb6-2"><a href="#cb6-2" aria-hidden="true" tabindex="-1"></a>  <span class="at">--genomeSAindexNbases</span> 12 <span class="dt">\</span></span>
+<span id="cb6-3"><a href="#cb6-3" aria-hidden="true" tabindex="-1"></a>  <span class="at">--genomeFastaFiles</span> genome/TAIR10.fasta <span class="dt">\</span></span>
+<span id="cb6-4"><a href="#cb6-4" aria-hidden="true" tabindex="-1"></a>  <span class="at">--genomeDir</span> TAIR10_STAR_index</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
 </div>
 <p>Allright, let’s finally run <code>STAR</code>. This tool requires quite some parameters to be set: how many threads to use (<code>--runThreadN</code>), where to find the index (<code>--genomeDir</code>), where to find the reads (<code>--readFilesIn</code>), that the reads are compressed (<code>--readFilesCommand</code>), where to store the results (<code>--outFileNamePrefix</code>), and which output file format we want (<code>--outSAMtype</code>). Pfew.</p>
@@ -466,13 +559,13 @@ Solution
 <div class="code-with-filename-file">
 <pre><strong>bash</strong></pre>
 </div>
-<div class="sourceCode cell-code" id="cb5"><pre class="sourceCode bash code-with-copy"><code class="sourceCode bash"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a><span class="ex">software/STAR</span> <span class="dt">\ </span>  </span>
-<span id="cb5-2"><a href="#cb5-2" aria-hidden="true" tabindex="-1"></a>  <span class="ex">--runThreadN</span> 2 <span class="dt">\ </span></span>
-<span id="cb5-3"><a href="#cb5-3" aria-hidden="true" tabindex="-1"></a>  <span class="ex">--genomeDir</span> TAIR10_STAR_index <span class="dt">\</span></span>
-<span id="cb5-4"><a href="#cb5-4" aria-hidden="true" tabindex="-1"></a>  <span class="at">--readFilesIn</span> reads/sample1.trimmed.fastq.gz <span class="dt">\</span></span>
-<span id="cb5-5"><a href="#cb5-5" aria-hidden="true" tabindex="-1"></a>  <span class="at">--readFilesCommand</span> zcat <span class="dt">\</span></span>
-<span id="cb5-6"><a href="#cb5-6" aria-hidden="true" tabindex="-1"></a>  <span class="at">--outFileNamePrefix</span> mapped_reads/sample1_ <span class="dt">\</span></span>
-<span id="cb5-7"><a href="#cb5-7" aria-hidden="true" tabindex="-1"></a>  <span class="at">--outSAMtype</span> BAM SortedByCoordinate</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb7"><pre class="sourceCode bash code-with-copy"><code class="sourceCode bash"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a><span class="ex">STAR</span> <span class="dt">\ </span>  </span>
+<span id="cb7-2"><a href="#cb7-2" aria-hidden="true" tabindex="-1"></a>  <span class="ex">--runThreadN</span> 2 <span class="dt">\ </span></span>
+<span id="cb7-3"><a href="#cb7-3" aria-hidden="true" tabindex="-1"></a>  <span class="ex">--genomeDir</span> TAIR10_STAR_index <span class="dt">\</span></span>
+<span id="cb7-4"><a href="#cb7-4" aria-hidden="true" tabindex="-1"></a>  <span class="at">--readFilesIn</span> trimmed_reads/sample1.trimmed.fastq.gz <span class="dt">\</span></span>
+<span id="cb7-5"><a href="#cb7-5" aria-hidden="true" tabindex="-1"></a>  <span class="at">--readFilesCommand</span> zcat <span class="dt">\</span></span>
+<span id="cb7-6"><a href="#cb7-6" aria-hidden="true" tabindex="-1"></a>  <span class="at">--outFileNamePrefix</span> mapped_reads/sample1_ <span class="dt">\</span></span>
+<span id="cb7-7"><a href="#cb7-7" aria-hidden="true" tabindex="-1"></a>  <span class="at">--outSAMtype</span> BAM SortedByCoordinate</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
 </div>
 <p>Let’s look at a mapping summary in a file generated by STAR that ends with <code>.final.out</code>. We can do that on the command line (using <code>cat</code>), or you can download the file and open it in a text editor.</p>
@@ -481,7 +574,7 @@ Solution
 <div class="code-with-filename-file">
 <pre><strong>bash</strong></pre>
 </div>
-<div class="sourceCode cell-code" id="cb6"><pre class="sourceCode bash code-with-copy"><code class="sourceCode bash"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a><span class="fu">cat</span> mapped_reads/sample1_Log.final.out</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb8"><pre class="sourceCode bash code-with-copy"><code class="sourceCode bash"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a><span class="fu">cat</span> mapped_reads/sample1_Log.final.out</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
 </div>
 <p>It’s important to check how many reads did not map to the reference genome. In our case, it looks like more than 95% of the reads mapped to the reference genome. That’s good! A high proportion of unmapped reads can be a warning sign that something went wrong in your experiment or analysis. The explanations may be technical (bad read quality), bioinformatical (perhaps you used the wrong reference genome!), or biological — it has been well documented that around 11% of primate and rodent cell-line RNA-seq datasets available on NCBI in 2015 were contaminated with mycoplasma RNA (<a href="https://pmc.ncbi.nlm.nih.gov/articles/PMC4357728/">Olarerin-George &amp; Hogenesch, 2015</a>). Likewise, 8,5% of all <em>Arabidopsis thaliana</em> NCBI RNA-seq datasets are contaminated with a virus that does not cause any disease symptoms, but can cover up to 80% of all reads generated in an RNA-seq experiment (<a href="https://nph.onlinelibrary.wiley.com/doi/full/10.1111/nph.18466">Verhoeven et al., 2022</a>). That said, we don’t need to aim for 100% reads mapped to the reference genome. There will always be some contamination, or your studied individual possesses genetic information not present in the reference genome.</p>
@@ -506,7 +599,7 @@ Exercise
 </div>
 </div>
 <div class="callout callout-style-default callout-caution no-icon callout-titled" title="Solution">
-<div class="callout-header d-flex align-content-center" data-bs-toggle="collapse" data-bs-target=".callout-6-contents" aria-controls="callout-6" aria-expanded="false" aria-label="Toggle callout">
+<div class="callout-header d-flex align-content-center" data-bs-toggle="collapse" data-bs-target=".callout-10-contents" aria-controls="callout-10" aria-expanded="false" aria-label="Toggle callout">
 <div class="callout-icon-container">
 <i class="callout-icon no-icon"></i>
 </div>
@@ -515,7 +608,7 @@ Solution
 </div>
 <div class="callout-btn-toggle d-inline-block border-0 py-1 ps-1 pe-0 float-end"><i class="callout-toggle"></i></div>
 </div>
-<div id="callout-6" class="callout-6-contents callout-collapse collapse">
+<div id="callout-10" class="callout-10-contents callout-collapse collapse">
 <div class="callout-body-container callout-body">
 <ol type="1">
 <li></li>
@@ -525,7 +618,7 @@ Solution
 <div class="code-with-filename-file">
 <pre><strong>bash</strong></pre>
 </div>
-<div class="sourceCode cell-code" id="cb7"><pre class="sourceCode bash code-with-copy"><code class="sourceCode bash"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a><span class="fu">head</span> mapped_reads/sample1_Aligned.sortedByCoord.out.bam</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb9"><pre class="sourceCode bash code-with-copy"><code class="sourceCode bash"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a><span class="fu">head</span> mapped_reads/sample1_Aligned.sortedByCoord.out.bam</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
 </div>
 <p>The output looks like gibberish, because <code>.bam</code> files are a binary file format.</p>
@@ -537,7 +630,7 @@ Solution
 <div class="code-with-filename-file">
 <pre><strong>bash</strong></pre>
 </div>
-<div class="sourceCode cell-code" id="cb8"><pre class="sourceCode bash code-with-copy"><code class="sourceCode bash"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a><span class="ex">software/samtools</span> view mapped_reads/sample1_Aligned.sortedByCoord.out.bam <span class="kw">|</span> <span class="fu">head</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb10"><pre class="sourceCode bash code-with-copy"><code class="sourceCode bash"><span id="cb10-1"><a href="#cb10-1" aria-hidden="true" tabindex="-1"></a><span class="ex">samtools</span> view mapped_reads/sample1_Aligned.sortedByCoord.out.bam <span class="kw">|</span> <span class="fu">head</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
 </div>
 </div>
@@ -561,7 +654,7 @@ Exercise
 </div>
 </div>
 <div class="callout callout-style-default callout-caution no-icon callout-titled" title="Solution">
-<div class="callout-header d-flex align-content-center" data-bs-toggle="collapse" data-bs-target=".callout-8-contents" aria-controls="callout-8" aria-expanded="false" aria-label="Toggle callout">
+<div class="callout-header d-flex align-content-center" data-bs-toggle="collapse" data-bs-target=".callout-12-contents" aria-controls="callout-12" aria-expanded="false" aria-label="Toggle callout">
 <div class="callout-icon-container">
 <i class="callout-icon no-icon"></i>
 </div>
@@ -570,10 +663,10 @@ Solution
 </div>
 <div class="callout-btn-toggle d-inline-block border-0 py-1 ps-1 pe-0 float-end"><i class="callout-toggle"></i></div>
 </div>
-<div id="callout-8" class="callout-8-contents callout-collapse collapse">
+<div id="callout-12" class="callout-12-contents callout-collapse collapse">
 <div class="callout-body-container callout-body">
 <ol type="1">
-<li><code>samtools flagstat</code> shows us (just like the <code>STAR</code> log file) how many reads were mapped correctly. In addition, it tells us whether read pairs (if mapping paired-end data) mapped together as expected.</li>
+<li><code>samtools flagstat</code> shows us (just like the <code>STAR</code> log file) how many reads were mapped correctly. In addition, it tells us whether read pairs (if mapping paired-end data) mapped together as expected (are ‘properly paired’). Today, we used single-end reads so this is not relavant.</li>
 <li><code>samtools idxstats</code> shows us how many reads were mapped to each chromosome of the reference genome. This is useful to confirm whether the entire genome is evenly covered, or that there may be overrepresentation on e.g.&nbsp;the mitochondrial DNA.</li>
 </ol>
 </div>
@@ -593,7 +686,7 @@ Exercise
 </div>
 </div>
 <div class="callout callout-style-default callout-caution no-icon callout-titled" title="Solution">
-<div class="callout-header d-flex align-content-center" data-bs-toggle="collapse" data-bs-target=".callout-10-contents" aria-controls="callout-10" aria-expanded="false" aria-label="Toggle callout">
+<div class="callout-header d-flex align-content-center" data-bs-toggle="collapse" data-bs-target=".callout-14-contents" aria-controls="callout-14" aria-expanded="false" aria-label="Toggle callout">
 <div class="callout-icon-container">
 <i class="callout-icon no-icon"></i>
 </div>
@@ -602,7 +695,7 @@ Solution
 </div>
 <div class="callout-btn-toggle d-inline-block border-0 py-1 ps-1 pe-0 float-end"><i class="callout-toggle"></i></div>
 </div>
-<div id="callout-10" class="callout-10-contents callout-collapse collapse">
+<div id="callout-14" class="callout-14-contents callout-collapse collapse">
 <div class="callout-body-container callout-body">
 <ol type="1">
 <li>For loop to trim:</li>
@@ -612,17 +705,17 @@ Solution
 <div class="code-with-filename-file">
 <pre><strong>bash</strong></pre>
 </div>
-<div class="sourceCode cell-code" id="cb9"><pre class="sourceCode bash code-with-copy"><code class="sourceCode bash"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> sample <span class="kw">in</span> reads/<span class="pp">*</span>.fastq.gz</span>
-<span id="cb9-2"><a href="#cb9-2" aria-hidden="true" tabindex="-1"></a><span class="cf">do</span></span>
-<span id="cb9-3"><a href="#cb9-3" aria-hidden="true" tabindex="-1"></a>  <span class="va">name</span><span class="op">=</span><span class="va">$(</span><span class="fu">basename</span> <span class="st">"</span><span class="va">$sample</span><span class="st">"</span> .fastq.gz<span class="va">)</span></span>
-<span id="cb9-4"><a href="#cb9-4" aria-hidden="true" tabindex="-1"></a>  <span class="bu">echo</span> <span class="st">"processing </span><span class="va">${name}</span><span class="st">"</span></span>
-<span id="cb9-5"><a href="#cb9-5" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb9-6"><a href="#cb9-6" aria-hidden="true" tabindex="-1"></a>  <span class="ex">fastp</span> <span class="dt">\</span></span>
-<span id="cb9-7"><a href="#cb9-7" aria-hidden="true" tabindex="-1"></a>  <span class="at">-i</span> reads/<span class="va">${name}</span>.fastq.gz <span class="dt">\</span></span>
-<span id="cb9-8"><a href="#cb9-8" aria-hidden="true" tabindex="-1"></a>  <span class="at">-o</span> reads/<span class="va">${name}</span>.trimmed.fastq.gz <span class="dt">\</span></span>
-<span id="cb9-9"><a href="#cb9-9" aria-hidden="true" tabindex="-1"></a>  <span class="at">--thread</span> 2 <span class="dt">\</span></span>
-<span id="cb9-10"><a href="#cb9-10" aria-hidden="true" tabindex="-1"></a>  <span class="at">--html</span> fastp_reports/<span class="va">${name}</span>_fastp_report.html</span>
-<span id="cb9-11"><a href="#cb9-11" aria-hidden="true" tabindex="-1"></a><span class="cf">done</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb11"><pre class="sourceCode bash code-with-copy"><code class="sourceCode bash"><span id="cb11-1"><a href="#cb11-1" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> sample <span class="kw">in</span> reads/<span class="pp">*</span>.fastq.gz</span>
+<span id="cb11-2"><a href="#cb11-2" aria-hidden="true" tabindex="-1"></a><span class="cf">do</span></span>
+<span id="cb11-3"><a href="#cb11-3" aria-hidden="true" tabindex="-1"></a>  <span class="va">name</span><span class="op">=</span><span class="va">$(</span><span class="fu">basename</span> <span class="st">"</span><span class="va">$sample</span><span class="st">"</span> .fastq.gz<span class="va">)</span></span>
+<span id="cb11-4"><a href="#cb11-4" aria-hidden="true" tabindex="-1"></a>  <span class="bu">echo</span> <span class="st">"processing </span><span class="va">${name}</span><span class="st">"</span></span>
+<span id="cb11-5"><a href="#cb11-5" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb11-6"><a href="#cb11-6" aria-hidden="true" tabindex="-1"></a>  <span class="ex">fastp</span> <span class="dt">\</span></span>
+<span id="cb11-7"><a href="#cb11-7" aria-hidden="true" tabindex="-1"></a>  <span class="at">-i</span> reads/<span class="va">${name}</span>.fastq.gz <span class="dt">\</span></span>
+<span id="cb11-8"><a href="#cb11-8" aria-hidden="true" tabindex="-1"></a>  <span class="at">-o</span> trimmed_reads/<span class="va">${name}</span>.trimmed.fastq.gz <span class="dt">\</span></span>
+<span id="cb11-9"><a href="#cb11-9" aria-hidden="true" tabindex="-1"></a>  <span class="at">--thread</span> 2 <span class="dt">\</span></span>
+<span id="cb11-10"><a href="#cb11-10" aria-hidden="true" tabindex="-1"></a>  <span class="at">--html</span> fastp_reports/<span class="va">${name}</span>_fastp_report.html</span>
+<span id="cb11-11"><a href="#cb11-11" aria-hidden="true" tabindex="-1"></a><span class="cf">done</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
 </div>
 <ol start="2" type="1">
@@ -633,18 +726,18 @@ Solution
 <div class="code-with-filename-file">
 <pre><strong>bash</strong></pre>
 </div>
-<div class="sourceCode cell-code" id="cb10"><pre class="sourceCode bash code-with-copy"><code class="sourceCode bash"><span id="cb10-1"><a href="#cb10-1" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> sample <span class="kw">in</span> reads/<span class="pp">*</span>.trimmed.fastq.gz</span>
-<span id="cb10-2"><a href="#cb10-2" aria-hidden="true" tabindex="-1"></a><span class="cf">do</span></span>
-<span id="cb10-3"><a href="#cb10-3" aria-hidden="true" tabindex="-1"></a>  <span class="va">name</span><span class="op">=</span><span class="va">$(</span><span class="fu">basename</span> <span class="st">"</span><span class="va">$sample</span><span class="st">"</span> .trimmed.fastq.gz<span class="va">)</span></span>
-<span id="cb10-4"><a href="#cb10-4" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb10-5"><a href="#cb10-5" aria-hidden="true" tabindex="-1"></a>  <span class="ex">software/STAR</span> <span class="dt">\</span></span>
-<span id="cb10-6"><a href="#cb10-6" aria-hidden="true" tabindex="-1"></a>    <span class="at">--runThreadN</span> 2 <span class="dt">\</span></span>
-<span id="cb10-7"><a href="#cb10-7" aria-hidden="true" tabindex="-1"></a>    <span class="at">--genomeDir</span> TAIR10_STAR_index <span class="dt">\</span></span>
-<span id="cb10-8"><a href="#cb10-8" aria-hidden="true" tabindex="-1"></a>    <span class="at">--readFilesIn</span> reads/<span class="va">${name}</span>.trimmed.fastq.gz <span class="dt">\</span></span>
-<span id="cb10-9"><a href="#cb10-9" aria-hidden="true" tabindex="-1"></a>    <span class="at">--readFilesCommand</span> zcat <span class="dt">\</span></span>
-<span id="cb10-10"><a href="#cb10-10" aria-hidden="true" tabindex="-1"></a>    <span class="at">--outFileNamePrefix</span> mapped_reads/<span class="va">${name}</span>_ <span class="dt">\</span></span>
-<span id="cb10-11"><a href="#cb10-11" aria-hidden="true" tabindex="-1"></a>    <span class="at">--outSAMtype</span> BAM SortedByCoordinate</span>
-<span id="cb10-12"><a href="#cb10-12" aria-hidden="true" tabindex="-1"></a><span class="cf">done</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb12"><pre class="sourceCode bash code-with-copy"><code class="sourceCode bash"><span id="cb12-1"><a href="#cb12-1" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> sample <span class="kw">in</span> trimmed_reads/<span class="pp">*</span>.trimmed.fastq.gz</span>
+<span id="cb12-2"><a href="#cb12-2" aria-hidden="true" tabindex="-1"></a><span class="cf">do</span></span>
+<span id="cb12-3"><a href="#cb12-3" aria-hidden="true" tabindex="-1"></a>  <span class="va">name</span><span class="op">=</span><span class="va">$(</span><span class="fu">basename</span> <span class="st">"</span><span class="va">$sample</span><span class="st">"</span> .trimmed.fastq.gz<span class="va">)</span></span>
+<span id="cb12-4"><a href="#cb12-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb12-5"><a href="#cb12-5" aria-hidden="true" tabindex="-1"></a>  <span class="ex">software/STAR</span> <span class="dt">\</span></span>
+<span id="cb12-6"><a href="#cb12-6" aria-hidden="true" tabindex="-1"></a>    <span class="at">--runThreadN</span> 2 <span class="dt">\</span></span>
+<span id="cb12-7"><a href="#cb12-7" aria-hidden="true" tabindex="-1"></a>    <span class="at">--genomeDir</span> TAIR10_STAR_index <span class="dt">\</span></span>
+<span id="cb12-8"><a href="#cb12-8" aria-hidden="true" tabindex="-1"></a>    <span class="at">--readFilesIn</span> reads/<span class="va">${name}</span>.trimmed.fastq.gz <span class="dt">\</span></span>
+<span id="cb12-9"><a href="#cb12-9" aria-hidden="true" tabindex="-1"></a>    <span class="at">--readFilesCommand</span> zcat <span class="dt">\</span></span>
+<span id="cb12-10"><a href="#cb12-10" aria-hidden="true" tabindex="-1"></a>    <span class="at">--outFileNamePrefix</span> mapped_reads/<span class="va">${name}</span>_ <span class="dt">\</span></span>
+<span id="cb12-11"><a href="#cb12-11" aria-hidden="true" tabindex="-1"></a>    <span class="at">--outSAMtype</span> BAM SortedByCoordinate</span>
+<span id="cb12-12"><a href="#cb12-12" aria-hidden="true" tabindex="-1"></a><span class="cf">done</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
 </div>
 </div>
@@ -655,27 +748,55 @@ Solution
 <h3 class="anchored" data-anchor-id="inspecting-the-mapping-on-a-genome-browser">Inspecting the mapping on a genome browser</h3>
 <p>So far, these steps may have been quite abstract. Let’s make it more visual. We will look at our mapped reads in a genome browser.</p>
 <ol type="1">
-<li>Download a <code>.bam</code> file with accompanying <code>.bam.bai</code> index file</li>
-<li>Go to <a href="https://phytozome-next.jgi.doe.gov/info/Athaliana_TAIR10">Phytozome Arabidopsis</a></li>
-<li>Click <code>JBrowse</code></li>
-<li>Go to <code>File</code> &gt; <code>Open track file or URL</code> &gt; <code>Select Files...</code> to find your files</li>
-<li>Click on <code>Open</code>!</li>
+<li>Download a <code>.bam</code> file with accompanying <code>.bam.bai</code> index file.</li>
+<li>Go to <a href="https://phytozome-next.jgi.doe.gov/info/Athaliana_TAIR10">the Arabidopsis page on Phytozome</a> (or another website for your favorite organism).</li>
+<li>Click <code>JBrowse</code>.</li>
+<li>Go to <code>File</code> &gt; <code>Open track file or URL</code> &gt; <code>Select Files...</code> to find your files.</li>
+<li>Click <code>Open</code>!</li>
 </ol>
+<p><img src="../images/alignment_arabidopsis.png" class="img-fluid"></p>
 <p>That’s wonderful! You should see red and blue (forward and reverse) blocks aligning with the exons of the annotated gene models of <em>A. thaliana</em>. Also notice that some reads will be beautifully split over two or more introns. Good RNA-seq mapping should align predominantly to exons. If this is not the case, something might be wrong. For example, your RNA sample could have been contaminated with genomic DNA. Another option that could explain mappings to non-annotated regions of the genome, is that the annotation may not be complete.</p>
-<p><strong>TODO</strong>: add a screenshot here.</p>
 <p>Obviously, we can’t manually inspect all samples and all genes like this, so we will need to count the number of reads in each in gene in each sample. We will do that in the next and final step of today.</p>
 </section>
 </section>
 <section id="counting-featurecounts" class="level2">
 <h2 class="anchored" data-anchor-id="counting-featurecounts">Counting: <code>featureCounts</code></h2>
+<p>The <code>featureCounts</code> program will …. count (!) the number of reads that map within an annotated feature. Here, we chose to aggregate read count by gene (<code>-t gene</code>). Alternative options are transcript and exon (but they may require a different formatting of the annotation file).</p>
 <div class="cell">
 <div class="code-with-filename">
 <div class="code-with-filename-file">
 <pre><strong>bash</strong></pre>
 </div>
-<div class="sourceCode cell-code" id="cb11"><pre class="sourceCode bash code-with-copy"><code class="sourceCode bash"><span id="cb11-1"><a href="#cb11-1" aria-hidden="true" tabindex="-1"></a><span class="co"># </span><span class="al">TODO</span><span class="co">: add featureCounts command here</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb13"><pre class="sourceCode bash code-with-copy"><code class="sourceCode bash"><span id="cb13-1"><a href="#cb13-1" aria-hidden="true" tabindex="-1"></a><span class="ex">featureCounts</span> <span class="dt">\</span></span>
+<span id="cb13-2"><a href="#cb13-2" aria-hidden="true" tabindex="-1"></a>  <span class="at">-T</span> 2 <span class="dt">\</span></span>
+<span id="cb13-3"><a href="#cb13-3" aria-hidden="true" tabindex="-1"></a>  <span class="at">-O</span> <span class="dt">\</span></span>
+<span id="cb13-4"><a href="#cb13-4" aria-hidden="true" tabindex="-1"></a>  <span class="at">-a</span> genome/TAIR10_GFF3_genes.gff <span class="dt">\</span></span>
+<span id="cb13-5"><a href="#cb13-5" aria-hidden="true" tabindex="-1"></a>  <span class="at">-o</span> counts.tsv <span class="dt">\</span></span>
+<span id="cb13-6"><a href="#cb13-6" aria-hidden="true" tabindex="-1"></a>  <span class="at">-t</span> gene <span class="dt">\</span></span>
+<span id="cb13-7"><a href="#cb13-7" aria-hidden="true" tabindex="-1"></a>  mapped_reads/<span class="pp">*</span>.bam</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
 </div>
+<p>While running, <code>featureCounts</code> shows how many mapped reads were assigned to features. Finally, let’s look at the counts table that was generated:</p>
+<div class="cell">
+<div class="code-with-filename">
+<div class="code-with-filename-file">
+<pre><strong>bash</strong></pre>
+</div>
+<div class="sourceCode cell-code" id="cb14"><pre class="sourceCode bash code-with-copy"><code class="sourceCode bash"><span id="cb14-1"><a href="#cb14-1" aria-hidden="true" tabindex="-1"></a><span class="fu">head</span> counts.tsv</span>
+<span id="cb14-2"><a href="#cb14-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb14-3"><a href="#cb14-3" aria-hidden="true" tabindex="-1"></a><span class="co"># Program:featureCounts v2.0.3; Command:"featureCounts" "-T" "2" "-O" "-a" "genome/TAIR10_GFF3_genes.gff" "-o" "raw_counts.tsv" "-t" "gene" "mapped_reads/sample1_Aligned.sortedByCoord.out.bam" "mapped_reads/sample2_Aligned.sortedByCoord.out.bam" "mapped_reads/sample3_Aligned.sortedByCoord.out.bam" "mapped_reads/sample4_Aligned.sortedByCoord.out.bam" </span></span>
+<span id="cb14-4"><a href="#cb14-4" aria-hidden="true" tabindex="-1"></a><span class="ex">Geneid</span>  Chr Start   End Strand  Length  mapped_reads/sample1_Aligned.sortedByCoord.out.bam  mapped_reads/sample2_Aligned.sortedByCoord.out.bam  mapped_reads/sample3_Aligned.sortedByCoord.out.bam  mapped_reads/sample4_Aligned.sortedByCoord.out.bam</span>
+<span id="cb14-5"><a href="#cb14-5" aria-hidden="true" tabindex="-1"></a><span class="ex">AT1G01010</span>   1   3631    5899    +   2269    0   0   0   0</span>
+<span id="cb14-6"><a href="#cb14-6" aria-hidden="true" tabindex="-1"></a><span class="ex">AT1G01020</span>   1   5928    8737    <span class="at">-</span>   2810    0   0   2   0</span>
+<span id="cb14-7"><a href="#cb14-7" aria-hidden="true" tabindex="-1"></a><span class="ex">AT1G01030</span>   1   11649   13714   <span class="at">-</span>   2066    0   0   0   0</span>
+<span id="cb14-8"><a href="#cb14-8" aria-hidden="true" tabindex="-1"></a><span class="ex">AT1G01040</span>   1   23146   31227   +   8082    5   5   3   1</span>
+<span id="cb14-9"><a href="#cb14-9" aria-hidden="true" tabindex="-1"></a><span class="ex">AT1G01046</span>   1   28500   28706   +   207 0   0   0   0</span>
+<span id="cb14-10"><a href="#cb14-10" aria-hidden="true" tabindex="-1"></a><span class="ex">AT1G01050</span>   1   31170   33153   <span class="at">-</span>   1984    3   6   4   0</span>
+<span id="cb14-11"><a href="#cb14-11" aria-hidden="true" tabindex="-1"></a><span class="ex">AT1G01060</span>   1   33379   37871   <span class="at">-</span>   4493    1   2   2   0</span>
+<span id="cb14-12"><a href="#cb14-12" aria-hidden="true" tabindex="-1"></a><span class="ex">AT1G01070</span>   1   38752   40944   <span class="at">-</span>   2193    1   0   0   0</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+</div>
+<p>The first row records the specific <code>featureCounts</code> command that we used to make this table. Ech subsequent row corresponds to a <code>Geneid</code>. The first six columns provide gene metadata: geneid, chromosome, start and end coordinates, strand, and gene length. All remaining columns contain the read counts of each sample.</p>
 </section>
 <section id="a-note-on-the-specific-tools-used-here" class="level2">
 <h2 class="anchored" data-anchor-id="a-note-on-the-specific-tools-used-here">A note on the specific tools used here</h2>
@@ -692,7 +813,7 @@ Solution
 <tr class="odd">
 <td>Trimming</td>
 <td><code>fastp</code></td>
-<td><code>cutadapt</code>, <code>trimmomoatic</code></td>
+<td><code>cutadapt</code>, <code>trimmomatic</code></td>
 </tr>
 <tr class="even">
 <td>Mapping</td>
@@ -706,6 +827,7 @@ Solution
 </tr>
 </tbody>
 </table>
+<p>Instead of real base-to-base read mapping using <code>STAR</code> or <code>HISAT2</code>, you can also consider <em>quasi-mapping</em> your reads to just the annotated transcript models using <code>salmon</code>. This is much faster and requires less storage space than real mapping, but for educational purposes and smaller scale experiments, true mapping is still more insightful.</p>
 </section>
 <section id="streamlining-read-mapping-procedure" class="level2">
 <h2 class="anchored" data-anchor-id="streamlining-read-mapping-procedure">Streamlining read mapping procedure</h2>
@@ -827,6 +949,13 @@ window.document.addEventListener("DOMContentLoaded", function (event) {
         if (link.dataset.originalHref !== undefined) {
           link.href = link.dataset.originalHref;
         }
+          // target, if specified
+          link.setAttribute("target", "_blank");
+          if (link.getAttribute("rel") === null) {
+            link.setAttribute("rel", "noopener");
+          }
+          // default icon
+          link.classList.add("external");
       }
     }
   function tippyHover(el, contentFn, onTriggerFn, onUntriggerFn) {

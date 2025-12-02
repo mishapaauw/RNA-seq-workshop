@@ -35,4 +35,4 @@ Current maintainers of this workshop page are members of the [bioDSC (University
 
 ## Credits
 
-This workshop is based on other teaching materials available online. The primary source is the [RNA-seq lesson designed by the Science Park Study Group](https://scienceparkstudygroup.github.io/rna-seq-lesson/), which in turn was based on [Harvard Chan Bioinformatics Core RNA-seq materials](https://hbctraining.github.io/Intro-to-bulk-RNAseq/schedule/links-to-lessons.html).
+This workshop is in part based on other teaching materials available online. The primary source is the [RNA-seq lesson designed by the Science Park Study Group](https://scienceparkstudygroup.github.io/rna-seq-lesson/), which in turn was based on [Harvard Chan Bioinformatics Core (HBC) RNA-seq materials](https://hbctraining.github.io/Intro-to-bulk-RNAseq/schedule/links-to-lessons.html). Both are open acces materials distributed under a CC BY 4.0 license.
