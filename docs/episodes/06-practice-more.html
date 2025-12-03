@@ -151,9 +151,7 @@ ul.task-list li input[type="checkbox"] {
     <h2 id="toc-title">On this page</h2>
    
   <ul>
-  <li><a href="#the-neuroscientist" id="toc-the-neuroscientist" class="nav-link active" data-scroll-target="#the-neuroscientist">The neuroscientist</a></li>
-  <li><a href="#the-microbiologist" id="toc-the-microbiologist" class="nav-link" data-scroll-target="#the-microbiologist">The microbiologist</a></li>
-  <li><a href="#the-plant-scientist" id="toc-the-plant-scientist" class="nav-link" data-scroll-target="#the-plant-scientist">The plant scientist</a></li>
+  <li><a href="#the-datasets" id="toc-the-datasets" class="nav-link active" data-scroll-target="#the-datasets">The datasets</a></li>
   </ul>
 </nav>
     </div>
@@ -180,18 +178,39 @@ ul.task-list li input[type="checkbox"] {
 
 
 <p>In this workshop, we went all the way from experimental design, to bioinformatic processing of <code>.fastq</code> files, to differential gene expression analysis in <code>DESeq2</code>. We hope that you are now ready to design and analyze your own transcriptome experiments. Remember that we only covered the very basics of transcriptome analysis, expect to learn a lot more when you start analyzing your own data.</p>
-<p>If you first want to practice more, or don’t have your own data yet, consider analyzing publicly available RNA-seq datasets. Papers often make their raw sequencing reads available on NCBI or ENA, which you can download to reanalyze. For now, we collected three count tables to practice <code>DESeq2</code> analysis, from three different domains of the life sciences.</p>
-<section id="the-neuroscientist" class="level3">
-<h3 class="anchored" data-anchor-id="the-neuroscientist">The neuroscientist</h3>
-<p><strong>TODO</strong> Find a neuroscience count table with associated metadata. Something brain development related? Maybe from the Frank Jacobs lab?</p>
-</section>
-<section id="the-microbiologist" class="level3">
-<h3 class="anchored" data-anchor-id="the-microbiologist">The microbiologist</h3>
-<p><strong>TODO</strong> Find a microbiology count table with associated metadata. Bacteria response to antibiotics? Bacteria during infection?</p>
-</section>
-<section id="the-plant-scientist" class="level3">
-<h3 class="anchored" data-anchor-id="the-plant-scientist">The plant scientist</h3>
-<p><strong>TODO</strong> Find a plant science count table with associated metadata. Tomato dataset from Petra Bleeker? Rice dataset from Harro Bouwmeester?</p>
+<p>If you first want to practice more, or don’t have your own data yet, consider analyzing publicly available RNA-seq datasets. Papers often make their raw sequencing reads available on NCBI or ENA, which you can download to reanalyze. A nice repository where pre-processed count tables are available is <a href="https://www.ebi.ac.uk/gxa/experiments">EMBL-EBI</a>. For now, we collected three count tables to practice <code>DESeq2</code> analysis, from three different domains of the life sciences. They are available in the <a href="https://github.com/mishapaauw/RNA-seq-workshop/tree/main/practice">GitHub repository of this workshop</a>.</p>
+<section id="the-datasets" class="level2">
+<h2 class="anchored" data-anchor-id="the-datasets">The datasets</h2>
+<ol type="1">
+<li><p><span class="emoji" data-emoji="corn">🌽</span> <span class="emoji" data-emoji="seedling">🌱</span> <strong>The Plant Scientist: maize plants infected with the fungus <em>Ustilago maydis</em></strong></p>
+<ul>
+<li>Experiment ID: <code>E-CURD-40</code></li>
+<li>Experimental factors:
+<ul>
+<li>Treatment, with levels: <code>Ustilago maydis</code> and <code>none</code></li>
+<li>Timepoint, with levels: <code>0.5</code>, <code>1</code>, <code>2</code>, <code>4</code>, <code>6</code>, <code>8</code>, <code>12</code>, days after infection</li>
+</ul></li>
+</ul></li>
+<li><p><span class="emoji" data-emoji="brain">🧠</span> <span class="emoji" data-emoji="zap">⚡</span> <strong>The Neuroscientist: different brain regions from patients with different psychiatric problems</strong></p>
+<ul>
+<li>Experiment ID: <code>E-GEOD-78936</code></li>
+<li>Experimental factors:
+<ul>
+<li><code>disease</code>, with levels: <code>normal</code>, <code>schizophrenia</code>, <code>bipolar disorder</code></li>
+<li><code>brain_region</code>, with levels: <code>area 9</code>, <code>area 11</code>, <code>area 24</code></li>
+</ul></li>
+</ul></li>
+<li><p><span class="emoji" data-emoji="microbe">🦠</span> <span class="emoji" data-emoji="microscope">🔬</span> <strong>The Microbiologist: <em>Pseudomonas aeruginosa</em> bacteria exposed to different concentrations of copper</strong></p>
+<ul>
+<li>Experiment ID: <code>GSE160187</code></li>
+<li>Experimental factors:
+<ul>
+<li><code>genotype</code>, with levels: <code>POA1</code> (wild-type bacteria) and <code>XEN41</code> (tetracyclin resistant bacteria)</li>
+<li><code>treatment</code>, with levels: <code>none</code>, <code>MIC/10</code>, <code>MIC</code> levels of copper</li>
+<li><code>timepoint</code>, with levels: <code>0</code>, <code>24</code>, <code>48</code>, <code>72</code> hours of incubation</li>
+</ul></li>
+</ul></li>
+</ol>
 
 
 </section>
@@ -303,6 +322,13 @@ window.document.addEventListener("DOMContentLoaded", function (event) {
         if (link.dataset.originalHref !== undefined) {
           link.href = link.dataset.originalHref;
         }
+          // target, if specified
+          link.setAttribute("target", "_blank");
+          if (link.getAttribute("rel") === null) {
+            link.setAttribute("rel", "noopener");
+          }
+          // default icon
+          link.classList.add("external");
       }
     }
   function tippyHover(el, contentFn, onTriggerFn, onUntriggerFn) {

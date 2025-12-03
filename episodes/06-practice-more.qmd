@@ -5,20 +5,35 @@ format:
         fig-width: 8
         fig-height: 4
         code-annotations: hover
+        from: markdown+emoji
+        link-external-icon: true
+        link-external-newwindow: true
 ---
 
 In this workshop, we went all the way from experimental design, to bioinformatic processing of `.fastq` files, to differential gene expression analysis in `DESeq2`. We hope that you are now ready to design and analyze your own transcriptome experiments. Remember that we only covered the very basics of transcriptome analysis, expect to learn a lot more when you start analyzing your own data.
 
-If you first want to practice more, or don't have your own data yet, consider analyzing publicly available RNA-seq datasets. Papers often make their raw sequencing reads available on NCBI or ENA, which you can download to reanalyze. For now, we collected three count tables to practice `DESeq2` analysis, from three different domains of the life sciences.
+If you first want to practice more, or don't have your own data yet, consider analyzing publicly available RNA-seq datasets. Papers often make their raw sequencing reads available on NCBI or ENA, which you can download to reanalyze. A nice repository where pre-processed count tables are available is [EMBL-EBI](https://www.ebi.ac.uk/gxa/experiments). For now, we collected three count tables to practice `DESeq2` analysis, from three different domains of the life sciences. They are available in the [GitHub repository of this workshop](https://github.com/mishapaauw/RNA-seq-workshop/tree/main/practice).
 
-### The neuroscientist
+## The datasets
 
-**TODO** Find a neuroscience count table with associated metadata. Something brain development related? Maybe from the Frank Jacobs lab?
+1. :corn: :seedling: **The Plant Scientist: maize plants infected with the fungus *Ustilago maydis***
 
-### The microbiologist
+    - Experiment ID: `E-CURD-40`
+    - Experimental factors:
+        - Treatment, with levels: `Ustilago maydis` and `none`
+        - Timepoint, with levels: `0.5`, `1`, `2`, `4`, `6`, `8`, `12`, days after infection
 
-**TODO** Find a microbiology count table with associated metadata. Bacteria response to antibiotics? Bacteria during infection?
+2. :brain: :zap: **The Neuroscientist: different brain regions from patients with different psychiatric problems**
 
-### The plant scientist
+    - Experiment ID: `E-GEOD-78936`
+    - Experimental factors:
+        - `disease`, with levels: `normal`, `schizophrenia`, `bipolar disorder`
+        - `brain_region`, with levels: `area 9`, `area 11`, `area 24`
 
-**TODO** Find a plant science count table with associated metadata. Tomato dataset from Petra Bleeker? Rice dataset from Harro Bouwmeester?
+2. :microbe: :microscope: **The Microbiologist: *Pseudomonas aeruginosa* bacteria exposed to different concentrations of copper**
+
+    - Experiment ID: `GSE160187`
+    - Experimental factors:
+        - `genotype`, with levels: `POA1` (wild-type bacteria) and `XEN41` (tetracyclin resistant bacteria)
+        - `treatment`, with levels: `none`, `MIC/10`, `MIC` levels of copper
+        - `timepoint`, with levels: `0`, `24`, `48`, `72` hours of incubation

@@ -269,7 +269,17 @@
     "href": "episodes/06-practice-more.html",
     "title": "Practice on your own",
     "section": "",
-    "text": "In this workshop, we went all the way from experimental design, to bioinformatic processing of .fastq files, to differential gene expression analysis in DESeq2. We hope that you are now ready to design and analyze your own transcriptome experiments. Remember that we only covered the very basics of transcriptome analysis, expect to learn a lot more when you start analyzing your own data.\nIf you first want to practice more, or don’t have your own data yet, consider analyzing publicly available RNA-seq datasets. Papers often make their raw sequencing reads available on NCBI or ENA, which you can download to reanalyze. For now, we collected three count tables to practice DESeq2 analysis, from three different domains of the life sciences.\n\nThe neuroscientist\nTODO Find a neuroscience count table with associated metadata. Something brain development related? Maybe from the Frank Jacobs lab?\n\n\nThe microbiologist\nTODO Find a microbiology count table with associated metadata. Bacteria response to antibiotics? Bacteria during infection?\n\n\nThe plant scientist\nTODO Find a plant science count table with associated metadata. Tomato dataset from Petra Bleeker? Rice dataset from Harro Bouwmeester?",
+    "text": "In this workshop, we went all the way from experimental design, to bioinformatic processing of .fastq files, to differential gene expression analysis in DESeq2. We hope that you are now ready to design and analyze your own transcriptome experiments. Remember that we only covered the very basics of transcriptome analysis, expect to learn a lot more when you start analyzing your own data.\nIf you first want to practice more, or don’t have your own data yet, consider analyzing publicly available RNA-seq datasets. Papers often make their raw sequencing reads available on NCBI or ENA, which you can download to reanalyze. A nice repository where pre-processed count tables are available is EMBL-EBI. For now, we collected three count tables to practice DESeq2 analysis, from three different domains of the life sciences. They are available in the GitHub repository of this workshop.",
+    "crumbs": [
+      "Practice on your own"
+    ]
+  },
+  {
+    "objectID": "episodes/06-practice-more.html#the-datasets",
+    "href": "episodes/06-practice-more.html#the-datasets",
+    "title": "Practice on your own",
+    "section": "The datasets",
+    "text": "The datasets\n\n🌽 🌱 The Plant Scientist: maize plants infected with the fungus Ustilago maydis\n\nExperiment ID: E-CURD-40\nExperimental factors:\n\nTreatment, with levels: Ustilago maydis and none\nTimepoint, with levels: 0.5, 1, 2, 4, 6, 8, 12, days after infection\n\n\n🧠 ⚡ The Neuroscientist: different brain regions from patients with different psychiatric problems\n\nExperiment ID: E-GEOD-78936\nExperimental factors:\n\ndisease, with levels: normal, schizophrenia, bipolar disorder\nbrain_region, with levels: area 9, area 11, area 24\n\n\n🦠 🔬 The Microbiologist: Pseudomonas aeruginosa bacteria exposed to different concentrations of copper\n\nExperiment ID: GSE160187\nExperimental factors:\n\ngenotype, with levels: POA1 (wild-type bacteria) and XEN41 (tetracyclin resistant bacteria)\ntreatment, with levels: none, MIC/10, MIC levels of copper\ntimepoint, with levels: 0, 24, 48, 72 hours of incubation",
     "crumbs": [
       "Practice on your own"
     ]
