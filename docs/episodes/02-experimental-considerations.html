@@ -186,10 +186,8 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
     <h2 id="toc-title">On this page</h2>
    
   <ul>
-  <li><a href="#hypothesis-testing" id="toc-hypothesis-testing" class="nav-link active" data-scroll-target="#hypothesis-testing">Hypothesis testing</a>
-  <ul class="collapse">
+  <li><a href="#hypothesis-testing" id="toc-hypothesis-testing" class="nav-link active" data-scroll-target="#hypothesis-testing">Hypothesis testing</a></li>
   <li><a href="#statistical-power" id="toc-statistical-power" class="nav-link" data-scroll-target="#statistical-power">Statistical power</a></li>
-  </ul></li>
   <li><a href="#what-determines-the-power-of-an-rna-seq-experiment" id="toc-what-determines-the-power-of-an-rna-seq-experiment" class="nav-link" data-scroll-target="#what-determines-the-power-of-an-rna-seq-experiment">What determines the power of an RNA-seq experiment?</a></li>
   <li><a href="#experimental-design" id="toc-experimental-design" class="nav-link" data-scroll-target="#experimental-design">Experimental design</a></li>
   <li><a href="#concluding-remarks" id="toc-concluding-remarks" class="nav-link" data-scroll-target="#concluding-remarks">Concluding remarks</a></li>
@@ -315,33 +313,141 @@ mean of x mean of y
 </div>
 </div>
 <p>Because the <strong>p-value &lt; 0.05</strong>, we can safely reject our null hypothesis, and claim that we have discovered that <em>Arabidopsis</em> significantly upregulates the expression of HSF2A under heat stress. Sounds like it’s time to write this down and submit a manuscript to <em>Nature</em>!</p>
-<section id="statistical-power" class="level3">
-<h3 class="anchored" data-anchor-id="statistical-power">Statistical power</h3>
-<p>Statistical power is the ability of your experimental sample population to detect differences (in this case, gene expression differences) that actually exist in the real population of your study species out there in the world. There are two main error one could make when testing hypotheses. Type I errors occur when the null hypothesis is rejected wrongly — you detect a significant difference while in reality there is no difference in gene expression (“false positive”). Type II errors also are common in hypothesis testing — they arise if you accept the null hypothesis when in fact a treatment effect exists (“false negative”)</p>
-<p>The power of an experiments is affected by several factors. We have seen so far:</p>
+</section>
+<section id="statistical-power" class="level2">
+<h2 class="anchored" data-anchor-id="statistical-power">Statistical power</h2>
+<p>Statistical power is the probability of your experimental sample population to detect a difference (in gene expression differences), given that an an effect actually exist in your experimental setup. There are two main error one could make when testing hypotheses. Type I errors occur when the null hypothesis is rejected wrongly — you detect a significant difference while in reality there is no difference in gene expression (“false positive”). Type II errors also are common in hypothesis testing — they arise if you accept the null hypothesis when in fact a treatment effect exists (“false negative”). The power of an experiments is affected by several factors:</p>
 <ul>
-<li><strong>The number of replicates</strong>: more samples results in a higher power</li>
+<li><strong>The number of replicates</strong>: more biological replicates results in a higher power</li>
 <li><strong>Size of the effect</strong>: bigger differences between groups are easier to detect</li>
 <li><strong>Variability of the data</strong>: less within-group variation makes it easier to detect differences</li>
 <li><strong>Confidence level threshold</strong>: usually, this is 0.05, but we can make our analysis more or less stringent by changing this to 0.01 or 0.1</li>
 </ul>
-<p>A fun tool to play with these parameters is the following <a href="https://rnaseq-power.serve.scilifelab.se/app/rnaseq-power">RNASeq Power calculator</a>. For example, with sequencing depth <code>50</code> and coefficient of variation <code>0.3</code>, you would need about 5 biological replicates to detect genes with 100% increase in gene expression with a power of 0.9:</p>
-<div class="cell">
-<div class="sourceCode cell-code" id="cb4"><pre class="sourceCode bash code-with-copy"><code class="sourceCode bash"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a>             <span class="ex">0.8</span>          0.9</span>
-<span id="cb4-2"><a href="#cb4-2" aria-hidden="true" tabindex="-1"></a><span class="ex">1.25</span>   34.678609    46.424819</span>
-<span id="cb4-3"><a href="#cb4-3" aria-hidden="true" tabindex="-1"></a><span class="ex">1.5</span>    10.503242    14.060861</span>
-<span id="cb4-4"><a href="#cb4-4" aria-hidden="true" tabindex="-1"></a><span class="ex">1.75</span>    5.513793     7.381404</span>
-<span id="cb4-5"><a href="#cb4-5" aria-hidden="true" tabindex="-1"></a><span class="ex">2</span>       3.594011     4.811361</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-</div>
-<p>Try playing with the sequencing depth. Increase it 10-fold, and another 10-fold. Does it reduce the amount of biological replicates needed to detect differences in gene expression with the same power?</p>
-</section>
 </section>
 <section id="what-determines-the-power-of-an-rna-seq-experiment" class="level2">
 <h2 class="anchored" data-anchor-id="what-determines-the-power-of-an-rna-seq-experiment">What determines the power of an RNA-seq experiment?</h2>
-<p>RNA-seq experiments measure the expression levels of thousands of genes simultaneously, meaning we perform thousands of statistical tests at once. To avoid making too many false discoveries (type I errors), we have to correct for multiple testing. However, it also reduces statistical power — increasing the chance of missing real differences (type II errors). As a result, RNA-seq experiments can have lower power, especially for detecting small or subtle changes in gene expression.</p>
-<p>So, how do we deal with that? We have a few parameters to play with when designing an RNA-seq experiment, including deciding the number of reads per sample, and the number of samples per treatment. <a href="https://academic.oup.com/bioinformatics/article/30/3/301/228651">Liu et al., 2014</a> investigated this systematically in an RNA-seq experiment with a human cell line. An exerpt from figure 1 is show below:</p>
-<p><img src="../images/02-de-replicates-2.png" class="img-fluid" style="width:5in"></p>
-<p><em>Image credits</em>: <a href="https://academic.oup.com/bioinformatics/article/30/3/301/228651">Liu et al., 2014</a></p>
+<p>RNA-seq experiments measure the expression levels of thousands of genes simultaneously, meaning we perform thousands of statistical tests at once. To avoid making too many false discoveries (type I errors), we have to correct for multiple testing. However, it also reduces statistical power — increasing the chance of missing real differences (type II errors). As a result, RNA-seq experiments can have lower power, especially for detecting small or subtle changes in gene expression. So, how do we deal with that? We have a few parameters to play with when designing an RNA-seq experiment, including deciding the number of reads per sample, and the number of samples per treatment.</p>
+<p>A fun tool to play with these parameters is the following <a href="https://rnaseq-power.serve.scilifelab.se/app/rnaseq-power">RNASeq Power calculator</a>. For example, with sequencing depth <code>50</code> and coefficient of variation <code>0.3</code>, you would need about 5 biological replicates to detect genes with 100% increase in gene expression (effect size 2) with a power of 0.9:</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb4"><pre class="sourceCode bash code-with-copy"><code class="sourceCode bash"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a>                 <span class="ex">Power→</span></span>
+<span id="cb4-2"><a href="#cb4-2" aria-hidden="true" tabindex="-1"></a><span class="ex">Effect</span>               0.8          0.9</span>
+<span id="cb4-3"><a href="#cb4-3" aria-hidden="true" tabindex="-1"></a><span class="fu">size</span>    1.25   34.678609    46.424819</span>
+<span id="cb4-4"><a href="#cb4-4" aria-hidden="true" tabindex="-1"></a> <span class="ex">↓</span>      1.5    10.503242    14.060861</span>
+<span id="cb4-5"><a href="#cb4-5" aria-hidden="true" tabindex="-1"></a>        <span class="ex">1.75</span>    5.513793     7.381404</span>
+<span id="cb4-6"><a href="#cb4-6" aria-hidden="true" tabindex="-1"></a>        <span class="ex">2</span>       3.594011     4.811361</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<p>In addition, notice how hard it is to detect subtle differences in gene expression: for genes with a 50% difference in expression, you would already need 14 biological relicates.</p>
+<div class="callout callout-style-default callout-tip no-icon callout-titled" title="Question">
+<div class="callout-header d-flex align-content-center">
+<div class="callout-icon-container">
+<i class="callout-icon no-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+Question
+</div>
+</div>
+<div class="callout-body-container callout-body">
+<p>Try playing with the sequencing depth. Increase it 10-fold, another 10-fold, and even much higher. Does it reduce the amount of biological replicates needed to detect differences in gene expression with the same power?</p>
+</div>
+</div>
+<div class="callout callout-style-default callout-caution no-icon callout-titled" title="Answer">
+<div class="callout-header d-flex align-content-center" data-bs-toggle="collapse" data-bs-target=".callout-4-contents" aria-controls="callout-4" aria-expanded="false" aria-label="Toggle callout">
+<div class="callout-icon-container">
+<i class="callout-icon no-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+Answer
+</div>
+<div class="callout-btn-toggle d-inline-block border-0 py-1 ps-1 pe-0 float-end"><i class="callout-toggle"></i></div>
+</div>
+<div id="callout-4" class="callout-4-contents callout-collapse collapse">
+<div class="callout-body-container callout-body">
+<p>It decreased the number of required replicates slightly, but the gain plateaus rather quickly. In other words, sequencing deeper does not increase the power of an RNA-seq experiment that much.</p>
+</div>
+</div>
+</div>
+<div class="callout callout-style-default callout-tip no-icon callout-titled" title="Question">
+<div class="callout-header d-flex align-content-center">
+<div class="callout-icon-container">
+<i class="callout-icon no-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+Question
+</div>
+</div>
+<div class="callout-body-container callout-body">
+<p>Change the calculator to the following settings:</p>
+<ul>
+<li>Variable to estimate: <code>power</code></li>
+<li>Sequencing depth: <code>20,50,100,400</code></li>
+<li>Number of samples: <code>3,5,7,10</code></li>
+<li>Coefficient of variation: <code>0.4</code></li>
+<li>Effect: <code>1.25,1.5,1.75,2</code></li>
+<li>Alpha = <code>0.05</code></li>
+</ul>
+<p>You now get 4 blocks of results, where the power is estimated depending on variable depth, number of samples, and effect size.</p>
+<p>What can you conclude from these estimations? Discuss with your neighbour if you are in a workshop with more participants.</p>
+</div>
+</div>
+<div class="callout callout-style-default callout-caution no-icon callout-titled" title="Answer">
+<div class="callout-header d-flex align-content-center" data-bs-toggle="collapse" data-bs-target=".callout-6-contents" aria-controls="callout-6" aria-expanded="false" aria-label="Toggle callout">
+<div class="callout-icon-container">
+<i class="callout-icon no-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+Answer
+</div>
+<div class="callout-btn-toggle d-inline-block border-0 py-1 ps-1 pe-0 float-end"><i class="callout-toggle"></i></div>
+</div>
+<div id="callout-6" class="callout-6-contents callout-collapse collapse">
+<div class="callout-body-container callout-body">
+<div class="sourceCode" id="cb5"><pre class="sourceCode bash code-with-copy"><code class="sourceCode bash"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a><span class="co">#| eval: false</span></span>
+<span id="cb5-2"><a href="#cb5-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb5-3"><a href="#cb5-3" aria-hidden="true" tabindex="-1"></a><span class="ex">,</span> , 1.25</span>
+<span id="cb5-4"><a href="#cb5-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb5-5"><a href="#cb5-5" aria-hidden="true" tabindex="-1"></a>             <span class="ex">3</span>         5         7        10</span>
+<span id="cb5-6"><a href="#cb5-6" aria-hidden="true" tabindex="-1"></a><span class="ex">20</span>  0.08634867 0.1170142 0.1470927 0.1918402</span>
+<span id="cb5-7"><a href="#cb5-7" aria-hidden="true" tabindex="-1"></a><span class="ex">50</span>  0.09411991 0.1295846 0.1645339 0.2165511</span>
+<span id="cb5-8"><a href="#cb5-8" aria-hidden="true" tabindex="-1"></a><span class="ex">100</span> 0.09729343 0.1347429 0.1717005 0.2266881</span>
+<span id="cb5-9"><a href="#cb5-9" aria-hidden="true" tabindex="-1"></a><span class="ex">400</span> 0.09992041 0.1390222 0.1776482 0.2350900</span>
+<span id="cb5-10"><a href="#cb5-10" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb5-11"><a href="#cb5-11" aria-hidden="true" tabindex="-1"></a><span class="ex">,</span> , 1.5</span>
+<span id="cb5-12"><a href="#cb5-12" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb5-13"><a href="#cb5-13" aria-hidden="true" tabindex="-1"></a>            <span class="ex">3</span>         5         7        10</span>
+<span id="cb5-14"><a href="#cb5-14" aria-hidden="true" tabindex="-1"></a><span class="ex">20</span>  0.1904300 0.2874068 0.3803127 0.5073813</span>
+<span id="cb5-15"><a href="#cb5-15" aria-hidden="true" tabindex="-1"></a><span class="ex">50</span>  0.2149137 0.3267574 0.4317066 0.5702555</span>
+<span id="cb5-16"><a href="#cb5-16" aria-hidden="true" tabindex="-1"></a><span class="ex">100</span> 0.2249586 0.3427107 0.4521639 0.5944392</span>
+<span id="cb5-17"><a href="#cb5-17" aria-hidden="true" tabindex="-1"></a><span class="ex">400</span> 0.2332846 0.3558407 0.4688270 0.6137674</span>
+<span id="cb5-18"><a href="#cb5-18" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb5-19"><a href="#cb5-19" aria-hidden="true" tabindex="-1"></a><span class="ex">,</span> , 1.75</span>
+<span id="cb5-20"><a href="#cb5-20" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb5-21"><a href="#cb5-21" aria-hidden="true" tabindex="-1"></a>            <span class="ex">3</span>         5         7        10</span>
+<span id="cb5-22"><a href="#cb5-22" aria-hidden="true" tabindex="-1"></a><span class="ex">20</span>  0.3212064 0.4883900 0.6272800 0.7795521</span>
+<span id="cb5-23"><a href="#cb5-23" aria-hidden="true" tabindex="-1"></a><span class="ex">50</span>  0.3652380 0.5499761 0.6941715 0.8387834</span>
+<span id="cb5-24"><a href="#cb5-24" aria-hidden="true" tabindex="-1"></a><span class="ex">100</span> 0.3829823 0.5738029 0.7187902 0.8588079</span>
+<span id="cb5-25"><a href="#cb5-25" aria-hidden="true" tabindex="-1"></a><span class="ex">400</span> 0.3975363 0.5929072 0.7379987 0.8737350</span>
+<span id="cb5-26"><a href="#cb5-26" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb5-27"><a href="#cb5-27" aria-hidden="true" tabindex="-1"></a><span class="ex">,</span> , 2</span>
+<span id="cb5-28"><a href="#cb5-28" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb5-29"><a href="#cb5-29" aria-hidden="true" tabindex="-1"></a>            <span class="ex">3</span>         5         7        10</span>
+<span id="cb5-30"><a href="#cb5-30" aria-hidden="true" tabindex="-1"></a><span class="ex">20</span>  0.4572159 0.6669916 0.8077945 0.9225229</span>
+<span id="cb5-31"><a href="#cb5-31" aria-hidden="true" tabindex="-1"></a><span class="ex">50</span>  0.5163439 0.7334376 0.8635761 0.9547953</span>
+<span id="cb5-32"><a href="#cb5-32" aria-hidden="true" tabindex="-1"></a><span class="ex">100</span> 0.5394269 0.7574533 0.8820190 0.9640029</span>
+<span id="cb5-33"><a href="#cb5-33" aria-hidden="true" tabindex="-1"></a><span class="ex">400</span> 0.5580268 0.7760088 0.8956052 0.9702800</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<ul>
+<li>The major conclusion is the same as before: increasing sample size is more important than sequencing depth to reach a higher detection power.</li>
+<li>Small effect sizes are very hard to detect, even with rather large sample sizes, reaching a maximum power of about <code>0.25</code> with the current settings.</li>
+</ul>
+</div>
+</div>
+</div>
+<p>To connect these theoretical estimates to reality, let’s look at a study that examined RNA-seq power using real data. <a href="https://academic.oup.com/bioinformatics/article/30/3/301/228651">Liu et al., 2014</a> investigated this systematically in an RNA-seq experiment with a human cell line, by downsampling reads or samples. An exerpt from figure 1 is show below:</p>
+<div class="quarto-figure quarto-figure-center">
+<figure class="figure">
+<p><img src="../images/02-de-replicates-2.png" class="img-fluid figure-img" style="width:5in"></p>
+<figcaption>Image adapted from <a href="https://academic.oup.com/bioinformatics/article/30/3/301/228651">Liu et al., 2014</a></figcaption>
+</figure>
+</div>
 <p>The figure shows the relationship between sequencing depth and number of replicates on the number of differentially expressed genes (DEGs) identified. It illustrates that <strong>biological replicates are of greater importance than sequencing depth</strong>. Above 10M-15M reads per sample, the number of DEGs increases marginally, while adding more biological replicates tends to return more DEGs. A similar conclusion was also reached by <a href="https://pmc.ncbi.nlm.nih.gov/articles/PMC4878611/">Schurch et al., 2016</a>. So, if your experiment is limited by a certain sequencing budget, it is almost always better to add more replicates than to sequence more reads of a limited number of samples. However, there are some caveats here. Say you are interested in the transcriptome of a fungal pathogen growing in plant roots. In such samples, most reads will probably come from the plant roots, so you will need to sequence deeply (that is, many reads from the same sample) to find DEGs from the fungal pathogen.</p>
 </section>
 <section id="experimental-design" class="level2">
