@@ -10,6 +10,8 @@ format:
         link-external-newwindow: true
 ---
 
+![](../images/flow-chart-RNA-Seq-2.png)
+
 The moment is there: you received the FASTQ files from your sequencing provider! .... now what?
 
 The `.fastq` files contain your RNA sequencing reads. Our goal is to find out from which genes these reads originate, and whether there are differentially expressed genes between your experimental factors. Before doing that, we need to make sure that the sequencing reads are of good quality, a process called quality control (QC). Additionally, no matter how good the overall quality of the sequencing data is, we will also 'trim' our reads to remove bad quality reads and sequencing adapters that may still be present in the sample. So, to summarize, we will do the following steps in this episode:

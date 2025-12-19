@@ -7,47 +7,6 @@ format:
         code-annotations: hover
 ---
 
-## Clustering and heatmaps
-
-**TODO**: add some text to describe the heatmap 
-
-Read the processed data into memory:
-
-```{R filename="R"}
-library(tidyverse)
-library(tidyheatmaps)
-
-variance_stabilised_counts <- read.csv('../data_processed/variance_stabilized_dataset.csv')
-metadata <- read.csv("../data/samples_to_condition.csv", header = T)
-DEGs <- read.csv('../data_processed/DEGs_spaceflight_vs_ground.csv', header = T)
-
-selection <- DEGs$genes
-
-vsc_selection <- variance_stabilised_counts %>% 
-                    filter(gene %in% selection) %>%
-                    pivot_longer(cols = - gene, names_to = "sample", values_to = "vst_counts") %>% 
-                    merge(metadata, by.x = "sample", by.y = "sample_name") 
-```
-
-```{R filename="R"}
-heatmap <- tidyheatmap(df = vsc_selection,
-            rows = gene,
-            columns = sample,
-            values = vst_counts,
-            scale = "row",
-            annotation_col = c(condition),
-            gaps_col = condition,
-            cluster_rows = TRUE,
-            # cluster_cols = TRUE,
-            color_legend_n = 7,
-            show_rownames = TRUE,
-            show_colnames = FALSE
-            # filename = "heatmap.pdf"
-)
-
-heatmap
-```
-
 ## Enrichment analysis of gene lists
 
 We want to assign some sort of funtion or pathway to a cluster / list of genes. To do this we can use GO term enrichment.
