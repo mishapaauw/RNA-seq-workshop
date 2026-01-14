@@ -371,7 +371,7 @@ One way to visualize DEG results is to display them in a Volcano plot. Such a pl
 
 ```{R filename="R"}
 # Define fold change and p-value cutoffs
-lfc_cutoff <- 1.5
+lfc_cutoff <- 1
 padj_cutoff <- 0.05
 
 # Make new categorical variable containing significance information
@@ -429,7 +429,6 @@ Yep, that seems about right.
 ### Heatmap
 
 Alternatively, we could also display the expression levels of the DEGs in a heatmap. With the following code, we make a 'tidy' dataframe from the variance stabilised counts, and select only the genes that we consider DEGs. Remember, these are the genes that passed both a `padj` threshold and `log2FoldChange` threshold above.
-
 
 ```{R filename="R"}
 variance_stabilised_df <- variance_stabilised_counts %>% 

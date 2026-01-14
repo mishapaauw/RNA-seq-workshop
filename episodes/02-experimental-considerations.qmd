@@ -110,11 +110,11 @@ Change the calculator to the following settings:
 
 You now get 4 blocks of results, where the power is estimated depending on variable depth, number of samples, and effect size.
 
-What can you conclude from these estimations? Discuss with your neighbour if you are in a workshop with more participants.
+What can you conclude from these estimations? Discuss with your neighbour if you are in a workshop with other participants.
 :::
 
 ::: {.callout-caution title="Answer" collapse="true" icon="false"}
-```bash
+```{bash}
 #| eval: false
 
 , , 1.25

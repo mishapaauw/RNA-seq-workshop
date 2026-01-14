@@ -20,6 +20,40 @@ ul.task-list li input[type="checkbox"] {
   margin: 0 0.8em 0.2em -1em; /* quarto-specific, see https://github.com/quarto-dev/quarto-cli/issues/4556 */ 
   vertical-align: middle;
 }
+/* CSS for syntax highlighting */
+pre > code.sourceCode { white-space: pre; position: relative; }
+pre > code.sourceCode > span { line-height: 1.25; }
+pre > code.sourceCode > span:empty { height: 1.2em; }
+.sourceCode { overflow: visible; }
+code.sourceCode > span { color: inherit; text-decoration: inherit; }
+div.sourceCode { margin: 1em 0; }
+pre.sourceCode { margin: 0; }
+@media screen {
+div.sourceCode { overflow: auto; }
+}
+@media print {
+pre > code.sourceCode { white-space: pre-wrap; }
+pre > code.sourceCode > span { display: inline-block; text-indent: -5em; padding-left: 5em; }
+}
+pre.numberSource code
+  { counter-reset: source-line 0; }
+pre.numberSource code > span
+  { position: relative; left: -4em; counter-increment: source-line; }
+pre.numberSource code > span > a:first-child::before
+  { content: counter(source-line);
+    position: relative; left: -1em; text-align: right; vertical-align: baseline;
+    border: none; display: inline-block;
+    -webkit-touch-callout: none; -webkit-user-select: none;
+    -khtml-user-select: none; -moz-user-select: none;
+    -ms-user-select: none; user-select: none;
+    padding: 0 4px; width: 4em;
+  }
+pre.numberSource { margin-left: 3em;  padding-left: 4px; }
+div.sourceCode
+  {   }
+@media screen {
+pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+}
 </style>
 
 
@@ -152,7 +186,14 @@ ul.task-list li input[type="checkbox"] {
     <h2 id="toc-title">On this page</h2>
    
   <ul>
-  <li><a href="#enrichment-analysis-of-gene-lists" id="toc-enrichment-analysis-of-gene-lists" class="nav-link active" data-scroll-target="#enrichment-analysis-of-gene-lists">Enrichment analysis of gene lists</a></li>
+  <li><a href="#what-is-a-go-term-exactly" id="toc-what-is-a-go-term-exactly" class="nav-link active" data-scroll-target="#what-is-a-go-term-exactly">What is a GO term exactly?</a></li>
+  <li><a href="#what-is-an-overrepresentation-analysis-exactly" id="toc-what-is-an-overrepresentation-analysis-exactly" class="nav-link" data-scroll-target="#what-is-an-overrepresentation-analysis-exactly">What is an overrepresentation analysis exactly?</a></li>
+  <li><a href="#lets-get-started" id="toc-lets-get-started" class="nav-link" data-scroll-target="#lets-get-started">Let’s get started</a></li>
+  <li><a href="#go-enrichment" id="toc-go-enrichment" class="nav-link" data-scroll-target="#go-enrichment">GO enrichment</a></li>
+  <li><a href="#kegg-enrichment" id="toc-kegg-enrichment" class="nav-link" data-scroll-target="#kegg-enrichment">KEGG enrichment</a></li>
+  <li><a href="#gsea-gene-set-enrichment-analysis" id="toc-gsea-gene-set-enrichment-analysis" class="nav-link" data-scroll-target="#gsea-gene-set-enrichment-analysis">GSEA (Gene Set Enrichment Analysis)</a></li>
+  <li><a href="#performing-enrichment-analysis-on-webservers" id="toc-performing-enrichment-analysis-on-webservers" class="nav-link" data-scroll-target="#performing-enrichment-analysis-on-webservers">Performing enrichment analysis on webservers</a></li>
+  <li><a href="#concluding-remarks" id="toc-concluding-remarks" class="nav-link" data-scroll-target="#concluding-remarks">Concluding remarks</a></li>
   </ul>
 </nav>
     </div>
@@ -178,15 +219,413 @@ ul.task-list li input[type="checkbox"] {
 </header>
 
 
-<section id="enrichment-analysis-of-gene-lists" class="level2">
-<h2 class="anchored" data-anchor-id="enrichment-analysis-of-gene-lists">Enrichment analysis of gene lists</h2>
-<p>We want to assign some sort of funtion or pathway to a cluster / list of genes. To do this we can use GO term enrichment.</p>
-<p><strong>TODO</strong>:</p>
+<p>In the previous episode, we ended up with a list of differentially expressed genes. We could examine this list manually and look for our favorite genes of interest. However, the power of RNA-seq is that we can move beyond a simple analysis of a few genes and start to understand which processes or pathways are involved in the response to your treatments. To do this, we will use overrepresentation analysis (ORA) of Gene Ontology (GO) terms.</p>
+<section id="what-is-a-go-term-exactly" class="level2">
+<h2 class="anchored" data-anchor-id="what-is-a-go-term-exactly">What is a GO term exactly?</h2>
+<p>GO terms offer a standardized way of describing gene functions and the biological processes they participate in. For example, a GO term could be: <code>nucleotide binding</code> or <code>response to biotic stress</code>. GO terms come in three categories:</p>
 <ul>
-<li>Add description to do this in a webserver e.g.&nbsp;<a href="http://biit.cs.ut.ee/gprofiler/gost">g:profiler</a>. Seems up to date and also looks like it contains many different organisms.</li>
-<li>Add instructions to do this in code via <code>clusterProfiler</code></li>
-<li>The example dataset is from Arabidopsis but preferably the instructions and code should work for a wide range of organisms, such that the instructions are easily usable for anyone.</li>
+<li><strong>Biological Process (BP)</strong></li>
+<li><strong>Molecular Function (MF)</strong></li>
+<li><strong>Cellular Component (CC)</strong></li>
 </ul>
+</section>
+<section id="what-is-an-overrepresentation-analysis-exactly" class="level2">
+<h2 class="anchored" data-anchor-id="what-is-an-overrepresentation-analysis-exactly">What is an overrepresentation analysis exactly?</h2>
+<p>In the R package that we will use, ORA uses a <em>hypergeometric</em> test to determine whether a particular GO term is enriched in your list of genes. Conceptually, it answers the following question:</p>
+<blockquote class="blockquote">
+<p>Given my background list of genes, are genes annotated to this GO term observed more often in my input gene list than expected by chance?</p>
+</blockquote>
+<p>The background list of genes, sometimes called the ‘universe’ in ORA jargon, is important. Naively, one could decide to use all genes present in annotation of your organism as universe. However, the universe is defined as all the genes that were elegible to be tested for differential expression. For an RNA-seq experiment, this means that genes that were not detected in any of your samples should be removed from the background universe for ORA.</p>
+</section>
+<section id="lets-get-started" class="level2">
+<h2 class="anchored" data-anchor-id="lets-get-started">Let’s get started</h2>
+<p>In case you continued directly from the previous episode, you will only need to load a few more packages. <code>clusterProfiler</code> is the main package for enrichment analysis in R, extensively documented <a href="https://yulab-smu.top/biomedical-knowledge-mining-book/02-Enrichment.html">here</a>. <code>org.At.tair.db</code> is a database containing functional annotation for <em>Arabidopsis thaliana</em> (At). Functional annotations are available for several model organisms such as <em>Homo sapiens</em> (<code>org.Hs.tair.db</code>), see <a href="https://bioconductor.org/packages/release/BiocViews.html#___Organism">Bioconductor</a> for all available organisms.</p>
+<div class="cell">
+<div class="code-with-filename">
+<div class="code-with-filename-file">
+<pre><strong>R</strong></pre>
+</div>
+<div class="sourceCode cell-code" id="cb1"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(clusterProfiler)</span>
+<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(org.At.tair.db)</span>
+<span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(enrichplot)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+</div>
+<p>In case you didn’t manage to finish the previous episode, or you’re starting here for other reasons, you can run the following code to get back to the starting point of this episode by running:</p>
+<div class="cell">
+<div class="code-with-filename">
+<details class="code-fold">
+<summary>Show the code to get to the starting point of this episode</summary>
+<div class="code-with-filename-file">
+<pre><strong>R</strong></pre>
+</div>
+<div class="sourceCode cell-code" id="annotated-cell-2"><pre class="sourceCode r code-annotation-code code-with-copy"><code class="sourceCode r"><span id="annotated-cell-2-1"><a href="#annotated-cell-2-1" aria-hidden="true" tabindex="-1"></a><span class="fu">set.seed</span>(<span class="dv">1992</span>)</span>
+<span id="annotated-cell-2-2"><a href="#annotated-cell-2-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="annotated-cell-2-3"><a href="#annotated-cell-2-3" aria-hidden="true" tabindex="-1"></a><span class="co"># Load packages</span></span>
+<span id="annotated-cell-2-4"><a href="#annotated-cell-2-4" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(DESeq2)</span>
+<span id="annotated-cell-2-5"><a href="#annotated-cell-2-5" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(tidyverse)</span>
+<span id="annotated-cell-2-6"><a href="#annotated-cell-2-6" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(ggrepel)</span>
+<span id="annotated-cell-2-7"><a href="#annotated-cell-2-7" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(clusterProfiler)</span>
+<span id="annotated-cell-2-8"><a href="#annotated-cell-2-8" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(org.At.tair.db)</span>
+<span id="annotated-cell-2-9"><a href="#annotated-cell-2-9" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(enrichplot)</span>
+<span id="annotated-cell-2-10"><a href="#annotated-cell-2-10" aria-hidden="true" tabindex="-1"></a></span>
+<span id="annotated-cell-2-11"><a href="#annotated-cell-2-11" aria-hidden="true" tabindex="-1"></a><span class="co"># Read the data</span></span>
+<span id="annotated-cell-2-12"><a href="#annotated-cell-2-12" aria-hidden="true" tabindex="-1"></a>raw_counts <span class="ot">&lt;-</span> <span class="fu">read.csv</span>(<span class="st">"../data/GLDS38_raw_counts.csv"</span>, <span class="at">header =</span> T, <span class="at">stringsAsFactors =</span> F) </span>
+<span id="annotated-cell-2-13"><a href="#annotated-cell-2-13" aria-hidden="true" tabindex="-1"></a>raw_counts <span class="ot">&lt;-</span> raw_counts <span class="sc">%&gt;%</span> <span class="fu">column_to_rownames</span>(<span class="st">"gene"</span>) </span>
+<span id="annotated-cell-2-14"><a href="#annotated-cell-2-14" aria-hidden="true" tabindex="-1"></a>metadata <span class="ot">&lt;-</span> <span class="fu">read.csv</span>(<span class="st">"../data/samples_to_condition.csv"</span>, <span class="at">header =</span> T)</span>
+<span id="annotated-cell-2-15"><a href="#annotated-cell-2-15" aria-hidden="true" tabindex="-1"></a></span>
+<span id="annotated-cell-2-16"><a href="#annotated-cell-2-16" aria-hidden="true" tabindex="-1"></a><span class="co"># Generate DDS object and run DESeq function:</span></span>
+<span id="annotated-cell-2-17"><a href="#annotated-cell-2-17" aria-hidden="true" tabindex="-1"></a>dds <span class="ot">&lt;-</span> <span class="fu">DESeqDataSetFromMatrix</span>(<span class="at">countData =</span> raw_counts, </span>
+<span id="annotated-cell-2-18"><a href="#annotated-cell-2-18" aria-hidden="true" tabindex="-1"></a>                              <span class="at">colData =</span> metadata, </span>
+<span id="annotated-cell-2-19"><a href="#annotated-cell-2-19" aria-hidden="true" tabindex="-1"></a>                              <span class="at">design =</span> <span class="sc">~</span> condition)</span>
+<span id="annotated-cell-2-20"><a href="#annotated-cell-2-20" aria-hidden="true" tabindex="-1"></a></span>
+<span id="annotated-cell-2-21"><a href="#annotated-cell-2-21" aria-hidden="true" tabindex="-1"></a>dds <span class="ot">&lt;-</span> <span class="fu">DESeq</span>(dds)</span>
+<span id="annotated-cell-2-22"><a href="#annotated-cell-2-22" aria-hidden="true" tabindex="-1"></a></span>
+<span id="annotated-cell-2-23"><a href="#annotated-cell-2-23" aria-hidden="true" tabindex="-1"></a><span class="co"># Run DEG analysis</span></span>
+<span id="annotated-cell-2-24"><a href="#annotated-cell-2-24" aria-hidden="true" tabindex="-1"></a>res <span class="ot">&lt;-</span> <span class="fu">results</span>(dds, <span class="at">alpha =</span> <span class="fl">0.05</span>)</span>
+<span id="annotated-cell-2-25"><a href="#annotated-cell-2-25" aria-hidden="true" tabindex="-1"></a></span>
+<span id="annotated-cell-2-26"><a href="#annotated-cell-2-26" aria-hidden="true" tabindex="-1"></a>DEGs <span class="ot">&lt;-</span> res <span class="sc">%&gt;%</span></span>
+<span id="annotated-cell-2-27"><a href="#annotated-cell-2-27" aria-hidden="true" tabindex="-1"></a>  <span class="fu">as.data.frame</span>() <span class="sc">%&gt;%</span> </span>
+<span id="annotated-cell-2-28"><a href="#annotated-cell-2-28" aria-hidden="true" tabindex="-1"></a>  <span class="fu">rownames_to_column</span>(<span class="st">"genes"</span>) <span class="sc">%&gt;%</span></span>
+<span id="annotated-cell-2-29"><a href="#annotated-cell-2-29" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(<span class="at">minus_log10_pvalue =</span> <span class="sc">-</span><span class="fu">log10</span>(padj)) <span class="sc">%&gt;%</span> </span>
+<span id="annotated-cell-2-30"><a href="#annotated-cell-2-30" aria-hidden="true" tabindex="-1"></a>  <span class="fu">arrange</span>(padj)</span>
+<span id="annotated-cell-2-31"><a href="#annotated-cell-2-31" aria-hidden="true" tabindex="-1"></a></span>
+<span id="annotated-cell-2-32"><a href="#annotated-cell-2-32" aria-hidden="true" tabindex="-1"></a><span class="co"># Define significantly upregulated and downregulated genes with LFC and padj cutoffs</span></span>
+<span id="annotated-cell-2-33"><a href="#annotated-cell-2-33" aria-hidden="true" tabindex="-1"></a>lfc_cutoff <span class="ot">&lt;-</span> <span class="dv">1</span></span>
+<span id="annotated-cell-2-34"><a href="#annotated-cell-2-34" aria-hidden="true" tabindex="-1"></a>padj_cutoff <span class="ot">&lt;-</span> <span class="fl">0.05</span></span>
+<span id="annotated-cell-2-35"><a href="#annotated-cell-2-35" aria-hidden="true" tabindex="-1"></a></span>
+<span id="annotated-cell-2-36"><a href="#annotated-cell-2-36" aria-hidden="true" tabindex="-1"></a><span class="co"># Make new categorical variable containing significance information</span></span>
+<span id="annotated-cell-2-37"><a href="#annotated-cell-2-37" aria-hidden="true" tabindex="-1"></a>DEGs <span class="ot">&lt;-</span> DEGs <span class="sc">%&gt;%</span> </span>
+<span id="annotated-cell-2-38"><a href="#annotated-cell-2-38" aria-hidden="true" tabindex="-1"></a>        <span class="fu">mutate</span>(<span class="at">significance =</span> <span class="fu">case_when</span>(</span>
+<span id="annotated-cell-2-39"><a href="#annotated-cell-2-39" aria-hidden="true" tabindex="-1"></a>          padj <span class="sc">&lt;</span> padj_cutoff <span class="sc">&amp;</span> log2FoldChange <span class="sc">&gt;</span> lfc_cutoff <span class="sc">~</span> <span class="st">'Significantly upregulated'</span>,</span>
+<span id="annotated-cell-2-40"><a href="#annotated-cell-2-40" aria-hidden="true" tabindex="-1"></a>          padj <span class="sc">&lt;</span> padj_cutoff <span class="sc">&amp;</span> log2FoldChange <span class="sc">&lt;</span> <span class="sc">-</span>lfc_cutoff <span class="sc">~</span> <span class="st">'Significantly downregulated'</span>,</span>
+<span id="annotated-cell-2-41"><a href="#annotated-cell-2-41" aria-hidden="true" tabindex="-1"></a>          padj <span class="sc">&lt;</span> padj_cutoff <span class="sc">~</span> <span class="st">'Significant but small effect size'</span>,</span>
+<span id="annotated-cell-2-42"><a href="#annotated-cell-2-42" aria-hidden="true" tabindex="-1"></a>          <span class="cn">TRUE</span> <span class="sc">~</span> <span class="st">'Not significant'</span></span>
+<span id="annotated-cell-2-43"><a href="#annotated-cell-2-43" aria-hidden="true" tabindex="-1"></a>        ))</span>
+<span id="annotated-cell-2-44"><a href="#annotated-cell-2-44" aria-hidden="true" tabindex="-1"></a></span>
+<span id="annotated-cell-2-45"><a href="#annotated-cell-2-45" aria-hidden="true" tabindex="-1"></a>DEGs_list <span class="ot">&lt;-</span> DEGs <span class="sc">%&gt;%</span> <span class="fu">filter</span>(significance <span class="sc">==</span> <span class="st">"Significantly upregulated"</span> <span class="sc">|</span> significance <span class="sc">==</span> <span class="st">"Significantly downregulated"</span>) <span class="sc">%&gt;%</span> <span class="fu">pull</span>(genes)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+</div>
+</div>
+<p>Let’s remind ourselves of what our list of genes of interest now looks like. This list is stored in the variable <code>DEGs_list</code>:</p>
+<div class="cell">
+<div class="code-with-filename">
+<div class="code-with-filename-file">
+<pre><strong>R</strong></pre>
+</div>
+<div class="sourceCode cell-code" id="cb2"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="fu">head</span>(DEGs_list)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<div class="cell-output cell-output-stdout">
+<pre><code>[1] "AT5G04120" "AT2G28780" "AT1G62280" "AT1G32450" "AT1G30530" "AT1G15380"</code></pre>
+</div>
+<div class="sourceCode cell-code" id="cb4"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a><span class="fu">length</span>(DEGs_list)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>[1] 1397</code></pre>
+</div>
+</div>
+<p>Ok, this list contains of 1397 entries of Arabidopsis TAIR gene IDs.</p>
+</section>
+<section id="go-enrichment" class="level2">
+<h2 class="anchored" data-anchor-id="go-enrichment">GO enrichment</h2>
+<p>We can perform the GO enrichment analysis with the <code>enrichGO()</code> function, and then plot the results using <code>dotplot()</code></p>
+<div class="cell">
+<div class="code-with-filename">
+<div class="code-with-filename-file">
+<pre><strong>R</strong></pre>
+</div>
+<div class="sourceCode cell-code" id="cb6"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a>go_results <span class="ot">&lt;-</span> <span class="fu">enrichGO</span>(</span>
+<span id="cb6-2"><a href="#cb6-2" aria-hidden="true" tabindex="-1"></a>  <span class="at">gene          =</span> DEGs_list,         <span class="co"># Your gene list</span></span>
+<span id="cb6-3"><a href="#cb6-3" aria-hidden="true" tabindex="-1"></a>  <span class="at">OrgDb         =</span> org.At.tair.db,    <span class="co"># Arabidopsis TAIR10 annotation</span></span>
+<span id="cb6-4"><a href="#cb6-4" aria-hidden="true" tabindex="-1"></a>  <span class="at">keyType       =</span> <span class="st">"TAIR"</span>,            <span class="co"># TAIR10 gene IDs (AT1Gxxx)</span></span>
+<span id="cb6-5"><a href="#cb6-5" aria-hidden="true" tabindex="-1"></a>  <span class="at">ont           =</span> <span class="st">"BP"</span>,              <span class="co"># "BP" (Biological Process), "MF", "CC"</span></span>
+<span id="cb6-6"><a href="#cb6-6" aria-hidden="true" tabindex="-1"></a>  <span class="at">pAdjustMethod =</span> <span class="st">"BH"</span>,              <span class="co"># Benjamini-Hochberg correction</span></span>
+<span id="cb6-7"><a href="#cb6-7" aria-hidden="true" tabindex="-1"></a>  <span class="at">pvalueCutoff  =</span> <span class="fl">0.05</span>,              <span class="co"># Significance threshold</span></span>
+<span id="cb6-8"><a href="#cb6-8" aria-hidden="true" tabindex="-1"></a>  <span class="at">qvalueCutoff  =</span> <span class="fl">0.05</span>,</span>
+<span id="cb6-9"><a href="#cb6-9" aria-hidden="true" tabindex="-1"></a>  <span class="at">readable      =</span> <span class="cn">TRUE</span>               <span class="co"># Convert gene IDs to common names</span></span>
+<span id="cb6-10"><a href="#cb6-10" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb6-11"><a href="#cb6-11" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb6-12"><a href="#cb6-12" aria-hidden="true" tabindex="-1"></a><span class="fu">dotplot</span>(go_results, <span class="at">showCategory =</span> <span class="dv">12</span>, <span class="at">x =</span> <span class="st">"FoldEnrichment"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<div class="cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="05-pathway-enrichment_files/figure-html/unnamed-chunk-4-1.png" class="img-fluid figure-img" width="576"></p>
+</figure>
+</div>
+</div>
+</div>
+<p>For example, this plot shows us that genes with the GO annotation <code>flavonoid biosynthetic process</code> occur about 4.8 times as often in our gene list, compared to random chance (e.g., picking 1397 random genes from our background gene universe). The color further indicates the adjusted p-value, while the size of the dot corresponds to the number of genes belonging to this GO term in our gene list.</p>
+<div class="callout callout-style-default callout-tip no-icon callout-titled" title="Question">
+<div class="callout-header d-flex align-content-center">
+<div class="callout-icon-container">
+<i class="callout-icon no-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+Question
+</div>
+</div>
+<div class="callout-body-container callout-body">
+<p>Repeat the GO enrichment analysis for the Cellular Component (CC) category. Which cellular localizations are enriched in our list of DEGs?</p>
+</div>
+</div>
+<div class="callout callout-style-default callout-caution no-icon callout-titled" title="Solution">
+<div class="callout-header d-flex align-content-center" data-bs-toggle="collapse" data-bs-target=".callout-2-contents" aria-controls="callout-2" aria-expanded="false" aria-label="Toggle callout">
+<div class="callout-icon-container">
+<i class="callout-icon no-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+Solution
+</div>
+<div class="callout-btn-toggle d-inline-block border-0 py-1 ps-1 pe-0 float-end"><i class="callout-toggle"></i></div>
+</div>
+<div id="callout-2" class="callout-2-contents callout-collapse collapse">
+<div class="callout-body-container callout-body">
+<div class="cell">
+<div class="code-with-filename">
+<div class="code-with-filename-file">
+<pre><strong>R</strong></pre>
+</div>
+<div class="sourceCode cell-code" id="cb7"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a>go_results <span class="ot">&lt;-</span> <span class="fu">enrichGO</span>(</span>
+<span id="cb7-2"><a href="#cb7-2" aria-hidden="true" tabindex="-1"></a>  <span class="at">gene          =</span> DEGs_list,         </span>
+<span id="cb7-3"><a href="#cb7-3" aria-hidden="true" tabindex="-1"></a>  <span class="at">OrgDb         =</span> org.At.tair.db,    </span>
+<span id="cb7-4"><a href="#cb7-4" aria-hidden="true" tabindex="-1"></a>  <span class="at">keyType       =</span> <span class="st">"TAIR"</span>,            </span>
+<span id="cb7-5"><a href="#cb7-5" aria-hidden="true" tabindex="-1"></a>  <span class="at">ont           =</span> <span class="st">"CC"</span>,              </span>
+<span id="cb7-6"><a href="#cb7-6" aria-hidden="true" tabindex="-1"></a>  <span class="at">pAdjustMethod =</span> <span class="st">"BH"</span>,             </span>
+<span id="cb7-7"><a href="#cb7-7" aria-hidden="true" tabindex="-1"></a>  <span class="at">pvalueCutoff  =</span> <span class="fl">0.05</span>,              </span>
+<span id="cb7-8"><a href="#cb7-8" aria-hidden="true" tabindex="-1"></a>  <span class="at">qvalueCutoff  =</span> <span class="fl">0.05</span>,</span>
+<span id="cb7-9"><a href="#cb7-9" aria-hidden="true" tabindex="-1"></a>  <span class="at">readable      =</span> <span class="cn">TRUE</span>               </span>
+<span id="cb7-10"><a href="#cb7-10" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb7-11"><a href="#cb7-11" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-12"><a href="#cb7-12" aria-hidden="true" tabindex="-1"></a><span class="fu">dotplot</span>(go_results, <span class="at">showCategory =</span> <span class="dv">10</span>, <span class="at">x =</span> <span class="st">"FoldEnrichment"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<div class="cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="05-pathway-enrichment_files/figure-html/unnamed-chunk-5-1.png" class="img-fluid figure-img" width="576"></p>
+</figure>
+</div>
+</div>
+</div>
+<p>It looks like the plastid or chloroplast – the photosynthetic organelles of plants – are enriched in our DEG list, as well as secretory vesicles.</p>
+</div>
+</div>
+</div>
+<div class="callout callout-style-default callout-tip no-icon callout-titled" title="Question">
+<div class="callout-header d-flex align-content-center">
+<div class="callout-icon-container">
+<i class="callout-icon no-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+Question
+</div>
+</div>
+<div class="callout-body-container callout-body">
+<ol type="1">
+<li>Come up with a way to get a better list of the background ‘universe’. Store this list in a variable called <code>universe_list</code></li>
+<li>Repeat the <code>BP</code> GO enrichment with this universe and see if it changes your results. Hint: you have to add an argument to the <code>enrichGO()</code> function: <code>universe = universe_list</code>.</li>
+</ol>
+</div>
+</div>
+<div class="callout callout-style-default callout-caution no-icon callout-titled" title="Solution">
+<div class="callout-header d-flex align-content-center" data-bs-toggle="collapse" data-bs-target=".callout-4-contents" aria-controls="callout-4" aria-expanded="false" aria-label="Toggle callout">
+<div class="callout-icon-container">
+<i class="callout-icon no-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+Solution
+</div>
+<div class="callout-btn-toggle d-inline-block border-0 py-1 ps-1 pe-0 float-end"><i class="callout-toggle"></i></div>
+</div>
+<div id="callout-4" class="callout-4-contents callout-collapse collapse">
+<div class="callout-body-container callout-body">
+<p><strong>1.</strong></p>
+<div class="cell">
+<div class="code-with-filename">
+<div class="code-with-filename-file">
+<pre><strong>R</strong></pre>
+</div>
+<div class="sourceCode cell-code" id="cb8"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a>universe_list <span class="ot">&lt;-</span> DEGs <span class="sc">%&gt;%</span> <span class="fu">filter</span>(baseMean <span class="sc">&gt;</span> <span class="dv">1</span>) <span class="sc">%&gt;%</span> <span class="fu">pull</span>(genes)</span>
+<span id="cb8-2"><a href="#cb8-2" aria-hidden="true" tabindex="-1"></a><span class="fu">head</span>(universe_list)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<div class="cell-output cell-output-stdout">
+<pre><code>[1] "AT5G04120" "AT2G28780" "AT1G62280" "AT1G32450" "AT1G30530" "AT1G15380"</code></pre>
+</div>
+<div class="sourceCode cell-code" id="cb10"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb10-1"><a href="#cb10-1" aria-hidden="true" tabindex="-1"></a><span class="fu">length</span>(universe_list)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>[1] 27323</code></pre>
+</div>
+</div>
+<p><strong>2.</strong></p>
+<div class="cell">
+<div class="code-with-filename">
+<div class="code-with-filename-file">
+<pre><strong>R</strong></pre>
+</div>
+<div class="sourceCode cell-code" id="cb12"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb12-1"><a href="#cb12-1" aria-hidden="true" tabindex="-1"></a>go_results <span class="ot">&lt;-</span> <span class="fu">enrichGO</span>(</span>
+<span id="cb12-2"><a href="#cb12-2" aria-hidden="true" tabindex="-1"></a>  <span class="at">gene          =</span> DEGs_list,</span>
+<span id="cb12-3"><a href="#cb12-3" aria-hidden="true" tabindex="-1"></a>  <span class="at">universe      =</span> universe_list,         </span>
+<span id="cb12-4"><a href="#cb12-4" aria-hidden="true" tabindex="-1"></a>  <span class="at">OrgDb         =</span> org.At.tair.db,    </span>
+<span id="cb12-5"><a href="#cb12-5" aria-hidden="true" tabindex="-1"></a>  <span class="at">keyType       =</span> <span class="st">"TAIR"</span>,            </span>
+<span id="cb12-6"><a href="#cb12-6" aria-hidden="true" tabindex="-1"></a>  <span class="at">ont           =</span> <span class="st">"BP"</span>,              </span>
+<span id="cb12-7"><a href="#cb12-7" aria-hidden="true" tabindex="-1"></a>  <span class="at">pAdjustMethod =</span> <span class="st">"BH"</span>,             </span>
+<span id="cb12-8"><a href="#cb12-8" aria-hidden="true" tabindex="-1"></a>  <span class="at">pvalueCutoff  =</span> <span class="fl">0.05</span>,              </span>
+<span id="cb12-9"><a href="#cb12-9" aria-hidden="true" tabindex="-1"></a>  <span class="at">qvalueCutoff  =</span> <span class="fl">0.05</span>,</span>
+<span id="cb12-10"><a href="#cb12-10" aria-hidden="true" tabindex="-1"></a>  <span class="at">readable      =</span> <span class="cn">TRUE</span>               </span>
+<span id="cb12-11"><a href="#cb12-11" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb12-12"><a href="#cb12-12" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb12-13"><a href="#cb12-13" aria-hidden="true" tabindex="-1"></a><span class="fu">dotplot</span>(go_results, <span class="at">showCategory =</span> <span class="dv">10</span>, <span class="at">x =</span> <span class="st">"FoldEnrichment"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<div class="cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="05-pathway-enrichment_files/figure-html/unnamed-chunk-7-1.png" class="img-fluid figure-img" width="576"></p>
+</figure>
+</div>
+</div>
+</div>
+<p>In this case, not so much changed compared to our earlier <code>BP</code> enrichment analysis, although some categories changed a little bit. At least, we will sleep better tonight, knowing that we performed a statiscally sound ORA.</p>
+</div>
+</div>
+</div>
+</section>
+<section id="kegg-enrichment" class="level2">
+<h2 class="anchored" data-anchor-id="kegg-enrichment">KEGG enrichment</h2>
+<p>KEGG terms describe gene functions at the level of <em>pathways</em>. While there will be quite some overlap with GO terms, it can happen that KEGG terms happen to describe what’s happening in your data a bit more clearly. Running and visualizing KEGG enrichment works very similar as GO term enrichment, but first we will need to find the ‘KEGG code’ of the organism we are studying, by searching by the scientific name.</p>
+<div class="cell">
+<div class="code-with-filename">
+<div class="code-with-filename-file">
+<pre><strong>R</strong></pre>
+</div>
+<div class="sourceCode cell-code" id="cb13"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb13-1"><a href="#cb13-1" aria-hidden="true" tabindex="-1"></a>kegg_result <span class="ot">&lt;-</span> <span class="fu">search_kegg_organism</span>(<span class="st">'Arabidopsis thaliana'</span>, <span class="at">by=</span><span class="st">'scientific_name'</span>)</span>
+<span id="cb13-2"><a href="#cb13-2" aria-hidden="true" tabindex="-1"></a><span class="fu">head</span>(kegg_result)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<div class="cell-output cell-output-stdout">
+<pre><code>    kegg_code      scientific_name common_name
+565       ath Arabidopsis thaliana thale cress</code></pre>
+</div>
+</div>
+<p>Aha, the KEGG code of <em>Arabidopsis thaliana</em> is <code>ath</code>.</p>
+<div class="cell">
+<div class="code-with-filename">
+<div class="code-with-filename-file">
+<pre><strong>R</strong></pre>
+</div>
+<div class="sourceCode cell-code" id="cb15"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb15-1"><a href="#cb15-1" aria-hidden="true" tabindex="-1"></a>KEGG_result <span class="ot">&lt;-</span> <span class="fu">enrichKEGG</span>(<span class="at">gene =</span> DEGs_list,</span>
+<span id="cb15-2"><a href="#cb15-2" aria-hidden="true" tabindex="-1"></a>                                <span class="at">universe =</span> universe_list,</span>
+<span id="cb15-3"><a href="#cb15-3" aria-hidden="true" tabindex="-1"></a>                                <span class="at">organism =</span> <span class="st">"ath"</span>,</span>
+<span id="cb15-4"><a href="#cb15-4" aria-hidden="true" tabindex="-1"></a>                                <span class="at">minGSSize =</span> <span class="dv">10</span>,</span>
+<span id="cb15-5"><a href="#cb15-5" aria-hidden="true" tabindex="-1"></a>                                <span class="at">maxGSSize =</span> <span class="dv">500</span>,</span>
+<span id="cb15-6"><a href="#cb15-6" aria-hidden="true" tabindex="-1"></a>                                <span class="at">pAdjustMethod =</span> <span class="st">"BH"</span>,</span>
+<span id="cb15-7"><a href="#cb15-7" aria-hidden="true" tabindex="-1"></a>                                <span class="at">qvalueCutoff =</span> <span class="fl">0.05</span>,</span>
+<span id="cb15-8"><a href="#cb15-8" aria-hidden="true" tabindex="-1"></a>                                <span class="at">use_internal_data =</span> <span class="cn">FALSE</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<div class="cell-output cell-output-stderr">
+<pre><code>Reading KEGG annotation online: "https://rest.kegg.jp/link/ath/pathway"...</code></pre>
+</div>
+<div class="cell-output cell-output-stderr">
+<pre><code>Reading KEGG annotation online: "https://rest.kegg.jp/list/pathway/ath"...</code></pre>
+</div>
+<div class="sourceCode cell-code" id="cb18"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb18-1"><a href="#cb18-1" aria-hidden="true" tabindex="-1"></a><span class="fu">dotplot</span>(KEGG_result, <span class="at">x =</span> <span class="st">"FoldEnrichment"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="05-pathway-enrichment_files/figure-html/unnamed-chunk-9-1.png" class="img-fluid figure-img" width="576"></p>
+</figure>
+</div>
+</div>
+</div>
+</section>
+<section id="gsea-gene-set-enrichment-analysis" class="level2">
+<h2 class="anchored" data-anchor-id="gsea-gene-set-enrichment-analysis">GSEA (Gene Set Enrichment Analysis)</h2>
+<p>In the GO and KEGG ORA sections, we started with a <em>binary</em> gene list, that is, ‘significant’ vs ‘not significant’. GSEA is another enrichment test that employs a different strategy. Here, we start with a <em>ranked list</em> of all the genes in our experiment. They might be ranked by Log2FoldChange, or adjusted p-value. Then, GSEA answers the following conceptual question:</p>
+<blockquote class="blockquote">
+<p>Are genes from a pathway consistently found toward the top or bottom of the ranked list?</p>
+</blockquote>
+<p>In other words, ORA requires us to make a choice about a threshold of significance and/or fold change, while GSEA is a ‘threshold free’ method.</p>
+<p>First, we will prepare the data structure to perform GSEA:</p>
+<div class="cell">
+<div class="code-with-filename">
+<div class="code-with-filename-file">
+<pre><strong>R</strong></pre>
+</div>
+<div class="sourceCode cell-code" id="annotated-cell-9"><pre class="sourceCode r code-annotation-code code-with-copy code-annotated"><code class="sourceCode r"><button class="code-annotation-anchor" data-target-cell="annotated-cell-9" data-target-annotation="1">1</button><span id="annotated-cell-9-1" class="code-annotation-target"><a href="#annotated-cell-9-1" aria-hidden="true" tabindex="-1"></a>gene_list <span class="ot">&lt;-</span> DEGs<span class="sc">$</span>log2FoldChange</span>
+<button class="code-annotation-anchor" data-target-cell="annotated-cell-9" data-target-annotation="2">2</button><span id="annotated-cell-9-2" class="code-annotation-target"><a href="#annotated-cell-9-2" aria-hidden="true" tabindex="-1"></a><span class="fu">names</span>(gene_list) <span class="ot">&lt;-</span> DEGs<span class="sc">$</span>genes</span>
+<span id="annotated-cell-9-3"><a href="#annotated-cell-9-3" aria-hidden="true" tabindex="-1"></a></span>
+<button class="code-annotation-anchor" data-target-cell="annotated-cell-9" data-target-annotation="3">3</button><span id="annotated-cell-9-4" class="code-annotation-target"><a href="#annotated-cell-9-4" aria-hidden="true" tabindex="-1"></a>gene_list <span class="ot">&lt;-</span> gene_list[<span class="sc">!</span><span class="fu">is.na</span>(gene_list)]</span>
+<button class="code-annotation-anchor" data-target-cell="annotated-cell-9" data-target-annotation="4">4</button><span id="annotated-cell-9-5" class="code-annotation-target"><a href="#annotated-cell-9-5" aria-hidden="true" tabindex="-1"></a>gene_list <span class="ot">&lt;-</span> <span class="fu">sort</span>(gene_list, <span class="at">decreasing =</span> <span class="cn">TRUE</span>)</span><div class="code-annotation-gutter-bg"></div><div class="code-annotation-gutter"></div></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<div class="cell-annotation">
+<dl class="code-annotation-container-hidden code-annotation-container-grid">
+<dt data-target-cell="annotated-cell-9" data-target-annotation="1">1</dt>
+<dd>
+<span data-code-cell="annotated-cell-9" data-code-lines="1" data-code-annotation="1">First, we take all the fold change values and store it in a list</span>
+</dd>
+<dt data-target-cell="annotated-cell-9" data-target-annotation="2">2</dt>
+<dd>
+<span data-code-cell="annotated-cell-9" data-code-lines="2" data-code-annotation="2">Then, we add the gene IDs as <code>names</code> of the list items</span>
+</dd>
+<dt data-target-cell="annotated-cell-9" data-target-annotation="3">3</dt>
+<dd>
+<span data-code-cell="annotated-cell-9" data-code-lines="4" data-code-annotation="3">We remove all entries where there was no valid fold change values (<code>NA</code>)</span>
+</dd>
+<dt data-target-cell="annotated-cell-9" data-target-annotation="4">4</dt>
+<dd>
+<span data-code-cell="annotated-cell-9" data-code-lines="5" data-code-annotation="4">Then, we sort the list.</span>
+</dd>
+</dl>
+</div>
+</div>
+<p>Let’s now run the GSEA:</p>
+<div class="cell">
+<div class="code-with-filename">
+<div class="code-with-filename-file">
+<pre><strong>R</strong></pre>
+</div>
+<div class="sourceCode cell-code" id="annotated-cell-10"><pre class="sourceCode r code-annotation-code code-with-copy code-annotated"><code class="sourceCode r"><span id="annotated-cell-10-1"><a href="#annotated-cell-10-1" aria-hidden="true" tabindex="-1"></a>gsea_go <span class="ot">&lt;-</span> <span class="fu">gseGO</span>(</span>
+<span id="annotated-cell-10-2"><a href="#annotated-cell-10-2" aria-hidden="true" tabindex="-1"></a>  <span class="at">geneList     =</span> gene_list,</span>
+<span id="annotated-cell-10-3"><a href="#annotated-cell-10-3" aria-hidden="true" tabindex="-1"></a>  <span class="at">OrgDb        =</span> org.At.tair.db,</span>
+<span id="annotated-cell-10-4"><a href="#annotated-cell-10-4" aria-hidden="true" tabindex="-1"></a>  <span class="at">keyType      =</span> <span class="st">"TAIR"</span>,</span>
+<span id="annotated-cell-10-5"><a href="#annotated-cell-10-5" aria-hidden="true" tabindex="-1"></a>  <span class="at">ont          =</span> <span class="st">"BP"</span>,</span>
+<span id="annotated-cell-10-6"><a href="#annotated-cell-10-6" aria-hidden="true" tabindex="-1"></a>  <span class="at">minGSSize    =</span> <span class="dv">10</span>,</span>
+<span id="annotated-cell-10-7"><a href="#annotated-cell-10-7" aria-hidden="true" tabindex="-1"></a>  <span class="at">maxGSSize    =</span> <span class="dv">500</span>,</span>
+<span id="annotated-cell-10-8"><a href="#annotated-cell-10-8" aria-hidden="true" tabindex="-1"></a>  <span class="at">pvalueCutoff =</span> <span class="fl">0.05</span>,</span>
+<span id="annotated-cell-10-9"><a href="#annotated-cell-10-9" aria-hidden="true" tabindex="-1"></a>  <span class="at">verbose      =</span> <span class="cn">FALSE</span></span>
+<span id="annotated-cell-10-10"><a href="#annotated-cell-10-10" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="annotated-cell-10-11"><a href="#annotated-cell-10-11" aria-hidden="true" tabindex="-1"></a></span>
+<span id="annotated-cell-10-12"><a href="#annotated-cell-10-12" aria-hidden="true" tabindex="-1"></a><span class="fu">gseaplot2</span>(</span>
+<span id="annotated-cell-10-13"><a href="#annotated-cell-10-13" aria-hidden="true" tabindex="-1"></a>  gsea_go,</span>
+<button class="code-annotation-anchor" data-target-cell="annotated-cell-10" data-target-annotation="1">1</button><span id="annotated-cell-10-14" class="code-annotation-target"><a href="#annotated-cell-10-14" aria-hidden="true" tabindex="-1"></a>  <span class="at">geneSetID =</span> <span class="dv">1</span>,</span>
+<span id="annotated-cell-10-15"><a href="#annotated-cell-10-15" aria-hidden="true" tabindex="-1"></a>  <span class="at">title =</span> gsea_go<span class="sc">@</span>result<span class="sc">$</span>Description[<span class="dv">1</span>]</span>
+<span id="annotated-cell-10-16"><a href="#annotated-cell-10-16" aria-hidden="true" tabindex="-1"></a>)</span><div class="code-annotation-gutter-bg"></div><div class="code-annotation-gutter"></div></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<div class="cell-annotation">
+<dl class="code-annotation-container-hidden code-annotation-container-grid">
+<dt data-target-cell="annotated-cell-10" data-target-annotation="1">1</dt>
+<dd>
+<span data-code-cell="annotated-cell-10" data-code-lines="14" data-code-annotation="1">By picking <code>1</code> here, we will plot the GO term with the lowest p-value. Make sure to explore a few more than just the first one!</span>
+</dd>
+</dl>
+</div>
+<div class="cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="05-pathway-enrichment_files/figure-html/unnamed-chunk-11-1.png" class="img-fluid figure-img" width="576"></p>
+</figure>
+</div>
+</div>
+</div>
+<p>This graph is rather complex but very interesting! Let’s break the most important parts down:</p>
+<ul>
+<li>The green line shows the <em>Running Enrichment Score</em>, and the highest point is enrichment score of this GO category. If the peak is at the left, this pathway is enriched among up-regulated genes.</li>
+<li>Each vertical <em>tick</em> represents one gene from this GO term. So, there is clustering of (in this case) photosynthesis annotated genes in the top end of the ranked list.</li>
+</ul>
+</section>
+<section id="performing-enrichment-analysis-on-webservers" class="level2">
+<h2 class="anchored" data-anchor-id="performing-enrichment-analysis-on-webservers">Performing enrichment analysis on webservers</h2>
+<p>Some people find it easier to use webservers for GO term enrichment. Of course, that’s also possible. For example, <a href="http://biit.cs.ut.ee/gprofiler/gost">g:Profiler</a> is an excellent webserver where you can simply paste a list of geneIDs, select your organism of study, hit <code>Run query</code>, and visually inspect the results. One big advantage of this webserver is that it contains GO annotations of hundreds of organisms, including many that are not available on <code>Bioconductor</code> for R-based analysis.</p>
+</section>
+<section id="concluding-remarks" class="level2">
+<h2 class="anchored" data-anchor-id="concluding-remarks">Concluding remarks</h2>
+<p><strong>TO WRITE</strong></p>
 
 
 </section>
