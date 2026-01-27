@@ -9,7 +9,7 @@ website:
   announcement: 
     icon: tools
     dismissable: true
-    content: "**Under construction** - this workshop is complete but in beta test phase"
+    content: "**Under construction** - this workshop is complete but in beta test phase."
     type: info
     position: below-navbar
   site-url: index.qmd
