@@ -10,27 +10,35 @@ format:
         link-external-newwindow: true
 ---
 
-In this workshop, we went all the way from experimental design, to bioinformatic processing of `.fastq` files, to differential gene expression analysis in `DESeq2`. We hope that you are now ready to design and analyze your own transcriptome experiments. Remember that we only covered the very basics of transcriptome analysis, expect to learn a lot more when you start analyzing your own data.
+In this workshop, we went all the way from experimental design, to bioinformatic processing of `.fastq` files, to differential gene expression analysis in `DESeq2`. We hope that you are now ready to design and analyze your own transcriptomics experiments. Remember that we only covered the very basics of transcriptome analysis, expect to learn a lot more when you start analyzing your own data.
 
-If you first want to practice more, or don't have your own data yet, consider analyzing publicly available RNA-seq datasets. Papers often make their raw sequencing reads available on NCBI or ENA, which you can download to reanalyze. A nice repository where pre-processed count tables are available is [EMBL-EBI](https://www.ebi.ac.uk/gxa/experiments). For now, we collected three count tables to practice `DESeq2` analysis, from three different domains of the life sciences. They are available in the [GitHub repository of this workshop](https://github.com/mishapaauw/RNA-seq-workshop/tree/main/practice).
+If you first want to practice more, or don't have your own data yet, you can analyze publicly available RNA-seq datasets. Papers often make their raw sequencing reads available on NCBI or ENA, which you can download to reanalyze. A repository where pre-processed count tables are available is [EMBL-EBI](https://www.ebi.ac.uk/gxa/experiments). We collected four count tables to practice `DESeq2` analysis, from three different domains of the life sciences. They are available in the `practice/` folder of the [GitHub repository of this workshop](https://github.com/mishapaauw/RNA-seq-workshop/tree/main/practice).
+
+Practice dataset #2 has one experimental factor, just like the dataset we worked with so far. However, it has five different levels, so it's a bit more complex. All other practice datasets (#1, #3, and #4) include two or mroe experimental factors. This makes the analysis more complex but also more informative, especially since your own experiments will probably involve multiple factors as well.
 
 ## The datasets
 
-1. :corn: :seedling: **The Plant Scientist: maize plants infected with the fungus *Ustilago maydis***
+1. :corn: :seedling: **The Plant Scientist #1: maize plants infected with the fungus *Ustilago maydis***
 
     - Experiment ID: `E-CURD-40`
     - Experimental factors:
-        - Treatment, with levels: `Ustilago maydis` and `none`
-        - Timepoint, with levels: `0.5`, `1`, `2`, `4`, `6`, `8`, `12`, days after infection
+        - `treatment`, with levels: `Ustilago maydis` and `none`
+        - `timepoint`, with levels: `0.5`, `1`, `2`, `4`, `6`, `8`, `12`, days after infection
 
-2. :brain: :zap: **The Neuroscientist: different brain regions from patients with different psychiatric problems**
+2. :seedling: :test_tube: **The Plant Scientist #2: Arabidopsis roots treated with different plant hormones**
+
+    - Experiment ID: `Deforges_2019`
+    - Experimental factors:
+        - `condition`, with levels: `control`, `auxin`, `aba`, `meja` or `acc`.
+
+3. :brain: :zap: **The Neuroscientist: different brain regions from patients with different psychiatric problems**
 
     - Experiment ID: `E-GEOD-78936`
     - Experimental factors:
         - `disease`, with levels: `normal`, `schizophrenia`, `bipolar disorder`
         - `brain_region`, with levels: `area 9`, `area 11`, `area 24`
 
-2. :microbe: :microscope: **The Microbiologist: *Pseudomonas aeruginosa* bacteria exposed to different concentrations of copper**
+4. :microbe: :microscope: **The microbiologist: *Pseudomonas aeruginosa* bacteria exposed to different concentrations of copper**
 
     - Experiment ID: `GSE160187`
     - Experimental factors:
