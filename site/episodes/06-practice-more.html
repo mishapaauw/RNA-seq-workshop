@@ -7,7 +7,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
 
 
-<title>Setting up</title>
+<title>Practice on your own</title>
 <style>
 code{white-space: pre-wrap;}
 span.smallcaps{font-variant: small-caps;}
@@ -20,40 +20,6 @@ ul.task-list li input[type="checkbox"] {
   margin: 0 0.8em 0.2em -1em; /* quarto-specific, see https://github.com/quarto-dev/quarto-cli/issues/4556 */ 
   vertical-align: middle;
 }
-/* CSS for syntax highlighting */
-pre > code.sourceCode { white-space: pre; position: relative; }
-pre > code.sourceCode > span { line-height: 1.25; }
-pre > code.sourceCode > span:empty { height: 1.2em; }
-.sourceCode { overflow: visible; }
-code.sourceCode > span { color: inherit; text-decoration: inherit; }
-div.sourceCode { margin: 1em 0; }
-pre.sourceCode { margin: 0; }
-@media screen {
-div.sourceCode { overflow: auto; }
-}
-@media print {
-pre > code.sourceCode { white-space: pre-wrap; }
-pre > code.sourceCode > span { display: inline-block; text-indent: -5em; padding-left: 5em; }
-}
-pre.numberSource code
-  { counter-reset: source-line 0; }
-pre.numberSource code > span
-  { position: relative; left: -4em; counter-increment: source-line; }
-pre.numberSource code > span > a:first-child::before
-  { content: counter(source-line);
-    position: relative; left: -1em; text-align: right; vertical-align: baseline;
-    border: none; display: inline-block;
-    -webkit-touch-callout: none; -webkit-user-select: none;
-    -khtml-user-select: none; -moz-user-select: none;
-    -ms-user-select: none; user-select: none;
-    padding: 0 4px; width: 4em;
-  }
-pre.numberSource { margin-left: 3em;  padding-left: 4px; }
-div.sourceCode
-  {   }
-@media screen {
-pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
-}
 </style>
 
 
@@ -64,7 +30,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <script src="../site_libs/quarto-search/fuse.min.js"></script>
 <script src="../site_libs/quarto-search/quarto-search.js"></script>
 <meta name="quarto:offset" content="../">
-<link href="../episodes/02-experimental-considerations.html" rel="next">
+<link href="../episodes/05-pathway-enrichment.html" rel="prev">
 <link href="../images/bioDSC-without-dots-transparent.png" rel="icon" type="image/png">
 <script src="../site_libs/quarto-html/quarto.js"></script>
 <script src="../site_libs/quarto-html/popper.min.js"></script>
@@ -116,13 +82,13 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
       <button type="button" class="quarto-btn-toggle btn" data-bs-toggle="collapse" role="button" data-bs-target=".quarto-sidebar-collapse-item" aria-controls="quarto-sidebar" aria-expanded="false" aria-label="Toggle sidebar navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">
         <i class="bi bi-layout-text-sidebar-reverse"></i>
       </button>
-        <nav class="quarto-page-breadcrumbs" aria-label="breadcrumb"><ol class="breadcrumb"><li class="breadcrumb-item"><a href="../episodes/01-setup.html">Setting up</a></li></ol></nav>
+        <nav class="quarto-page-breadcrumbs" aria-label="breadcrumb"><ol class="breadcrumb"><li class="breadcrumb-item"><a href="../episodes/06-practice-more.html">Practice on your own</a></li></ol></nav>
         <a class="flex-grow-1" role="navigation" data-bs-toggle="collapse" data-bs-target=".quarto-sidebar-collapse-item" aria-controls="quarto-sidebar" aria-expanded="false" aria-label="Toggle sidebar navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">      
         </a>
     </div>
   </nav>
-  <div id="quarto-announcement" data-announcement-id="89ce9ef2b4ebf269c94e4aa5198c8bf8" class="alert alert-info hidden"><i class="bi bi-tools quarto-announcement-icon"></i><div class="quarto-announcement-content">
-<p><strong>Under construction</strong> - this workshop is complete but in beta test phase</p>
+  <div id="quarto-announcement" data-announcement-id="b2c11b2d011607af97af16491de3082f" class="alert alert-info hidden"><i class="bi bi-tools quarto-announcement-icon"></i><div class="quarto-announcement-content">
+<p><strong>Under construction</strong> - this workshop is complete but in beta test phase.</p>
 </div><i class="bi bi-x-lg quarto-announcement-action"></i></div>
 </header>
 <!-- content -->
@@ -141,7 +107,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
     <ul class="list-unstyled mt-1">
         <li class="sidebar-item">
   <div class="sidebar-item-container"> 
-  <a href="../episodes/01-setup.html" class="sidebar-item-text sidebar-link active">
+  <a href="../episodes/01-setup.html" class="sidebar-item-text sidebar-link">
  <span class="menu-text">Setting up</span></a>
   </div>
 </li>
@@ -171,7 +137,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 </li>
         <li class="sidebar-item">
   <div class="sidebar-item-container"> 
-  <a href="../episodes/06-practice-more.html" class="sidebar-item-text sidebar-link">
+  <a href="../episodes/06-practice-more.html" class="sidebar-item-text sidebar-link active">
  <span class="menu-text">Practice on your own</span></a>
   </div>
 </li>
@@ -185,9 +151,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
     <h2 id="toc-title">On this page</h2>
    
   <ul>
-  <li><a href="#from-reads-to-alignments" id="toc-from-reads-to-alignments" class="nav-link active" data-scroll-target="#from-reads-to-alignments">From reads to alignments</a></li>
-  <li><a href="#differential-gene-expression-with-deseq2" id="toc-differential-gene-expression-with-deseq2" class="nav-link" data-scroll-target="#differential-gene-expression-with-deseq2">Differential gene expression with DESeq2</a></li>
-  <li><a href="#getting-the-data" id="toc-getting-the-data" class="nav-link" data-scroll-target="#getting-the-data">Getting the data</a></li>
+  <li><a href="#the-datasets" id="toc-the-datasets" class="nav-link active" data-scroll-target="#the-datasets">The datasets</a></li>
   </ul>
 </nav>
     </div>
@@ -196,7 +160,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 
 <header id="title-block-header" class="quarto-title-block default">
 <div class="quarto-title">
-<h1 class="title">Setting up</h1>
+<h1 class="title">Practice on your own</h1>
 </div>
 
 
@@ -213,58 +177,40 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 </header>
 
 
-<p>Any bioinformatics project requires setting up the required software. Let’s go through the setup for this RNA-seq workshop here.</p>
-<section id="from-reads-to-alignments" class="level2">
-<h2 class="anchored" data-anchor-id="from-reads-to-alignments">From reads to alignments</h2>
-<p><img src="../images/flow-chart-RNA-Seq-2.png" class="img-fluid"></p>
-<p>This part is the ‘hardcore’ bioinformatics part of this workshop. These steps are nearly always performed using <strong>command-line programs</strong>, which can be accessed via the Terminal (macOS, Linux) or WSL (Windows). For this workshop, we prepared a Google Colab environment where we will run the commands. Access to the Google Colab environment requires a Google account.</p>
+<p>In this workshop, we went all the way from experimental design, to bioinformatic processing of <code>.fastq</code> files, to differential gene expression analysis in <code>DESeq2</code>. We hope that you are now ready to design and analyze your own transcriptome experiments. Remember that we only covered the very basics of transcriptome analysis, expect to learn a lot more when you start analyzing your own data.</p>
+<p>If you first want to practice more, or don’t have your own data yet, consider analyzing publicly available RNA-seq datasets. Papers often make their raw sequencing reads available on NCBI or ENA, which you can download to reanalyze. A nice repository where pre-processed count tables are available is <a href="https://www.ebi.ac.uk/gxa/experiments">EMBL-EBI</a>. For now, we collected three count tables to practice <code>DESeq2</code> analysis, from three different domains of the life sciences. They are available in the <a href="https://github.com/mishapaauw/RNA-seq-workshop/tree/main/practice">GitHub repository of this workshop</a>.</p>
+<section id="the-datasets" class="level2">
+<h2 class="anchored" data-anchor-id="the-datasets">The datasets</h2>
+<ol type="1">
+<li><p><span class="emoji" data-emoji="corn">🌽</span> <span class="emoji" data-emoji="seedling">🌱</span> <strong>The Plant Scientist: maize plants infected with the fungus <em>Ustilago maydis</em></strong></p>
 <ul>
-<li><a href="https://colab.research.google.com/drive/1jR2Og_qrUVg-VXNsfqJc5eEILcqHJYAC?usp=share_link">Find the google colab here</a></li>
-</ul>
-<p>In reality, you will often have so many samples and reads that you will need access to a compute cluster with more compute power (CPUs), working memory (RAM), and storage space. At the University of Amsterdam, we use <a href="https://crunchomics-documentation.readthedocs.io/en/latest/">Crunchomics</a>. Crunchomics comes with many popular bioinformatics pre-installed, additional programs can be installed using <code>conda</code>.</p>
-</section>
-<section id="differential-gene-expression-with-deseq2" class="level2">
-<h2 class="anchored" data-anchor-id="differential-gene-expression-with-deseq2">Differential gene expression with DESeq2</h2>
-<p><img src="../images/flow-chart-RNA-Seq-3.png" class="img-fluid"></p>
-<p>For this part of the workshop, we will use <code>R</code>. Please make sure you have <code>R</code> and <code>RStudio</code> installed on your computer. In addition, you will need to install the following packages, via two different routes:</p>
-<p>Install the following packages via <code>install.packages()</code></p>
-<div class="cell">
-<div class="code-with-filename">
-<div class="code-with-filename-file">
-<pre><strong>R</strong></pre>
-</div>
-<div class="sourceCode cell-code" id="cb1"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="fu">install.packages</span>(<span class="st">'tidyverse'</span>)</span>
-<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a><span class="fu">install.packages</span>(<span class="st">'patchwork'</span>)</span>
-<span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a><span class="fu">install.packages</span>(<span class="st">"pheatmap"</span>)</span>
-<span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a><span class="fu">install.packages</span>(<span class="st">"BiocManager"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-</div>
-</div>
-<p>Install the following packages via <code>Bioconductor</code></p>
-<div class="cell">
-<div class="code-with-filename">
-<div class="code-with-filename-file">
-<pre><strong>R</strong></pre>
-</div>
-<div class="sourceCode cell-code" id="cb2"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a>BiocManager<span class="sc">::</span><span class="fu">install</span>(<span class="st">"apeglm"</span>)</span>
-<span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a>BiocManager<span class="sc">::</span><span class="fu">install</span>(<span class="st">"clusterProfiler"</span>)</span>
-<span id="cb2-3"><a href="#cb2-3" aria-hidden="true" tabindex="-1"></a>BiocManager<span class="sc">::</span><span class="fu">install</span>(<span class="st">"org.At.tair.db"</span>)</span>
-<span id="cb2-4"><a href="#cb2-4" aria-hidden="true" tabindex="-1"></a>BiocManager<span class="sc">::</span><span class="fu">install</span>(<span class="st">"DESeq2"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-</div>
-</div>
-<p>Test whether <code>DESeq2</code> was installed properly by loading it:</p>
-<div class="cell">
-<div class="code-with-filename">
-<div class="code-with-filename-file">
-<pre><strong>R</strong></pre>
-</div>
-<div class="sourceCode cell-code" id="cb3"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(DESeq2)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-</div>
-</div>
-<p>During the workshop, we will <strong>not</strong> have time to install the packages, or to troubleshoot installation problems. Please try to install the packages before the workshop. You can always contact the <a href="https://www.biodsc.nl/people.html">workshop organizers</a> if you run into problems.</p>
-</section>
-<section id="getting-the-data" class="level2">
-<h2 class="anchored" data-anchor-id="getting-the-data">Getting the data</h2>
-<p>The data that will be used in this workshop can be found in the <a href="https://github.com/mishapaauw/RNA-seq-workshop-materials">following Github repository</a>.</p>
+<li>Experiment ID: <code>E-CURD-40</code></li>
+<li>Experimental factors:
+<ul>
+<li>Treatment, with levels: <code>Ustilago maydis</code> and <code>none</code></li>
+<li>Timepoint, with levels: <code>0.5</code>, <code>1</code>, <code>2</code>, <code>4</code>, <code>6</code>, <code>8</code>, <code>12</code>, days after infection</li>
+</ul></li>
+</ul></li>
+<li><p><span class="emoji" data-emoji="brain">🧠</span> <span class="emoji" data-emoji="zap">⚡</span> <strong>The Neuroscientist: different brain regions from patients with different psychiatric problems</strong></p>
+<ul>
+<li>Experiment ID: <code>E-GEOD-78936</code></li>
+<li>Experimental factors:
+<ul>
+<li><code>disease</code>, with levels: <code>normal</code>, <code>schizophrenia</code>, <code>bipolar disorder</code></li>
+<li><code>brain_region</code>, with levels: <code>area 9</code>, <code>area 11</code>, <code>area 24</code></li>
+</ul></li>
+</ul></li>
+<li><p><span class="emoji" data-emoji="microbe">🦠</span> <span class="emoji" data-emoji="microscope">🔬</span> <strong>The Microbiologist: <em>Pseudomonas aeruginosa</em> bacteria exposed to different concentrations of copper</strong></p>
+<ul>
+<li>Experiment ID: <code>GSE160187</code></li>
+<li>Experimental factors:
+<ul>
+<li><code>genotype</code>, with levels: <code>POA1</code> (wild-type bacteria) and <code>XEN41</code> (tetracyclin resistant bacteria)</li>
+<li><code>treatment</code>, with levels: <code>none</code>, <code>MIC/10</code>, <code>MIC</code> levels of copper</li>
+<li><code>timepoint</code>, with levels: <code>0</code>, <code>24</code>, <code>48</code>, <code>72</code> hours of incubation</li>
+</ul></li>
+</ul></li>
+</ol>
 
 
 </section>
@@ -376,6 +322,13 @@ window.document.addEventListener("DOMContentLoaded", function (event) {
         if (link.dataset.originalHref !== undefined) {
           link.href = link.dataset.originalHref;
         }
+          // target, if specified
+          link.setAttribute("target", "_blank");
+          if (link.getAttribute("rel") === null) {
+            link.setAttribute("rel", "noopener");
+          }
+          // default icon
+          link.classList.add("external");
       }
     }
   function tippyHover(el, contentFn, onTriggerFn, onUntriggerFn) {
@@ -731,11 +684,11 @@ window.document.addEventListener("DOMContentLoaded", function (event) {
 </script>
 <nav class="page-navigation">
   <div class="nav-page nav-page-previous">
+      <a href="../episodes/05-pathway-enrichment.html" class="pagination-link" aria-label="Enrichment analysis">
+        <i class="bi bi-arrow-left-short"></i> <span class="nav-page-text">Enrichment analysis</span>
+      </a>          
   </div>
   <div class="nav-page nav-page-next">
-      <a href="../episodes/02-experimental-considerations.html" class="pagination-link" aria-label="Before the experiment">
-        <span class="nav-page-text">Before the experiment</span> <i class="bi bi-arrow-right-short"></i>
-      </a>
   </div>
 </nav>
 </div> <!-- /content -->
