@@ -230,7 +230,24 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <li>Mapping: where in the genome do these reads come from?</li>
 <li>Counting: how many reach originate from each gene?</li>
 </ol>
-<p>The commands in this episode are to be executed in a <a href="https://colab.research.google.com/drive/1jR2Og_qrUVg-VXNsfqJc5eEILcqHJYAC?usp=share_link">Google Colab notebook</a> associated to this workshop. We will use some basic terminal commands. You don’t need to understand every command, rather, the goal is to become familiar with RNA-seq concepts and steps.</p>
+<p>The commands in this episode are to be executed in a Google Colab notebook. We will use some basic terminal commands. You don’t need to understand every command, rather, the goal is to become familiar with RNA-seq concepts and steps. There are two versions of the notebook:</p>
+<ol type="1">
+<li><a href="https://colab.research.google.com/drive/1jR2Og_qrUVg-VXNsfqJc5eEILcqHJYAC?usp=share_link">The empty Google Colab notebook</a>: if you want to type the commands yourself (recommended!)</li>
+<li><a href="https://colab.research.google.com/drive/1jR2Og_qrUVg-VXNsfqJc5eEILcqHJYAC?usp=share_link">The Google Colab notebook with pre-written commands</a>: if you just want to execute the commands (also fine!)</li>
+</ol>
+<div class="callout callout-style-default callout-note callout-titled">
+<div class="callout-header d-flex align-content-center">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+Note
+</div>
+</div>
+<div class="callout-body-container callout-body">
+<p>Run the first cell of the notebook by clicking the arrow (<i class="bi bi-play-circle-fill"></i>) on the top-left corner of the cell. This initialized the notebook with all the required data and software. It may take a few minutes.</p>
+</div>
+</div>
 <section id="quality-control-fastqc" class="level2">
 <h2 class="anchored" data-anchor-id="quality-control-fastqc">Quality control: <code>fastqc</code></h2>
 <p>The first step in the RNA-seq workflow is to assess the quality of the sequencing reads. Sequence reads generated from next-generation sequencing technologies come in the FASTQ file format. This file format evolved from FASTA: it contains sequence data, but also contains quality information. For a single record (sequence read) there are four lines, each of which are described below:</p>
@@ -316,7 +333,7 @@ Exercise
 </div>
 </div>
 <div class="callout callout-style-default callout-caution no-icon callout-titled" title="Solution">
-<div class="callout-header d-flex align-content-center" data-bs-toggle="collapse" data-bs-target=".callout-2-contents" aria-controls="callout-2" aria-expanded="false" aria-label="Toggle callout">
+<div class="callout-header d-flex align-content-center" data-bs-toggle="collapse" data-bs-target=".callout-3-contents" aria-controls="callout-3" aria-expanded="false" aria-label="Toggle callout">
 <div class="callout-icon-container">
 <i class="callout-icon no-icon"></i>
 </div>
@@ -325,7 +342,7 @@ Solution
 </div>
 <div class="callout-btn-toggle d-inline-block border-0 py-1 ps-1 pe-0 float-end"><i class="callout-toggle"></i></div>
 </div>
-<div id="callout-2" class="callout-2-contents callout-collapse collapse">
+<div id="callout-3" class="callout-3-contents callout-collapse collapse">
 <div class="callout-body-container callout-body">
 <p>To do this, we need to replace the input filename.</p>
 <div class="cell">
@@ -388,7 +405,7 @@ Solution
 </dl>
 </div>
 </div>
-<p>Finally, let’s inspect the QC results. If you are working in the Google Colab, you can browse the files in the workspace by clicking the directory symbol. Find <code>fastqc_reports</code> and download the <code>.html</code> files. You can open these in any browser. <code>fastqc</code> gives teach dataset a score (Pass, Warning, or Fail) on several different modules. All scores are reported in the <strong>Summary</strong>. The next section contains basic statistics like the number of reads, average sequence length, and the GC content. Generally it is a good idea to keep track of the total number of reads sequenced for each sample and to make sure the read length and GC content is as expected (based on what you know of your studied organism). One of the most important analysis modules is the <strong>“Per base sequence quality”</strong> plot. This plot provides the distribution of quality scores at each position in the read across all reads. This plot can alert us to whether there were any problems occuring during sequencing. For example, see a good and bad quality result below:</p>
+<p>Finally, let’s inspect the QC results. If you are working in the Google Colab, you can browse the files in the workspace by clicking the directory symbol. Find <code>fastqc_reports</code> and download the <code>.html</code> files to your local computer. You can open these in any browser. <code>fastqc</code> gives each dataset a score (Pass, Warning, or Fail) on several different modules. All scores are reported in the <strong>Summary</strong>. The next section contains basic statistics like the number of reads, average sequence length, and the GC content. Generally it is a good idea to keep track of the total number of reads sequenced for each sample and to make sure the read length and GC content is as expected (based on what you know of your studied organism). One of the most important analysis modules is the <strong>“Per base sequence quality”</strong> plot. This plot provides the distribution of quality scores at each position in the read across all reads. This plot can alert us to whether there were any problems occuring during sequencing. For example, see a good and bad quality result below:</p>
 <p><img src="../images/fastqc-good-bad.png" class="img-fluid"></p>
 <p>Other modules are discussed in detail <a href="https://hbctraining.github.io/Intro-to-rnaseq-hpc-salmon/lessons/qc_fastqc_assessment.html">here</a>. Note that nearly all sequencing datasets will show yellow warnings or red fails: <code>fastqc</code> is quite conservative. Additionally, the module “Per base sequence content” very often fails for RNA-seq data, as a result of RNA-seq library prep. Your experiment is not lost if you get warnings or fails, but it might warrant additional inspection of the reads. If you suspect something is wrong, don’t hesitate to contact the sequencing provider or your favorite bioinformatician.</p>
 <div class="callout callout-style-default callout-tip no-icon callout-titled" title="Exercise">
@@ -405,7 +422,7 @@ Exercise
 </div>
 </div>
 <div class="callout callout-style-default callout-caution no-icon callout-titled" title="Solution">
-<div class="callout-header d-flex align-content-center" data-bs-toggle="collapse" data-bs-target=".callout-4-contents" aria-controls="callout-4" aria-expanded="false" aria-label="Toggle callout">
+<div class="callout-header d-flex align-content-center" data-bs-toggle="collapse" data-bs-target=".callout-5-contents" aria-controls="callout-5" aria-expanded="false" aria-label="Toggle callout">
 <div class="callout-icon-container">
 <i class="callout-icon no-icon"></i>
 </div>
@@ -414,7 +431,7 @@ Solution
 </div>
 <div class="callout-btn-toggle d-inline-block border-0 py-1 ps-1 pe-0 float-end"><i class="callout-toggle"></i></div>
 </div>
-<div id="callout-4" class="callout-4-contents callout-collapse collapse">
+<div id="callout-5" class="callout-5-contents callout-collapse collapse">
 <div class="callout-body-container callout-body">
 <ul>
 <li>Sample 1, 2 and 3 are actually of good quality. Only the expected module (Per base sequence content) gives a FAIL, all other modules are green!</li>
@@ -436,9 +453,9 @@ Solution
 <span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a><span class="fu">mkdir</span> trimmed_reads</span>
 <span id="cb3-3"><a href="#cb3-3" aria-hidden="true" tabindex="-1"></a><span class="ex">fastp</span> <span class="dt">\ </span></span>
 <span id="cb3-4"><a href="#cb3-4" aria-hidden="true" tabindex="-1"></a>  <span class="ex">-i</span> reads/sample1.fastq.gz <span class="dt">\</span></span>
-<span id="cb3-5"><a href="#cb3-5" aria-hidden="true" tabindex="-1"></a>  <span class="at">-o</span> trimmed_reads/sample4.trimmed.fastq.gz <span class="dt">\</span></span>
+<span id="cb3-5"><a href="#cb3-5" aria-hidden="true" tabindex="-1"></a>  <span class="at">-o</span> trimmed_reads/sample1.trimmed.fastq.gz <span class="dt">\</span></span>
 <span id="cb3-6"><a href="#cb3-6" aria-hidden="true" tabindex="-1"></a>  <span class="at">--thread</span> 2 <span class="dt">\</span></span>
-<span id="cb3-7"><a href="#cb3-7" aria-hidden="true" tabindex="-1"></a>  <span class="at">--html</span> fastp_reports/sample4_fastp_report.html</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<span id="cb3-7"><a href="#cb3-7" aria-hidden="true" tabindex="-1"></a>  <span class="at">--html</span> fastp_reports/sample1_fastp_report.html</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
 </div>
 <p><code>fastp</code> prints information about the trimming on the terminal, for example:</p>
@@ -475,7 +492,7 @@ Exercise
 </div>
 </div>
 <div class="callout callout-style-default callout-caution no-icon callout-titled" title="Solution">
-<div class="callout-header d-flex align-content-center" data-bs-toggle="collapse" data-bs-target=".callout-6-contents" aria-controls="callout-6" aria-expanded="false" aria-label="Toggle callout">
+<div class="callout-header d-flex align-content-center" data-bs-toggle="collapse" data-bs-target=".callout-7-contents" aria-controls="callout-7" aria-expanded="false" aria-label="Toggle callout">
 <div class="callout-icon-container">
 <i class="callout-icon no-icon"></i>
 </div>
@@ -484,7 +501,7 @@ Solution
 </div>
 <div class="callout-btn-toggle d-inline-block border-0 py-1 ps-1 pe-0 float-end"><i class="callout-toggle"></i></div>
 </div>
-<div id="callout-6" class="callout-6-contents callout-collapse collapse">
+<div id="callout-7" class="callout-7-contents callout-collapse collapse">
 <div class="callout-body-container callout-body">
 <ol type="1">
 <li>We can run <code>fastqc</code> again, this time on the trimmed reads.</li>
@@ -526,7 +543,7 @@ Question
 </div>
 </div>
 <div class="callout callout-style-default callout-caution no-icon callout-titled" title="Solution">
-<div class="callout-header d-flex align-content-center" data-bs-toggle="collapse" data-bs-target=".callout-8-contents" aria-controls="callout-8" aria-expanded="false" aria-label="Toggle callout">
+<div class="callout-header d-flex align-content-center" data-bs-toggle="collapse" data-bs-target=".callout-9-contents" aria-controls="callout-9" aria-expanded="false" aria-label="Toggle callout">
 <div class="callout-icon-container">
 <i class="callout-icon no-icon"></i>
 </div>
@@ -535,7 +552,7 @@ Solution
 </div>
 <div class="callout-btn-toggle d-inline-block border-0 py-1 ps-1 pe-0 float-end"><i class="callout-toggle"></i></div>
 </div>
-<div id="callout-8" class="callout-8-contents callout-collapse collapse">
+<div id="callout-9" class="callout-9-contents callout-collapse collapse">
 <div class="callout-body-container callout-body">
 <p>In experiments where we don’t need to think about exon-intron boundaries. This is the case when the reads originate from genomic DNA, for example for whole genome sequencing experiments, or enrichment sequencing experiments like Chip-Seq.</p>
 </div>
@@ -554,7 +571,15 @@ Solution
 <span id="cb6-4"><a href="#cb6-4" aria-hidden="true" tabindex="-1"></a>  <span class="at">--genomeDir</span> TAIR10_STAR_index</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
 </div>
-<p>Allright, let’s finally run <code>STAR</code>. This tool requires quite some parameters to be set: how many threads to use (<code>--runThreadN</code>), where to find the index (<code>--genomeDir</code>), where to find the reads (<code>--readFilesIn</code>), that the reads are compressed (<code>--readFilesCommand</code>), where to store the results (<code>--outFileNamePrefix</code>), and which output file format we want (<code>--outSAMtype</code>). Pfew.</p>
+<p>Allright, let’s finally run <code>STAR</code>. This tool requires quite some parameters to be set:</p>
+<ul>
+<li>How many threads to use (<code>--runThreadN</code>)</li>
+<li>Where to find the index (<code>--genomeDir</code>)</li>
+<li>Ehere to find the reads (<code>--readFilesIn</code>)</li>
+<li>That the reads are compressed (<code>--readFilesCommand</code>)</li>
+<li>Where to store the results (<code>--outFileNamePrefix</code>)</li>
+<li>And which output file format we want (<code>--outSAMtype</code>)</li>
+</ul>
 <div class="cell">
 <div class="code-with-filename">
 <div class="code-with-filename-file">
@@ -600,7 +625,7 @@ Exercise
 </div>
 </div>
 <div class="callout callout-style-default callout-caution no-icon callout-titled" title="Solution">
-<div class="callout-header d-flex align-content-center" data-bs-toggle="collapse" data-bs-target=".callout-10-contents" aria-controls="callout-10" aria-expanded="false" aria-label="Toggle callout">
+<div class="callout-header d-flex align-content-center" data-bs-toggle="collapse" data-bs-target=".callout-11-contents" aria-controls="callout-11" aria-expanded="false" aria-label="Toggle callout">
 <div class="callout-icon-container">
 <i class="callout-icon no-icon"></i>
 </div>
@@ -609,7 +634,7 @@ Solution
 </div>
 <div class="callout-btn-toggle d-inline-block border-0 py-1 ps-1 pe-0 float-end"><i class="callout-toggle"></i></div>
 </div>
-<div id="callout-10" class="callout-10-contents callout-collapse collapse">
+<div id="callout-11" class="callout-11-contents callout-collapse collapse">
 <div class="callout-body-container callout-body">
 <ol type="1">
 <li></li>
@@ -655,7 +680,7 @@ Exercise
 </div>
 </div>
 <div class="callout callout-style-default callout-caution no-icon callout-titled" title="Solution">
-<div class="callout-header d-flex align-content-center" data-bs-toggle="collapse" data-bs-target=".callout-12-contents" aria-controls="callout-12" aria-expanded="false" aria-label="Toggle callout">
+<div class="callout-header d-flex align-content-center" data-bs-toggle="collapse" data-bs-target=".callout-13-contents" aria-controls="callout-13" aria-expanded="false" aria-label="Toggle callout">
 <div class="callout-icon-container">
 <i class="callout-icon no-icon"></i>
 </div>
@@ -664,7 +689,7 @@ Solution
 </div>
 <div class="callout-btn-toggle d-inline-block border-0 py-1 ps-1 pe-0 float-end"><i class="callout-toggle"></i></div>
 </div>
-<div id="callout-12" class="callout-12-contents callout-collapse collapse">
+<div id="callout-13" class="callout-13-contents callout-collapse collapse">
 <div class="callout-body-container callout-body">
 <ol type="1">
 <li><code>samtools flagstat</code> shows us (just like the <code>STAR</code> log file) how many reads were mapped correctly. In addition, it tells us whether read pairs (if mapping paired-end data) mapped together as expected (are ‘properly paired’). Today, we used single-end reads so this is not relavant.</li>
@@ -683,11 +708,11 @@ Exercise
 </div>
 </div>
 <div class="callout-body-container callout-body">
-<p>So far, we only trimmed and mapped one sample. Write two <code>bash</code> for loops to process all four samples.</p>
+<p>So far, we only trimmed and mapped one sample. Trim and map the other three samples. Easy mode: repeat the commands performed earlier, update the sample numbers. For a challenge: write two <code>bash</code> for loops to process all four samples.</p>
 </div>
 </div>
 <div class="callout callout-style-default callout-caution no-icon callout-titled" title="Solution">
-<div class="callout-header d-flex align-content-center" data-bs-toggle="collapse" data-bs-target=".callout-14-contents" aria-controls="callout-14" aria-expanded="false" aria-label="Toggle callout">
+<div class="callout-header d-flex align-content-center" data-bs-toggle="collapse" data-bs-target=".callout-15-contents" aria-controls="callout-15" aria-expanded="false" aria-label="Toggle callout">
 <div class="callout-icon-container">
 <i class="callout-icon no-icon"></i>
 </div>
@@ -696,7 +721,7 @@ Solution
 </div>
 <div class="callout-btn-toggle d-inline-block border-0 py-1 ps-1 pe-0 float-end"><i class="callout-toggle"></i></div>
 </div>
-<div id="callout-14" class="callout-14-contents callout-collapse collapse">
+<div id="callout-15" class="callout-15-contents callout-collapse collapse">
 <div class="callout-body-container callout-body">
 <ol type="1">
 <li>For loop to trim:</li>
@@ -834,9 +859,9 @@ Solution
 <h2 class="anchored" data-anchor-id="streamlining-read-mapping-procedure">Streamlining read mapping procedure</h2>
 <p>If you find this process quite cumbersome, then I have good news for you! There are <em>pipelines</em> available that streamline the chain of commands required for mapping:</p>
 <ul>
-<li><a href="https://github.com/BleekerLab/snakemake_rnaseq">snakemake_rnaseq</a>, developed at the Bleeker Lab (UvA).</li>
-<li><a href="https://nf-co.re/rnaseq/3.19.0">nf-core/rnaseq</a>, developed and maintained by the Nextflow community.</li>
-<li><strong>TODO</strong>: GALAXY server information here</li>
+<li><a href="https://github.com/BleekerLab/snakemake_rnaseq">snakemake_rnaseq</a>: developed at the Bleeker Lab (UvA).</li>
+<li><a href="https://nf-co.re/rnaseq/3.19.0">nf-core/rnaseq</a>: developed and maintained by the Nextflow community.</li>
+<li>Galaxy server: if you prefer graphical interfaces over command lines, you can contact Frans van der Kloet for access to a Galaxy Server (for UvA/SILS researchers).</li>
 </ul>
 <p>A full instruction of these pipelines is beyond the scope of this workshop. Also, we wish to highlight that it is <em>very insightful</em> to have run all the steps by yourself rather than in a pipeline.</p>
 

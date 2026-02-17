@@ -8,23 +8,24 @@ format:
         code-annotations: hover
 ---
 
-Any bioinformatics project requires setting up the required software. Let's go through the setup for this RNA-seq workshop here.
+All bioinformatics projects requires setting up the required software. Let's go through the setup for this RNA-seq workshop here.
 
 ## From reads to alignments
 
 ![](../images/flow-chart-RNA-Seq-2.png)
 
-This part is the 'hardcore' bioinformatics part of this workshop. These steps are nearly always performed using **command-line programs**, which can be accessed via the Terminal (macOS, Linux) or WSL (Windows). For this workshop, we prepared a Google Colab environment where we will run the commands. Access to the Google Colab environment requires a Google account.
+The first part is the 'hardcore' bioinformatics part of this workshop. These steps are nearly always performed using **command-line programs**, which can be accessed via the Terminal (macOS, Linux) or WSL (Windows). For this workshop, we prepared a Google Colab environment where we will run the commands. Access to the Google Colab environment requires a Google account.
     
-* [Find the google colab here](https://colab.research.google.com/drive/1jR2Og_qrUVg-VXNsfqJc5eEILcqHJYAC?usp=share_link) 
+* [Empty Google Colab environment](https://colab.research.google.com/drive/1jR2Og_qrUVg-VXNsfqJc5eEILcqHJYAC?usp=share_link): to write the commands yourself
+* [Pre-filled Google Colab environment](https://colab.research.google.com/drive/1jR2Og_qrUVg-VXNsfqJc5eEILcqHJYAC?usp=share_link): to execute prewritten commands
 
-In reality, you will often have so many samples and reads that you will need access to a compute cluster with more compute power (CPUs), working memory (RAM), and storage space. At the University of Amsterdam, we use [Crunchomics](https://crunchomics-documentation.readthedocs.io/en/latest/). Crunchomics comes with many popular bioinformatics pre-installed, additional programs can be installed using `conda`.
+In a real experiment, you will often have so many samples and reads that you will need access to a compute cluster with more compute power (CPUs), working memory (RAM), and storage space. At the University of Amsterdam, we use [Crunchomics](https://crunchomics-documentation.readthedocs.io/en/latest/). Crunchomics comes with many popular bioinformatics pre-installed, additional programs can be installed using `conda`.
 
 ## Differential gene expression with DESeq2
 
 ![](../images/flow-chart-RNA-Seq-3.png)
 
-For this part of the workshop, we will use `R`. Please make sure you have `R` and `RStudio` installed on your computer. In addition, you will need to install the following packages, via two different routes:
+For the second of the workshop, we will use `R`. Please make sure you have `R` and `RStudio` installed on your computer. In addition, you will need to install the following packages, via two different routes:
 
 Install the following packages via `install.packages()`
 
@@ -57,4 +58,6 @@ During the workshop, we will **not** have time to install the packages, or to tr
 
 ## Getting the data
 
-The data that will be used in this workshop can be found in the  [following Github repository](https://github.com/mishapaauw/RNA-seq-workshop-materials).
+The reads and reference that will be used in this workshop can be found in the [following Github repository](https://github.com/mishapaauw/RNA-seq-workshop-materials), and will be downloaded into the Google Colab automatically.
+
+The count table and experimental design file used in the DESeq2 part of this workshop can be found [here](https://github.com/mishapaauw/RNA-seq-workshop/tree/main/data).

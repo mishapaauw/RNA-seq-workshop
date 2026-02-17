@@ -46,7 +46,7 @@ Can you name another measure of central tendency? And another one for the measur
 :::
 
 ::: {.callout-caution title="Answer" collapse="true" icon="false"}
-Another often used measure of central tendency would be the *mean*. As for the measure of spread, the variance (square of the standard deviation) or the standard error (standard deviation divided by the square root of the number of observations) are often used. 
+Another often used measure of central tendency would be the *mean*. As for the measure of spread, the variance (square of the standard deviation) or the standard error (standard deviation divided by the square root of the number of observations) are often used.
 :::
 
 Let's test whether the *means* of the two groups are equal or not. We do this with a **two-sample *t*-test**.
@@ -65,7 +65,11 @@ Because the **p-value < 0.05**, we can safely reject our null hypothesis, and cl
 
 ## Statistical power
 
-Statistical power is the probability of your experimental sample population to detect a difference (in gene expression differences), given that an an effect actually exist in your experimental setup. There are two main error one could make when testing hypotheses. Type I errors occur when the null hypothesis is rejected wrongly --- you detect a significant difference while in reality there is no difference in gene expression ("false positive"). Type II errors also are common in hypothesis testing --- they arise if you accept the null hypothesis when in fact a treatment effect exists ("false negative"). The power of an experiments is affected by several factors:
+Statistical power is the probability of your experimental sample population to detect a difference (in gene expression differences), given that an an effect actually exist in your experimental setup. There are two main error one could make when testing hypotheses. Type I errors occur when the null hypothesis is rejected wrongly --- you detect a significant difference while in reality there is no difference in gene expression ("false positive"). Type II errors also are common in hypothesis testing --- they arise if you accept the null hypothesis when in fact a treatment effect exists ("false negative"). 
+
+![Type I and Type II error - schematic visualization](../images/typeI-typeII-error-MG.png){width=100%}
+
+The power of an experiments is affected by several factors:
 
 - **The number of replicates**: more biological replicates results in a higher power
 - **Size of the effect**: bigger differences between groups are easier to detect
@@ -167,8 +171,7 @@ In a typical biological experiment, you will encounter various sources of variat
 - **Desirable** because they are part of your experimental factors. For example, the genotype, treatment, or timepoint.
 - **Undesirable** because you are not interested in them. This could be: batch of RNA isolation, location of plants in the greenhouse, ...
 
-Undesirable variation is unavaidable, but there are some practices to limit their impact. First of all, make sure that you don't confound your experimental factors with undesirable sources of variation by properly randomizing your treatments. For example, if you have too many samples to isolate RNA in one day of labwork, make sure you don't isolate RNA from samples with genotype A on day 1, and genotype B on day 2. In this case, you will never be able to know whether genes were differentially expressed because the genotypes of the samples differ (very interesting!) or because RNA was isolated on two different days (not very interesting). Instead, mix your samples of genotype A and B over your two RNA isolation days. Still, you should always record known sources of undesirable variation so you can correct for it later. There's much more to be said about this, for more details see [these materials from Harvard Chan Bioinformatics Core](https://hbctraining.github.io/Intro-to-rnaseq-fasrc-salmon-flipped/lessons/02_experimental_planning_considerations.html).
-
+Undesirable variation is unavaidable, but there are some practices to limit their impact. First of all, make sure that you don't confound your experimental factors with undesirable sources of variation by properly randomizing your treatments. For example, if you have too many samples to isolate RNA in one day of labwork, make sure you don't isolate RNA from samples with genotype A on day 1, and genotype B on day 2. Instead, mix your samples of genotype A and B over your two RNA isolation days. Still, you should always record known sources of undesirable variation so you can correct for it later. There's much more to be said about this, for more details see [these materials from Harvard Chan Bioinformatics Core](https://hbctraining.github.io/Intro-to-rnaseq-fasrc-salmon-flipped/lessons/02_experimental_planning_considerations.html).
 
 ## Concluding remarks
 

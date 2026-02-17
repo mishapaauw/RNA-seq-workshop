@@ -213,20 +213,21 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 </header>
 
 
-<p>Any bioinformatics project requires setting up the required software. Let’s go through the setup for this RNA-seq workshop here.</p>
+<p>All bioinformatics projects requires setting up the required software. Let’s go through the setup for this RNA-seq workshop here.</p>
 <section id="from-reads-to-alignments" class="level2">
 <h2 class="anchored" data-anchor-id="from-reads-to-alignments">From reads to alignments</h2>
 <p><img src="../images/flow-chart-RNA-Seq-2.png" class="img-fluid"></p>
-<p>This part is the ‘hardcore’ bioinformatics part of this workshop. These steps are nearly always performed using <strong>command-line programs</strong>, which can be accessed via the Terminal (macOS, Linux) or WSL (Windows). For this workshop, we prepared a Google Colab environment where we will run the commands. Access to the Google Colab environment requires a Google account.</p>
+<p>The first part is the ‘hardcore’ bioinformatics part of this workshop. These steps are nearly always performed using <strong>command-line programs</strong>, which can be accessed via the Terminal (macOS, Linux) or WSL (Windows). For this workshop, we prepared a Google Colab environment where we will run the commands. Access to the Google Colab environment requires a Google account.</p>
 <ul>
-<li><a href="https://colab.research.google.com/drive/1jR2Og_qrUVg-VXNsfqJc5eEILcqHJYAC?usp=share_link">Find the google colab here</a></li>
+<li><a href="https://colab.research.google.com/drive/1jR2Og_qrUVg-VXNsfqJc5eEILcqHJYAC?usp=share_link">Empty Google Colab environment</a>: to write the commands yourself</li>
+<li><a href="https://colab.research.google.com/drive/1jR2Og_qrUVg-VXNsfqJc5eEILcqHJYAC?usp=share_link">Pre-filled Google Colab environment</a>: to execute prewritten commands</li>
 </ul>
-<p>In reality, you will often have so many samples and reads that you will need access to a compute cluster with more compute power (CPUs), working memory (RAM), and storage space. At the University of Amsterdam, we use <a href="https://crunchomics-documentation.readthedocs.io/en/latest/">Crunchomics</a>. Crunchomics comes with many popular bioinformatics pre-installed, additional programs can be installed using <code>conda</code>.</p>
+<p>In a real experiment, you will often have so many samples and reads that you will need access to a compute cluster with more compute power (CPUs), working memory (RAM), and storage space. At the University of Amsterdam, we use <a href="https://crunchomics-documentation.readthedocs.io/en/latest/">Crunchomics</a>. Crunchomics comes with many popular bioinformatics pre-installed, additional programs can be installed using <code>conda</code>.</p>
 </section>
 <section id="differential-gene-expression-with-deseq2" class="level2">
 <h2 class="anchored" data-anchor-id="differential-gene-expression-with-deseq2">Differential gene expression with DESeq2</h2>
 <p><img src="../images/flow-chart-RNA-Seq-3.png" class="img-fluid"></p>
-<p>For this part of the workshop, we will use <code>R</code>. Please make sure you have <code>R</code> and <code>RStudio</code> installed on your computer. In addition, you will need to install the following packages, via two different routes:</p>
+<p>For the second of the workshop, we will use <code>R</code>. Please make sure you have <code>R</code> and <code>RStudio</code> installed on your computer. In addition, you will need to install the following packages, via two different routes:</p>
 <p>Install the following packages via <code>install.packages()</code></p>
 <div class="cell">
 <div class="code-with-filename">
@@ -264,7 +265,8 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 </section>
 <section id="getting-the-data" class="level2">
 <h2 class="anchored" data-anchor-id="getting-the-data">Getting the data</h2>
-<p>The data that will be used in this workshop can be found in the <a href="https://github.com/mishapaauw/RNA-seq-workshop-materials">following Github repository</a>.</p>
+<p>The reads and reference that will be used in this workshop can be found in the <a href="https://github.com/mishapaauw/RNA-seq-workshop-materials">following Github repository</a>, and will be downloaded into the Google Colab automatically.</p>
+<p>The count table and experimental design file used in the DESeq2 part of this workshop can be found <a href="https://github.com/mishapaauw/RNA-seq-workshop/tree/main/data">here</a>.</p>
 
 
 </section>

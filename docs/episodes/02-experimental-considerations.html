@@ -316,7 +316,14 @@ mean of x mean of y
 </section>
 <section id="statistical-power" class="level2">
 <h2 class="anchored" data-anchor-id="statistical-power">Statistical power</h2>
-<p>Statistical power is the probability of your experimental sample population to detect a difference (in gene expression differences), given that an an effect actually exist in your experimental setup. There are two main error one could make when testing hypotheses. Type I errors occur when the null hypothesis is rejected wrongly — you detect a significant difference while in reality there is no difference in gene expression (“false positive”). Type II errors also are common in hypothesis testing — they arise if you accept the null hypothesis when in fact a treatment effect exists (“false negative”). The power of an experiments is affected by several factors:</p>
+<p>Statistical power is the probability of your experimental sample population to detect a difference (in gene expression differences), given that an an effect actually exist in your experimental setup. There are two main error one could make when testing hypotheses. Type I errors occur when the null hypothesis is rejected wrongly — you detect a significant difference while in reality there is no difference in gene expression (“false positive”). Type II errors also are common in hypothesis testing — they arise if you accept the null hypothesis when in fact a treatment effect exists (“false negative”).</p>
+<div class="quarto-figure quarto-figure-center">
+<figure class="figure">
+<p><img src="../images/typeI-typeII-error-MG.png" class="img-fluid figure-img" style="width:100.0%"></p>
+<figcaption>Type I and Type II error - schematic visualization</figcaption>
+</figure>
+</div>
+<p>The power of an experiments is affected by several factors:</p>
 <ul>
 <li><strong>The number of replicates</strong>: more biological replicates results in a higher power</li>
 <li><strong>Size of the effect</strong>: bigger differences between groups are easier to detect</li>
@@ -457,7 +464,7 @@ Answer
 <li><strong>Desirable</strong> because they are part of your experimental factors. For example, the genotype, treatment, or timepoint.</li>
 <li><strong>Undesirable</strong> because you are not interested in them. This could be: batch of RNA isolation, location of plants in the greenhouse, …</li>
 </ul>
-<p>Undesirable variation is unavaidable, but there are some practices to limit their impact. First of all, make sure that you don’t confound your experimental factors with undesirable sources of variation by properly randomizing your treatments. For example, if you have too many samples to isolate RNA in one day of labwork, make sure you don’t isolate RNA from samples with genotype A on day 1, and genotype B on day 2. In this case, you will never be able to know whether genes were differentially expressed because the genotypes of the samples differ (very interesting!) or because RNA was isolated on two different days (not very interesting). Instead, mix your samples of genotype A and B over your two RNA isolation days. Still, you should always record known sources of undesirable variation so you can correct for it later. There’s much more to be said about this, for more details see <a href="https://hbctraining.github.io/Intro-to-rnaseq-fasrc-salmon-flipped/lessons/02_experimental_planning_considerations.html">these materials from Harvard Chan Bioinformatics Core</a>.</p>
+<p>Undesirable variation is unavaidable, but there are some practices to limit their impact. First of all, make sure that you don’t confound your experimental factors with undesirable sources of variation by properly randomizing your treatments. For example, if you have too many samples to isolate RNA in one day of labwork, make sure you don’t isolate RNA from samples with genotype A on day 1, and genotype B on day 2. Instead, mix your samples of genotype A and B over your two RNA isolation days. Still, you should always record known sources of undesirable variation so you can correct for it later. There’s much more to be said about this, for more details see <a href="https://hbctraining.github.io/Intro-to-rnaseq-fasrc-salmon-flipped/lessons/02_experimental_planning_considerations.html">these materials from Harvard Chan Bioinformatics Core</a>.</p>
 </section>
 <section id="concluding-remarks" class="level2">
 <h2 class="anchored" data-anchor-id="concluding-remarks">Concluding remarks</h2>

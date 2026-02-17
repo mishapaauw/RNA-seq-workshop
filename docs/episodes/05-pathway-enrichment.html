@@ -269,9 +269,9 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <span id="annotated-cell-2-9"><a href="#annotated-cell-2-9" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(enrichplot)</span>
 <span id="annotated-cell-2-10"><a href="#annotated-cell-2-10" aria-hidden="true" tabindex="-1"></a></span>
 <span id="annotated-cell-2-11"><a href="#annotated-cell-2-11" aria-hidden="true" tabindex="-1"></a><span class="co"># Read the data</span></span>
-<span id="annotated-cell-2-12"><a href="#annotated-cell-2-12" aria-hidden="true" tabindex="-1"></a>raw_counts <span class="ot">&lt;-</span> <span class="fu">read.csv</span>(<span class="st">"../data/GLDS38_raw_counts.csv"</span>, <span class="at">header =</span> T, <span class="at">stringsAsFactors =</span> F) </span>
+<span id="annotated-cell-2-12"><a href="#annotated-cell-2-12" aria-hidden="true" tabindex="-1"></a>raw_counts <span class="ot">&lt;-</span> <span class="fu">read.csv</span>(<span class="st">"data/GLDS38_raw_counts.csv"</span>, <span class="at">header =</span> T, <span class="at">stringsAsFactors =</span> F) </span>
 <span id="annotated-cell-2-13"><a href="#annotated-cell-2-13" aria-hidden="true" tabindex="-1"></a>raw_counts <span class="ot">&lt;-</span> raw_counts <span class="sc">%&gt;%</span> <span class="fu">column_to_rownames</span>(<span class="st">"gene"</span>) </span>
-<span id="annotated-cell-2-14"><a href="#annotated-cell-2-14" aria-hidden="true" tabindex="-1"></a>metadata <span class="ot">&lt;-</span> <span class="fu">read.csv</span>(<span class="st">"../data/samples_to_condition.csv"</span>, <span class="at">header =</span> T)</span>
+<span id="annotated-cell-2-14"><a href="#annotated-cell-2-14" aria-hidden="true" tabindex="-1"></a>metadata <span class="ot">&lt;-</span> <span class="fu">read.csv</span>(<span class="st">"data/samples_to_condition.csv"</span>, <span class="at">header =</span> T)</span>
 <span id="annotated-cell-2-15"><a href="#annotated-cell-2-15" aria-hidden="true" tabindex="-1"></a></span>
 <span id="annotated-cell-2-16"><a href="#annotated-cell-2-16" aria-hidden="true" tabindex="-1"></a><span class="co"># Generate DDS object and run DESeq function:</span></span>
 <span id="annotated-cell-2-17"><a href="#annotated-cell-2-17" aria-hidden="true" tabindex="-1"></a>dds <span class="ot">&lt;-</span> <span class="fu">DESeqDataSetFromMatrix</span>(<span class="at">countData =</span> raw_counts, </span>
@@ -283,26 +283,25 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <span id="annotated-cell-2-23"><a href="#annotated-cell-2-23" aria-hidden="true" tabindex="-1"></a><span class="co"># Run DEG analysis</span></span>
 <span id="annotated-cell-2-24"><a href="#annotated-cell-2-24" aria-hidden="true" tabindex="-1"></a>res <span class="ot">&lt;-</span> <span class="fu">results</span>(dds, <span class="at">alpha =</span> <span class="fl">0.05</span>)</span>
 <span id="annotated-cell-2-25"><a href="#annotated-cell-2-25" aria-hidden="true" tabindex="-1"></a></span>
-<span id="annotated-cell-2-26"><a href="#annotated-cell-2-26" aria-hidden="true" tabindex="-1"></a>DEGs <span class="ot">&lt;-</span> res <span class="sc">%&gt;%</span></span>
+<span id="annotated-cell-2-26"><a href="#annotated-cell-2-26" aria-hidden="true" tabindex="-1"></a>results <span class="ot">&lt;-</span> res <span class="sc">%&gt;%</span></span>
 <span id="annotated-cell-2-27"><a href="#annotated-cell-2-27" aria-hidden="true" tabindex="-1"></a>  <span class="fu">as.data.frame</span>() <span class="sc">%&gt;%</span> </span>
 <span id="annotated-cell-2-28"><a href="#annotated-cell-2-28" aria-hidden="true" tabindex="-1"></a>  <span class="fu">rownames_to_column</span>(<span class="st">"genes"</span>) <span class="sc">%&gt;%</span></span>
-<span id="annotated-cell-2-29"><a href="#annotated-cell-2-29" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(<span class="at">minus_log10_pvalue =</span> <span class="sc">-</span><span class="fu">log10</span>(padj)) <span class="sc">%&gt;%</span> </span>
-<span id="annotated-cell-2-30"><a href="#annotated-cell-2-30" aria-hidden="true" tabindex="-1"></a>  <span class="fu">arrange</span>(padj)</span>
-<span id="annotated-cell-2-31"><a href="#annotated-cell-2-31" aria-hidden="true" tabindex="-1"></a></span>
-<span id="annotated-cell-2-32"><a href="#annotated-cell-2-32" aria-hidden="true" tabindex="-1"></a><span class="co"># Define significantly upregulated and downregulated genes with LFC and padj cutoffs</span></span>
-<span id="annotated-cell-2-33"><a href="#annotated-cell-2-33" aria-hidden="true" tabindex="-1"></a>lfc_cutoff <span class="ot">&lt;-</span> <span class="dv">1</span></span>
-<span id="annotated-cell-2-34"><a href="#annotated-cell-2-34" aria-hidden="true" tabindex="-1"></a>padj_cutoff <span class="ot">&lt;-</span> <span class="fl">0.05</span></span>
-<span id="annotated-cell-2-35"><a href="#annotated-cell-2-35" aria-hidden="true" tabindex="-1"></a></span>
-<span id="annotated-cell-2-36"><a href="#annotated-cell-2-36" aria-hidden="true" tabindex="-1"></a><span class="co"># Make new categorical variable containing significance information</span></span>
-<span id="annotated-cell-2-37"><a href="#annotated-cell-2-37" aria-hidden="true" tabindex="-1"></a>DEGs <span class="ot">&lt;-</span> DEGs <span class="sc">%&gt;%</span> </span>
-<span id="annotated-cell-2-38"><a href="#annotated-cell-2-38" aria-hidden="true" tabindex="-1"></a>        <span class="fu">mutate</span>(<span class="at">significance =</span> <span class="fu">case_when</span>(</span>
-<span id="annotated-cell-2-39"><a href="#annotated-cell-2-39" aria-hidden="true" tabindex="-1"></a>          padj <span class="sc">&lt;</span> padj_cutoff <span class="sc">&amp;</span> log2FoldChange <span class="sc">&gt;</span> lfc_cutoff <span class="sc">~</span> <span class="st">'Significantly upregulated'</span>,</span>
-<span id="annotated-cell-2-40"><a href="#annotated-cell-2-40" aria-hidden="true" tabindex="-1"></a>          padj <span class="sc">&lt;</span> padj_cutoff <span class="sc">&amp;</span> log2FoldChange <span class="sc">&lt;</span> <span class="sc">-</span>lfc_cutoff <span class="sc">~</span> <span class="st">'Significantly downregulated'</span>,</span>
-<span id="annotated-cell-2-41"><a href="#annotated-cell-2-41" aria-hidden="true" tabindex="-1"></a>          padj <span class="sc">&lt;</span> padj_cutoff <span class="sc">~</span> <span class="st">'Significant but small effect size'</span>,</span>
-<span id="annotated-cell-2-42"><a href="#annotated-cell-2-42" aria-hidden="true" tabindex="-1"></a>          <span class="cn">TRUE</span> <span class="sc">~</span> <span class="st">'Not significant'</span></span>
-<span id="annotated-cell-2-43"><a href="#annotated-cell-2-43" aria-hidden="true" tabindex="-1"></a>        ))</span>
-<span id="annotated-cell-2-44"><a href="#annotated-cell-2-44" aria-hidden="true" tabindex="-1"></a></span>
-<span id="annotated-cell-2-45"><a href="#annotated-cell-2-45" aria-hidden="true" tabindex="-1"></a>DEGs_list <span class="ot">&lt;-</span> DEGs <span class="sc">%&gt;%</span> <span class="fu">filter</span>(significance <span class="sc">==</span> <span class="st">"Significantly upregulated"</span> <span class="sc">|</span> significance <span class="sc">==</span> <span class="st">"Significantly downregulated"</span>) <span class="sc">%&gt;%</span> <span class="fu">pull</span>(genes)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<span id="annotated-cell-2-29"><a href="#annotated-cell-2-29" aria-hidden="true" tabindex="-1"></a>  <span class="fu">arrange</span>(padj)</span>
+<span id="annotated-cell-2-30"><a href="#annotated-cell-2-30" aria-hidden="true" tabindex="-1"></a></span>
+<span id="annotated-cell-2-31"><a href="#annotated-cell-2-31" aria-hidden="true" tabindex="-1"></a><span class="co"># Define significantly upregulated and downregulated genes with LFC and padj cutoffs</span></span>
+<span id="annotated-cell-2-32"><a href="#annotated-cell-2-32" aria-hidden="true" tabindex="-1"></a>lfc_cutoff <span class="ot">&lt;-</span> <span class="dv">1</span></span>
+<span id="annotated-cell-2-33"><a href="#annotated-cell-2-33" aria-hidden="true" tabindex="-1"></a>padj_cutoff <span class="ot">&lt;-</span> <span class="fl">0.05</span></span>
+<span id="annotated-cell-2-34"><a href="#annotated-cell-2-34" aria-hidden="true" tabindex="-1"></a></span>
+<span id="annotated-cell-2-35"><a href="#annotated-cell-2-35" aria-hidden="true" tabindex="-1"></a><span class="co"># Make new categorical variable containing significance information</span></span>
+<span id="annotated-cell-2-36"><a href="#annotated-cell-2-36" aria-hidden="true" tabindex="-1"></a>results <span class="ot">&lt;-</span> results <span class="sc">%&gt;%</span> </span>
+<span id="annotated-cell-2-37"><a href="#annotated-cell-2-37" aria-hidden="true" tabindex="-1"></a>        <span class="fu">mutate</span>(<span class="at">significance =</span> <span class="fu">case_when</span>(</span>
+<span id="annotated-cell-2-38"><a href="#annotated-cell-2-38" aria-hidden="true" tabindex="-1"></a>          padj <span class="sc">&lt;</span> padj_cutoff <span class="sc">&amp;</span> log2FoldChange <span class="sc">&gt;</span> lfc_cutoff <span class="sc">~</span> <span class="st">'Significantly upregulated'</span>,</span>
+<span id="annotated-cell-2-39"><a href="#annotated-cell-2-39" aria-hidden="true" tabindex="-1"></a>          padj <span class="sc">&lt;</span> padj_cutoff <span class="sc">&amp;</span> log2FoldChange <span class="sc">&lt;</span> <span class="sc">-</span>lfc_cutoff <span class="sc">~</span> <span class="st">'Significantly downregulated'</span>,</span>
+<span id="annotated-cell-2-40"><a href="#annotated-cell-2-40" aria-hidden="true" tabindex="-1"></a>          padj <span class="sc">&lt;</span> padj_cutoff <span class="sc">~</span> <span class="st">'Significant but small effect size'</span>,</span>
+<span id="annotated-cell-2-41"><a href="#annotated-cell-2-41" aria-hidden="true" tabindex="-1"></a>          <span class="cn">TRUE</span> <span class="sc">~</span> <span class="st">'Not significant'</span></span>
+<span id="annotated-cell-2-42"><a href="#annotated-cell-2-42" aria-hidden="true" tabindex="-1"></a>        ))</span>
+<span id="annotated-cell-2-43"><a href="#annotated-cell-2-43" aria-hidden="true" tabindex="-1"></a></span>
+<span id="annotated-cell-2-44"><a href="#annotated-cell-2-44" aria-hidden="true" tabindex="-1"></a>DEGs_list <span class="ot">&lt;-</span> results <span class="sc">%&gt;%</span> <span class="fu">filter</span>(significance <span class="sc">==</span> <span class="st">"Significantly upregulated"</span> <span class="sc">|</span> significance <span class="sc">==</span> <span class="st">"Significantly downregulated"</span>) <span class="sc">%&gt;%</span> <span class="fu">pull</span>(genes)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details>
 </div>
 </div>
@@ -443,7 +442,7 @@ Solution
 <div class="code-with-filename-file">
 <pre><strong>R</strong></pre>
 </div>
-<div class="sourceCode cell-code" id="cb8"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a>universe_list <span class="ot">&lt;-</span> DEGs <span class="sc">%&gt;%</span> <span class="fu">filter</span>(baseMean <span class="sc">&gt;</span> <span class="dv">1</span>) <span class="sc">%&gt;%</span> <span class="fu">pull</span>(genes)</span>
+<div class="sourceCode cell-code" id="cb8"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a>universe_list <span class="ot">&lt;-</span> results <span class="sc">%&gt;%</span> <span class="fu">filter</span>(baseMean <span class="sc">&gt;</span> <span class="dv">1</span>) <span class="sc">%&gt;%</span> <span class="fu">pull</span>(genes)</span>
 <span id="cb8-2"><a href="#cb8-2" aria-hidden="true" tabindex="-1"></a><span class="fu">head</span>(universe_list)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
 <div class="cell-output cell-output-stdout">
@@ -547,8 +546,8 @@ Solution
 <div class="code-with-filename-file">
 <pre><strong>R</strong></pre>
 </div>
-<div class="sourceCode cell-code" id="annotated-cell-9"><pre class="sourceCode r code-annotation-code code-with-copy code-annotated"><code class="sourceCode r"><button class="code-annotation-anchor" data-target-cell="annotated-cell-9" data-target-annotation="1">1</button><span id="annotated-cell-9-1" class="code-annotation-target"><a href="#annotated-cell-9-1" aria-hidden="true" tabindex="-1"></a>gene_list <span class="ot">&lt;-</span> DEGs<span class="sc">$</span>log2FoldChange</span>
-<button class="code-annotation-anchor" data-target-cell="annotated-cell-9" data-target-annotation="2">2</button><span id="annotated-cell-9-2" class="code-annotation-target"><a href="#annotated-cell-9-2" aria-hidden="true" tabindex="-1"></a><span class="fu">names</span>(gene_list) <span class="ot">&lt;-</span> DEGs<span class="sc">$</span>genes</span>
+<div class="sourceCode cell-code" id="annotated-cell-9"><pre class="sourceCode r code-annotation-code code-with-copy code-annotated"><code class="sourceCode r"><button class="code-annotation-anchor" data-target-cell="annotated-cell-9" data-target-annotation="1">1</button><span id="annotated-cell-9-1" class="code-annotation-target"><a href="#annotated-cell-9-1" aria-hidden="true" tabindex="-1"></a>gene_list <span class="ot">&lt;-</span> results<span class="sc">$</span>log2FoldChange</span>
+<button class="code-annotation-anchor" data-target-cell="annotated-cell-9" data-target-annotation="2">2</button><span id="annotated-cell-9-2" class="code-annotation-target"><a href="#annotated-cell-9-2" aria-hidden="true" tabindex="-1"></a><span class="fu">names</span>(gene_list) <span class="ot">&lt;-</span> results<span class="sc">$</span>genes</span>
 <span id="annotated-cell-9-3"><a href="#annotated-cell-9-3" aria-hidden="true" tabindex="-1"></a></span>
 <button class="code-annotation-anchor" data-target-cell="annotated-cell-9" data-target-annotation="3">3</button><span id="annotated-cell-9-4" class="code-annotation-target"><a href="#annotated-cell-9-4" aria-hidden="true" tabindex="-1"></a>gene_list <span class="ot">&lt;-</span> gene_list[<span class="sc">!</span><span class="fu">is.na</span>(gene_list)]</span>
 <button class="code-annotation-anchor" data-target-cell="annotated-cell-9" data-target-annotation="4">4</button><span id="annotated-cell-9-5" class="code-annotation-target"><a href="#annotated-cell-9-5" aria-hidden="true" tabindex="-1"></a>gene_list <span class="ot">&lt;-</span> <span class="fu">sort</span>(gene_list, <span class="at">decreasing =</span> <span class="cn">TRUE</span>)</span><div class="code-annotation-gutter-bg"></div><div class="code-annotation-gutter"></div></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
@@ -601,7 +600,7 @@ Solution
 <dl class="code-annotation-container-hidden code-annotation-container-grid">
 <dt data-target-cell="annotated-cell-10" data-target-annotation="1">1</dt>
 <dd>
-<span data-code-cell="annotated-cell-10" data-code-lines="14" data-code-annotation="1">By picking <code>1</code> here, we will plot the GO term with the lowest p-value. Make sure to explore a few more than just the first one!</span>
+<span data-code-cell="annotated-cell-10" data-code-lines="14" data-code-annotation="1">By picking <code>1</code> here, we will plot the GO term with the lowest p-value. Make sure to explore a few more than just the first one, by changing the <code>1</code> to other numbers. You can inspect all significant GO terms in table format by using <code>summary(gsea_go)</code>.</span>
 </dd>
 </dl>
 </div>
@@ -625,7 +624,7 @@ Solution
 </section>
 <section id="concluding-remarks" class="level2">
 <h2 class="anchored" data-anchor-id="concluding-remarks">Concluding remarks</h2>
-<p><strong>TO WRITE</strong></p>
+<p>This concludes the bioDSC workshop on RNA-seq. We went all the way from experimental design to mapping reads to differential gene expression in <code>R</code>. If you want to practice more with existing datasets, continue to the next episode.</p>
 
 
 </section>

@@ -21,7 +21,14 @@ The `.fastq` files contain your RNA sequencing reads. Our goal is to find out fr
 3. Mapping: where in the genome do these reads come from? 
 4. Counting: how many reach originate from each gene?
 
-The commands in this episode are to be executed in a [Google Colab notebook](https://colab.research.google.com/drive/1jR2Og_qrUVg-VXNsfqJc5eEILcqHJYAC?usp=share_link) associated to this workshop. We will use some basic terminal commands. You don't need to understand every command, rather, the goal is to become familiar with RNA-seq concepts and steps.
+The commands in this episode are to be executed in a Google Colab notebook. We will use some basic terminal commands. You don't need to understand every command, rather, the goal is to become familiar with RNA-seq concepts and steps. There are two versions of the notebook:
+
+1. [The empty Google Colab notebook](https://colab.research.google.com/drive/1jR2Og_qrUVg-VXNsfqJc5eEILcqHJYAC?usp=share_link): if you want to type the commands yourself (recommended!)
+2. [The Google Colab notebook with pre-written commands](https://colab.research.google.com/drive/1jR2Og_qrUVg-VXNsfqJc5eEILcqHJYAC?usp=share_link): if you just want to execute the commands (also fine!)
+
+::: {.callout-note}
+Run the first cell of the notebook by clicking the arrow (<i class="bi bi-play-circle-fill"></i>) on the top-left corner of the cell. This initialized the notebook with all the required data and software. It may take a few minutes.
+:::
 
 ## Quality control: `fastqc`
 
@@ -100,7 +107,7 @@ sample2_fastqc.html  sample3_fastqc.zip
 ```
 1. `ls` is a command to 'list' all the files present in a directory.
 
-Finally, let's inspect the QC results. If you are working in the Google Colab, you can browse the files in the workspace by clicking the directory symbol. Find `fastqc_reports` and download the `.html` files. You can open these in any browser. `fastqc` gives teach dataset a score (Pass, Warning, or Fail) on several different modules. All scores are reported in the **Summary**. The next section contains basic statistics like the number of reads, average sequence length, and the GC content. Generally it is a good idea to keep track of the total number of reads sequenced for each sample and to make sure the read length and GC content is as expected (based on what you know of your studied organism). One of the most important analysis modules is the **“Per base sequence quality”** plot. This plot provides the distribution of quality scores at each position in the read across all reads. This plot can alert us to whether there were any problems occuring during sequencing. For example, see a good and bad quality result below:
+Finally, let's inspect the QC results. If you are working in the Google Colab, you can browse the files in the workspace by clicking the directory symbol. Find `fastqc_reports` and download the `.html` files to your local computer. You can open these in any browser. `fastqc` gives each dataset a score (Pass, Warning, or Fail) on several different modules. All scores are reported in the **Summary**. The next section contains basic statistics like the number of reads, average sequence length, and the GC content. Generally it is a good idea to keep track of the total number of reads sequenced for each sample and to make sure the read length and GC content is as expected (based on what you know of your studied organism). One of the most important analysis modules is the **“Per base sequence quality”** plot. This plot provides the distribution of quality scores at each position in the read across all reads. This plot can alert us to whether there were any problems occuring during sequencing. For example, see a good and bad quality result below:
 
 ![](../images/fastqc-good-bad.png)
 
@@ -117,6 +124,7 @@ Inspect all four QC reports, and discuss with your neighbour what you think abou
 
 :::
 
+
 ## Trimming: `fastp`
 
 A common anomaly detected by `fastqc` is sequencing adapters still being present some of the the reads (shown in **Overrepresented sequences** table). This is known as 'adapter contamination', and the presence of these adapter sequences in the reads might affect how the reads map to the genome of interest. So, we need to get rid of them. We will use `fastp` to do this. In addition, `fastp` will trim low quality bases from the reads. Finally, it will remove reads that are overall of low quality, or are too short after the trimming steps.
@@ -127,9 +135,9 @@ mkdir fastp_reports
 mkdir trimmed_reads
 fastp \ 
   -i reads/sample1.fastq.gz \
-  -o trimmed_reads/sample4.trimmed.fastq.gz \
+  -o trimmed_reads/sample1.trimmed.fastq.gz \
   --thread 2 \
-  --html fastp_reports/sample4_fastp_report.html
+  --html fastp_reports/sample1_fastp_report.html
 ```
 
 `fastp` prints information about the trimming on the terminal, for example:
@@ -190,7 +198,14 @@ STAR --runMode genomeGenerate \
   --genomeDir TAIR10_STAR_index
 ```
 
-Allright, let's finally run `STAR`. This tool requires quite some parameters to be set: how many threads to use (`--runThreadN`), where to find the index (`--genomeDir`), where to find the reads (`--readFilesIn`), that the reads are compressed (`--readFilesCommand`), where to store the results (`--outFileNamePrefix`), and which output file format we want (`--outSAMtype`). Pfew.
+Allright, let's finally run `STAR`. This tool requires quite some parameters to be set: 
+
+- How many threads to use (`--runThreadN`)
+- Where to find the index (`--genomeDir`)
+- Ehere to find the reads (`--readFilesIn`)
+- That the reads are compressed (`--readFilesCommand`)
+- Where to store the results (`--outFileNamePrefix`)
+- And which output file format we want (`--outSAMtype`)
 
 ```{bash filename="bash"}
 #| eval: false
@@ -255,7 +270,7 @@ Use the two following commands on a `.bam` file, and interpret the output.
 :::
 
 ::: {.callout-tip title="Exercise" icon="false"}
-So far, we only trimmed and mapped one sample. Write two `bash` for loops to process all four samples.
+So far, we only trimmed and mapped one sample. Trim and map the other three samples. Easy mode: repeat the commands performed earlier, update the sample numbers. For a challenge: write two `bash` for loops to process all four samples.
 :::
 
 ::: {.callout-caution title="Solution" collapse="true" icon="false"}
@@ -363,8 +378,8 @@ Instead of real base-to-base read mapping using `STAR` or `HISAT2`, you can also
 
 If you find this process quite cumbersome, then I have good news for you! There are *pipelines* available that streamline the chain of commands required for mapping:
 
-- [snakemake_rnaseq](https://github.com/BleekerLab/snakemake_rnaseq), developed at the Bleeker Lab (UvA).
-- [nf-core/rnaseq](https://nf-co.re/rnaseq/3.19.0), developed and maintained by the Nextflow community.
-- **TODO**: GALAXY server information here
+- [snakemake_rnaseq](https://github.com/BleekerLab/snakemake_rnaseq): developed at the Bleeker Lab (UvA).
+- [nf-core/rnaseq](https://nf-co.re/rnaseq/3.19.0): developed and maintained by the Nextflow community.
+- Galaxy server: if you prefer graphical interfaces over command lines, you can contact Frans van der Kloet for access to a Galaxy Server (for UvA/SILS researchers).
 
 A full instruction of these pipelines is beyond the scope of this workshop. Also, we wish to highlight that it is *very insightful* to have run all the steps by yourself rather than in a pipeline.

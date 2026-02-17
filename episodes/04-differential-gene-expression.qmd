@@ -15,7 +15,25 @@ The main goal of most RNA-seq experiments is to discover which genes are differe
 
 In this tutorial, we will explore the transcriptomes of *A. thaliana* plants that experienced microgravity by growing on the International Space Station, while control plants were grown on earth. The experimental design is simple: there are three replicates in both conditions `space_flight` and `ground_control`.
 
-First we will load the packages that we need, and then load the count table and metadata file.
+::: {.callout-note}
+Download the data from [the repository of this workshop](https://github.com/mishapaauw/RNA-seq-workshop/tree/main/data). Store the files in a folder on your computer. See below for a good workshop folder setup:
+
+```{bash}
+#| eval: FALSE
+RNA-seq-workshop
+├── data/
+│   ├── GLDS38_raw_counts.csv.csv
+│   └── samples_to_condition.csv
+├── data_processed/
+│   └── Normalized counts will go here
+├── results/
+│   └── Graphs will go here
+└── RNA-seq.R
+```
+:::
+
+
+First we will load the packages that we need:
 
 ```{R filename = "R"}
 #| warning: false
@@ -26,12 +44,14 @@ library(tidyverse)
 library(ggrepel)
 ```
 
+Then, load the count table and metadata file:
+
 ```{R filename = "R"}
-raw_counts <- read.csv("../data/GLDS38_raw_counts.csv", header = T, stringsAsFactors = F) # <1>
+raw_counts <- read.csv("data/GLDS38_raw_counts.csv", header = T, stringsAsFactors = F) # <1>
 
 raw_counts <- raw_counts %>% column_to_rownames("gene") # <2>
 
-metadata <- read.csv("../data/samples_to_condition.csv", header = T)
+metadata <- read.csv("data/samples_to_condition.csv", header = T)
 
 raw_counts[1:4,1:4]
 ```
@@ -111,7 +131,8 @@ without_vst | with_vst
 variance_stabilised_counts_df <- variance_stabilised_counts %>%
   as.data.frame() %>% 
   rownames_to_column("gene")  
-write.csv(variance_stabilised_counts_df, "../data_processed/variance_stabilized_dataset.csv", row.names=FALSE)
+
+write.csv(variance_stabilised_counts_df, "data_processed/variance_stabilized_dataset.csv", row.names=FALSE)
 ```
 Indeed, we can observe that genes that are highly expressed (have high mean count) also have a high standard deviation. This correlation is no longer there after stabilizing the variance.
 
@@ -223,7 +244,7 @@ We can see that all the `ground_control` and `space_flight` samples cluster toge
 
 ## Differential gene expression analysis
 
-`DESeq2` handles all steps of DEG analysis, from sample normalization (e.g., to account for difference in sequencing depth per sample) to the statistical models and tests in one function. Easy! We run this function with the `dds` object as input, while storing the output in the `dds` object as well. In this way, we will 'fill' the `dds` object with the new analysis. `R` will now print all the individual steps that the `DESeq()` function performed for us. 
+`DESeq2` handles all steps of DEG analysis, from sample normalization (e.g., to account for difference in sequencing depth per sample) to the statistical models and tests in one function. Easy! We run this function with the `dds` object as input, while storing the output in the `dds` object as well. In this way, we will 'fill' the `dds` object with the new analysis. `R` will now print all the individual steps that the `DESeq()` function performed for us.
 
 ```{R filename="R"}
 dds <- DESeq(dds)
@@ -238,19 +259,16 @@ norm_counts <- norm_counts %>%
   as.data.frame() %>%
   rownames_to_column("gene_id") 
 
-write.csv(norm_counts, file = "../data_processed/normalized_counts.csv", row.names = FALSE)
+write.csv(norm_counts, file = "data_processed/normalized_counts.csv", row.names = FALSE)
 ```
 
 ::: {.callout-tip title="Question" icon="false"}
-
 How would you visualize the effect of the normalization on the distribution of read counts?
-
 :::
 
 ::: {.callout-caution title="Solution" collapse="true" icon="false"}
 
 You would make a boxplot of all the read counts per sample, for both raw counts and normalized counts.
-
 
 ```{R filename="R"}
 # Get the raw counts and the normalized counts
@@ -278,7 +296,7 @@ tidy_total %>%
   geom_boxplot(aes(fill = dataset)) + facet_wrap(~ dataset)
 ```
 
-Notice how the median read counts of the normalized datasets are closer together than those of the raw read counts.f
+Notice how the median read counts of the normalized datasets are closer together than those of the raw read counts.
 :::
 
 ### Lists of DEGs
@@ -290,15 +308,14 @@ res <- results(dds, alpha = 0.05) # <1>
 
 summary(res) # <2>
 
-DEGs <- res %>%    # <3>
+results <- res %>%    # <3>
   as.data.frame() %>% 
   rownames_to_column("genes") %>%
-  mutate(minus_log10_pvalue = -log10(padj)) %>% 
   arrange(padj) 
 
-head(DEGs) 
+head(results) 
 
-write.csv(DEGs, '../data_processed/all_genes_spaceflight_vs_ground.csv', quote = FALSE, row.names = FALSE) # <4>
+write.csv(results, 'data_processed/all_genes_spaceflight_vs_ground.csv', quote = FALSE, row.names = FALSE) # <4>
 ```
 1. Generate results table
 2. Print a quick summary of the results: how many genes are significantly differentially expressed?
@@ -375,7 +392,7 @@ lfc_cutoff <- 1
 padj_cutoff <- 0.05
 
 # Make new categorical variable containing significance information
-DEGs <- DEGs %>% 
+results <- results %>% 
         mutate(significance = case_when(
           padj < padj_cutoff & log2FoldChange > lfc_cutoff ~ 'Significantly upregulated',
           padj < padj_cutoff & log2FoldChange < -lfc_cutoff ~ 'Significantly downregulated',
@@ -383,15 +400,18 @@ DEGs <- DEGs %>%
           TRUE ~ 'Not significant'
         ))
 
-DEGs_subset <- DEGs %>% filter(significance == "Significantly upregulated" | significance == "Significantly downregulated")
-write.csv(DEGs_subset, '../data_processed/DEGs_spaceflight_vs_ground.csv', quote = FALSE, row.names = FALSE)
+DEGs <- results %>% filter(significance == "Significantly upregulated" | significance == "Significantly downregulated")
+write.csv(DEGs, 'data_processed/DEGs_spaceflight_vs_ground.csv', quote = FALSE, row.names = FALSE)
 
-colors <- c("Significantly upregulated"="#E69F00", "Significantly downregulated"="#56B4E9", "Not significant"="gray80", "Significant but small effect size" = 'grey50')
+colors <- c("Significantly upregulated" = "#E69F00", 
+            "Significantly downregulated" = "#56B4E9", 
+            "Not significant" = "gray80", 
+            "Significant but small effect size" = 'grey50')
 
 # select top 10 genes to highlight
-top_genes <- DEGs[1:10, ]
+top_genes <- results[1:10, ]
 
-volcano <- DEGs %>% 
+volcano <- results %>% 
   ggplot(aes(x = log2FoldChange, y = -log10(padj), colour = significance)) +
   geom_point(alpha = 0.5, size = 0.8) + 
   geom_hline(aes(yintercept = -log10(padj_cutoff)), linetype = "dashed") +
@@ -403,7 +423,8 @@ volcano <- DEGs %>%
   xlim(c(-10,10)) +
   theme_bw() 
 
-ggsave("volcano_plot.png", volcano, width = 14, height = 8, units = "cm")
+ggsave("results/volcano_plot.png", volcano, width = 14, height = 8, units = "cm")
+
 volcano 
 ```
 We can plot the DESeq2-normalized counts of two genes, just to confirm whether the volcano plot is correct. We pick one that is highly upregulated in `space_flight`conditions (AT5G04120), and one that is strongly downregulated (AT1G62280). 
@@ -436,7 +457,7 @@ variance_stabilised_df <- variance_stabilised_counts %>%
   rownames_to_column("gene") %>% 
   pivot_longer(cols = - gene, names_to = "sample", values_to = "count")
 
-selection <- DEGs_subset$genes
+selection <- DEGs$genes
 
 vsd_selection <- variance_stabilised_df %>% 
                     filter(gene %in% selection) %>%

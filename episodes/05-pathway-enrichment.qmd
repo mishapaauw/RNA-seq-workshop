@@ -53,9 +53,9 @@ library(org.At.tair.db)
 library(enrichplot)
 
 # Read the data
-raw_counts <- read.csv("../data/GLDS38_raw_counts.csv", header = T, stringsAsFactors = F) 
+raw_counts <- read.csv("data/GLDS38_raw_counts.csv", header = T, stringsAsFactors = F) 
 raw_counts <- raw_counts %>% column_to_rownames("gene") 
-metadata <- read.csv("../data/samples_to_condition.csv", header = T)
+metadata <- read.csv("data/samples_to_condition.csv", header = T)
 
 # Generate DDS object and run DESeq function:
 dds <- DESeqDataSetFromMatrix(countData = raw_counts, 
@@ -67,10 +67,9 @@ dds <- DESeq(dds)
 # Run DEG analysis
 res <- results(dds, alpha = 0.05)
 
-DEGs <- res %>%    # <3>
+results <- res %>%    # <3>
   as.data.frame() %>% 
   rownames_to_column("genes") %>%
-  mutate(minus_log10_pvalue = -log10(padj)) %>% 
   arrange(padj)
 
 # Define significantly upregulated and downregulated genes with LFC and padj cutoffs
@@ -78,7 +77,7 @@ lfc_cutoff <- 1
 padj_cutoff <- 0.05
 
 # Make new categorical variable containing significance information
-DEGs <- DEGs %>% 
+results <- results %>% 
         mutate(significance = case_when(
           padj < padj_cutoff & log2FoldChange > lfc_cutoff ~ 'Significantly upregulated',
           padj < padj_cutoff & log2FoldChange < -lfc_cutoff ~ 'Significantly downregulated',
@@ -86,7 +85,7 @@ DEGs <- DEGs %>%
           TRUE ~ 'Not significant'
         ))
 
-DEGs_list <- DEGs %>% filter(significance == "Significantly upregulated" | significance == "Significantly downregulated") %>% pull(genes)
+DEGs_list <- results %>% filter(significance == "Significantly upregulated" | significance == "Significantly downregulated") %>% pull(genes)
 ```
 
 Let's remind ourselves of what our list of genes of interest now looks like. This list is stored in the variable `DEGs_list`:
@@ -158,7 +157,7 @@ It looks like the plastid or chloroplast -- the photosynthetic organelles of pla
 **1.**
 
 ```{R filename = "R"}
-universe_list <- DEGs %>% filter(baseMean > 1) %>% pull(genes)
+universe_list <- results %>% filter(baseMean > 1) %>% pull(genes)
 head(universe_list)
 length(universe_list)
 ```
@@ -222,8 +221,8 @@ In other words, ORA requires us to make a choice about a threshold of significan
 First, we will prepare the data structure to perform GSEA:
 
 ```{R filename = "R"}
-gene_list <- DEGs$log2FoldChange # <1>
-names(gene_list) <- DEGs$genes # <2>
+gene_list <- results$log2FoldChange # <1>
+names(gene_list) <- results$genes # <2>
 
 gene_list <- gene_list[!is.na(gene_list)] # <3>
 gene_list <- sort(gene_list, decreasing = TRUE) # <4>
@@ -256,7 +255,7 @@ gseaplot2(
 )
 ```
 
-1. By picking `1` here, we will plot the GO term with the lowest p-value. Make sure to explore a few more than just the first one!
+1. By picking `1` here, we will plot the GO term with the lowest p-value. Make sure to explore a few more than just the first one, by changing the `1` to other numbers. You can inspect all significant GO terms in table format by using `summary(gsea_go)`.
 
 This graph is rather complex but very interesting! Let's break the most important parts down:
 
@@ -269,4 +268,4 @@ Some people find it easier to use webservers for GO term enrichment. Of course, 
 
 ## Concluding remarks
 
-**TO WRITE**
+This concludes the bioDSC workshop on RNA-seq. We went all the way from experimental design to mapping reads to differential gene expression in `R`. If you want to practice more with existing datasets, continue to the next episode. 
