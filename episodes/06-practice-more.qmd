@@ -45,3 +45,13 @@ Practice dataset #2 has one experimental factor, just like the dataset we worked
         - `genotype`, with levels: `POA1` (wild-type bacteria) and `XEN41` (tetracyclin resistant bacteria)
         - `treatment`, with levels: `none`, `MIC/10`, `MIC` levels of copper
         - `timepoint`, with levels: `0`, `24`, `48`, `72` hours of incubation
+
+## Where to start?
+
+You can follow the `DESeq2` episode with these new datasets. Broadly, these are the steps you can take:
+
+1. Create a `dds` object by combining the counts table with the experimental design table. 
+2. Perform a PCA to see how the samples are clustering. Try mapping different experimental factors to different aestethics in `ggplot2`: e.g., map the treatment to to the shape of the points, and timepoint to color.
+3. Perform differential gene expression analysis between different conditions. 
+4. Visualize DEG results in a volcano plot or a heatmap.
+5. Select a group of DEGs to dive into the biological intepretation via GO term enrichment.

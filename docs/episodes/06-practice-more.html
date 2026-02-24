@@ -152,6 +152,7 @@ ul.task-list li input[type="checkbox"] {
    
   <ul>
   <li><a href="#the-datasets" id="toc-the-datasets" class="nav-link active" data-scroll-target="#the-datasets">The datasets</a></li>
+  <li><a href="#where-to-start" id="toc-where-to-start" class="nav-link" data-scroll-target="#where-to-start">Where to start?</a></li>
   </ul>
 </nav>
     </div>
@@ -219,6 +220,17 @@ ul.task-list li input[type="checkbox"] {
 <li><code>timepoint</code>, with levels: <code>0</code>, <code>24</code>, <code>48</code>, <code>72</code> hours of incubation</li>
 </ul></li>
 </ul></li>
+</ol>
+</section>
+<section id="where-to-start" class="level2">
+<h2 class="anchored" data-anchor-id="where-to-start">Where to start?</h2>
+<p>You can follow the <code>DESeq2</code> episode with these new datasets. Broadly, these are the steps you can take:</p>
+<ol type="1">
+<li>Create a <code>dds</code> object by combining the counts table with the experimental design table.</li>
+<li>Perform a PCA to see how the samples are clustering. Try mapping different experimental factors to different aestethics in <code>ggplot2</code>: e.g., map the treatment to to the shape of the points, and timepoint to color.</li>
+<li>Perform differential gene expression analysis between different conditions.</li>
+<li>Visualize DEG results in a volcano plot or a heatmap.</li>
+<li>Select a group of DEGs to dive into the biological intepretation via GO term enrichment.</li>
 </ol>
 
 

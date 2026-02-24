@@ -275,7 +275,7 @@ Note
 <div class="cell">
 <div class="sourceCode cell-code" id="cb1"><pre class="sourceCode bash code-with-copy"><code class="sourceCode bash"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="ex">RNA-seq-workshop</span></span>
 <span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a><span class="ex">├──</span> data/</span>
-<span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a><span class="ex">│</span>   ├── GLDS38_raw_counts.csv.csv</span>
+<span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a><span class="ex">│</span>   ├── GLDS38_raw_counts.csv</span>
 <span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a><span class="ex">│</span>   └── samples_to_condition.csv</span>
 <span id="cb1-5"><a href="#cb1-5" aria-hidden="true" tabindex="-1"></a><span class="ex">├──</span> data_processed/</span>
 <span id="cb1-6"><a href="#cb1-6" aria-hidden="true" tabindex="-1"></a><span class="ex">│</span>   └── Normalized counts will go here</span>
@@ -496,9 +496,8 @@ design formula are characters, converting to factors</code></pre>
 </div>
 <p>Let’s break this plot down:</p>
 <ul>
-<li>We see that principal component 1 (<code>PC1</code>) explains 60% of the variance, while <code>PC2</code> explains 29%. Those are nice scores. However, <code>PC1</code> does not seem to separate our two conditions. This means that there’s another source of variation in this dataset that we are seemingly unaware of.</li>
-<li>We see that <code>PC2</code> nicely separates our two conditions. This is good!<br>
-</li>
+<li>We see that principal component 1 (<code>PC1</code>) explains 60% of the variance, while <code>PC2</code> explains 29%. <code>PC1</code> does not seem to separate our two conditions. This means that there’s a source of variation in this dataset that we are seemingly unaware of.</li>
+<li>We see that <code>PC2</code> nicely separates our two conditions. This is good news.</li>
 <li>We see that two samples from <code>space_flight</code> cluster very closely together, while one sample is quite a distant from those two. This means that this one replicate behaves a bit differently than the rest. However, since it’s still similar to the other two samples on the <code>PC2</code> axis, this does not worry me.</li>
 </ul>
 <p>If you want to have full control and make the PCA plot yourself in <code>ggplot</code>, you can add <code>returnData=TRUE)</code></p>

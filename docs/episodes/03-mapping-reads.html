@@ -232,7 +232,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 </ol>
 <p>The commands in this episode are to be executed in a Google Colab notebook. We will use some basic terminal commands. You don’t need to understand every command, rather, the goal is to become familiar with RNA-seq concepts and steps. There are two versions of the notebook:</p>
 <ol type="1">
-<li><a href="https://colab.research.google.com/drive/1jR2Og_qrUVg-VXNsfqJc5eEILcqHJYAC?usp=share_link">The empty Google Colab notebook</a>: if you want to type the commands yourself (recommended!)</li>
+<li><a href="https://colab.research.google.com/drive/1KivSKgH3RkKH4EvP-Q_42Bl2aDwIfv0X?usp=sharing">The empty Google Colab notebook</a>: if you want to type the commands yourself (recommended!)</li>
 <li><a href="https://colab.research.google.com/drive/1jR2Og_qrUVg-VXNsfqJc5eEILcqHJYAC?usp=share_link">The Google Colab notebook with pre-written commands</a>: if you just want to execute the commands (also fine!)</li>
 </ol>
 <div class="callout callout-style-default callout-note callout-titled">
@@ -525,8 +525,8 @@ Solution
 <p>Our reads are now ready for mapping. Mapping reads means figuring out where each read from the RNA-seq experiment originally came from within the genome. For RNA-seq experiments, it’s important to pick a <strong>splice-aware</strong> aligner, since a RNA-seq read can span an exon-intron-exon boundary. After all, the vast majority of RNA you sequenced is mature mRNA where introns have been spliced out.</p>
 <div class="quarto-figure quarto-figure-center">
 <figure class="figure">
-<p><img src="../images/HBC-spliced-alignment.png" class="img-fluid figure-img"></p>
-<figcaption>Splice-aware vs non-splice-aware alignment (image from Harvard Chan Bioinformatics Core)</figcaption>
+<p><img src="../images/spliced_alignment-2.png" class="img-fluid figure-img"></p>
+<figcaption>Splice-aware alignment diagram. (Image from <a href="https://uclouvain-cbio.github.io/WSBIM2122/sec-hts.html">UCLouvian Omics Data Analysis course</a>)</figcaption>
 </figure>
 </div>
 <div class="callout callout-style-default callout-tip no-icon callout-titled" title="Question">
@@ -558,7 +558,7 @@ Solution
 </div>
 </div>
 </div>
-<p>To use an aligner, we must first get the <strong>reference genome</strong> (e.g.&nbsp;via <a href="https://www.ncbi.nlm.nih.gov/datasets/genome/">NCBI Genomes</a> or organism specific databases), in <code>.fa</code> or <code>.fasta</code> format. You will also need an annotation file with all the predicted gene models (<code>.gff</code> or <code>.gtf</code>format). For this workshop, the <em>A. thaliana</em> reference genome was included in the workshop materials.</p>
+<p>To use an aligner, we must first get the <strong>reference genome</strong> (e.g.&nbsp;via <a href="https://www.ncbi.nlm.nih.gov/datasets/genome/">NCBI Genomes</a>, <a href="https://www.ensembl.org/info/data/ftp/index.html">ENSEMBL</a>, <a href="https://plants.ensembl.org/info/data/ftp/index.html">ENSEMBL Plants</a> or various organism specific databases), in <code>.fa</code> or <code>.fasta</code> format. You will also need an annotation file with all the predicted gene models (<code>.gff</code> or <code>.gtf</code>format). For this workshop, the <em>A. thaliana</em> reference genome was included in the workshop materials.</p>
 <p>Before we start mapping we need to <em>index</em> the reference genome. Indexing the genome prepares the genome in a way that allows a computer to search it efficiently. The genome, a multi-million basepair long string of text, is encoded into a different, computer-friendly datastructure such as a suffix tree. The details of this procedure are beyond the scope of this workshop, but it’s important to do it. The <em>Arabidopsis thaliana</em> genome is already present in the notebook. We make the index using <code>STAR</code>:</p>
 <div class="cell">
 <div class="code-with-filename">
@@ -744,6 +744,7 @@ Solution
 <span id="cb11-11"><a href="#cb11-11" aria-hidden="true" tabindex="-1"></a><span class="cf">done</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
 </div>
+<p>Note the use of <code>name=$(basename "$sample" .fastq.gz)</code>: this is a trick to remove the file extension (<code>.fastq.gz</code>) and the folder structure <code>reads/</code> from the filenames, resulting in just the sample names e.g.&nbsp;<code>sample1</code>.</p>
 <ol start="2" type="1">
 <li>For loop to map:</li>
 </ol>
@@ -775,19 +776,32 @@ Solution
 <p>So far, these steps may have been quite abstract. Let’s make it more visual. We will look at our mapped reads in a genome browser.</p>
 <ol type="1">
 <li>Download a <code>.bam</code> file with accompanying <code>.bam.bai</code> index file.</li>
-<li>Go to <a href="https://phytozome-next.jgi.doe.gov/info/Athaliana_TAIR10">the Arabidopsis page on Phytozome</a> (or another website for your favorite organism).</li>
+<li>Go to <a href="https://phytozome-next.jgi.doe.gov/info/Athaliana_TAIR10">the Arabidopsis page on Phytozome</a></li>
 <li>Click <code>JBrowse</code>.</li>
 <li>Go to <code>File</code> &gt; <code>Open track file or URL</code> &gt; <code>Select Files...</code> to find your files.</li>
 <li>Click <code>Open</code>!</li>
 </ol>
 <p><img src="../images/alignment_arabidopsis.png" class="img-fluid"></p>
 <p>That’s wonderful! You should see red and blue (forward and reverse) blocks aligning with the exons of the annotated gene models of <em>A. thaliana</em>. Also notice that some reads will be beautifully split over two or more introns. Good RNA-seq mapping should align predominantly to exons. If this is not the case, something might be wrong. For example, your RNA sample could have been contaminated with genomic DNA. Another option that could explain mappings to non-annotated regions of the genome, is that the annotation may not be complete.</p>
+<div class="callout callout-style-default callout-note callout-titled">
+<div class="callout-header d-flex align-content-center">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+Note
+</div>
+</div>
+<div class="callout-body-container callout-body">
+<p>An alternative genome browser that can display <code>.bam</code> files is <a href="https://igv.org">IGV</a>. In IGV the genomes of many model organisms are available, but you can also upload your own genome of interest.</p>
+</div>
+</div>
 <p>Obviously, we can’t manually inspect all samples and all genes like this, so we will need to count the number of reads in each in gene in each sample. We will do that in the next and final step of today.</p>
 </section>
 </section>
 <section id="counting-featurecounts" class="level2">
 <h2 class="anchored" data-anchor-id="counting-featurecounts">Counting: <code>featureCounts</code></h2>
-<p>The <code>featureCounts</code> program will …. count (!) the number of reads that map within an annotated feature. Here, we chose to aggregate read count by gene (<code>-t gene</code>). Alternative options are transcript and exon (but they may require a different formatting of the annotation file).</p>
+<p>The <code>featureCounts</code> program will …. count (!) the number of reads that map within an annotated feature. To do this we need the <code>.gff</code> or <code>.gtf</code> gene annotation files. These files contain numerous rows with <code>chromosome</code>, <code>start</code> and <code>end</code> coordinates of all annotated features (e.g.&nbsp;genes!). Here, we chose to aggregate read count by gene (<code>-t gene</code>). Alternative options are transcript and exon (but they may require a different formatting of the annotation file).</p>
 <div class="cell">
 <div class="code-with-filename">
 <div class="code-with-filename-file">
@@ -822,7 +836,22 @@ Solution
 <span id="cb14-12"><a href="#cb14-12" aria-hidden="true" tabindex="-1"></a><span class="ex">AT1G01070</span>   1   38752   40944   <span class="at">-</span>   2193    1   0   0   0</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
 </div>
-<p>The first row records the specific <code>featureCounts</code> command that we used to make this table. Ech subsequent row corresponds to a <code>Geneid</code>. The first six columns provide gene metadata: geneid, chromosome, start and end coordinates, strand, and gene length. All remaining columns contain the read counts of each sample.</p>
+<p>The first row records the specific <code>featureCounts</code> command that we used to make this table. Ech subsequent row corresponds to a <code>Geneid</code>. The first six columns provide gene metadata: <code>geneid</code>, <code>chromosome</code>, <code>start</code> and <code>end</code> coordinates, <code>strand</code>, and <code>gene length</code>. All remaining columns contain the read counts of each sample.</p>
+<div class="callout callout-style-default callout-note callout-titled">
+<div class="callout-header d-flex align-content-center">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+Note
+</div>
+</div>
+<div class="callout-body-container callout-body">
+<p>To use the <code>featureCounts</code> table with <code>DESeq2</code>, you will need to clean it. First, we don’t need the header that starts with <code>#</code>. Second, we only need the <code>geneid</code> and count columns, nothing else. Third, the sample names should be cleaned from <code>mapped_reads/sample1_Aligned.sortedByCoord.out.bam</code> to just <code>sample1</code>.</p>
+<p>You can do this in many ways. It’s possible in <code>R</code>, after loading the data, but before starting <code>DESeq</code>. It’s possible to do this by hand in <code>Excel</code>. Finally, you can do it with a number of <code>unix</code> commands on the command line:</p>
+<div class="sourceCode" id="cb15"><pre class="sourceCode bash code-with-copy"><code class="sourceCode bash"><span id="cb15-1"><a href="#cb15-1" aria-hidden="true" tabindex="-1"></a><span class="fu">grep</span> <span class="at">-v</span> <span class="st">'#'</span> counts.tsv <span class="kw">|</span> <span class="fu">cut</span> <span class="at">-f1,7-</span> <span class="kw">|</span> <span class="fu">sed</span> <span class="st">'s/_Aligned.sortedByCoord.out.bam//g'</span><span class="kw">|</span> <span class="fu">sed</span> <span class="st">'s|mapped_reads/||g'</span> <span class="kw">|</span> <span class="ex">column</span> <span class="at">-t</span> <span class="op">&gt;</span> counts_cleaned.tsv</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+</div>
 </section>
 <section id="a-note-on-the-specific-tools-used-here" class="level2">
 <h2 class="anchored" data-anchor-id="a-note-on-the-specific-tools-used-here">A note on the specific tools used here</h2>

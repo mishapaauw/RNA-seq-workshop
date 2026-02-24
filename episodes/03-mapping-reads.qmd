@@ -23,7 +23,7 @@ The `.fastq` files contain your RNA sequencing reads. Our goal is to find out fr
 
 The commands in this episode are to be executed in a Google Colab notebook. We will use some basic terminal commands. You don't need to understand every command, rather, the goal is to become familiar with RNA-seq concepts and steps. There are two versions of the notebook:
 
-1. [The empty Google Colab notebook](https://colab.research.google.com/drive/1jR2Og_qrUVg-VXNsfqJc5eEILcqHJYAC?usp=share_link): if you want to type the commands yourself (recommended!)
+1. [The empty Google Colab notebook](https://colab.research.google.com/drive/1KivSKgH3RkKH4EvP-Q_42Bl2aDwIfv0X?usp=sharing): if you want to type the commands yourself (recommended!)
 2. [The Google Colab notebook with pre-written commands](https://colab.research.google.com/drive/1jR2Og_qrUVg-VXNsfqJc5eEILcqHJYAC?usp=share_link): if you just want to execute the commands (also fine!)
 
 ::: {.callout-note}
@@ -124,7 +124,6 @@ Inspect all four QC reports, and discuss with your neighbour what you think abou
 
 :::
 
-
 ## Trimming: `fastp`
 
 A common anomaly detected by `fastqc` is sequencing adapters still being present some of the the reads (shown in **Overrepresented sequences** table). This is known as 'adapter contamination', and the presence of these adapter sequences in the reads might affect how the reads map to the genome of interest. So, we need to get rid of them. We will use `fastp` to do this. In addition, `fastp` will trim low quality bases from the reads. Finally, it will remove reads that are overall of low quality, or are too short after the trimming steps.
@@ -176,7 +175,7 @@ By inspecting the `.html` report of the trimmed reads, we should see that the qu
 
 Our reads are now ready for mapping. Mapping reads means figuring out where each read from the RNA-seq experiment originally came from within the genome. For RNA-seq experiments, it's important to pick a **splice-aware** aligner, since a RNA-seq read can span an exon-intron-exon boundary. After all, the vast majority of RNA you sequenced is mature mRNA where introns have been spliced out. 
 
-![Splice-aware vs non-splice-aware alignment (image from Harvard Chan Bioinformatics Core)](../images/HBC-spliced-alignment.png)
+![Splice-aware alignment diagram. (Image from [UCLouvian Omics Data Analysis course](https://uclouvain-cbio.github.io/WSBIM2122/sec-hts.html))](../images/spliced_alignment-2.png)
 
 ::: {.callout-tip title="Question" icon="false"}
 So, for RNA-seq we need splice-aware aligners. Can you come up with an experiment that would not require a splice-aware aligner program?
@@ -186,7 +185,7 @@ So, for RNA-seq we need splice-aware aligners. Can you come up with an experimen
 In experiments where we don't need to think about exon-intron boundaries. This is the case when the reads originate from genomic DNA, for example for whole genome sequencing experiments, or enrichment sequencing experiments like Chip-Seq. 
 :::
 
-To use an aligner, we must first get the **reference genome** (e.g. via [NCBI Genomes](https://www.ncbi.nlm.nih.gov/datasets/genome/) or organism specific databases), in `.fa` or `.fasta` format. You will also need an annotation file with all the predicted gene models (`.gff` or `.gtf`format). For this workshop, the *A. thaliana* reference genome was included in the workshop materials. 
+To use an aligner, we must first get the **reference genome** (e.g. via [NCBI Genomes](https://www.ncbi.nlm.nih.gov/datasets/genome/), [ENSEMBL](https://www.ensembl.org/info/data/ftp/index.html), [ENSEMBL Plants](https://plants.ensembl.org/info/data/ftp/index.html) or various organism specific databases), in `.fa` or `.fasta` format. You will also need an annotation file with all the predicted gene models (`.gff` or `.gtf`format). For this workshop, the *A. thaliana* reference genome was included in the workshop materials. 
 
 Before we start mapping we need to *index* the reference genome. Indexing the genome prepares the genome in a way that allows a computer to search it efficiently. The genome, a multi-million basepair long string of text, is encoded into a different, computer-friendly datastructure such as a suffix tree. The details of this procedure are beyond the scope of this workshop, but it's important to do it. The *Arabidopsis thaliana* genome is already present in the notebook. We make the index using `STAR`:
 
@@ -292,6 +291,8 @@ do
 done
 ```
 
+Note the use of `name=$(basename "$sample" .fastq.gz)`: this is a trick to remove the file extension (`.fastq.gz`) and the folder structure `reads/` from the filenames, resulting in just the sample names e.g. `sample1`.
+
 2. For loop to map:
 
 ```{bash filename="bash"}
@@ -316,7 +317,7 @@ done
 So far, these steps may have been quite abstract. Let's make it more visual. We will look at our mapped reads in a genome browser. 
 
 1. Download a `.bam` file with accompanying `.bam.bai` index file.
-2. Go to [the Arabidopsis page on Phytozome](https://phytozome-next.jgi.doe.gov/info/Athaliana_TAIR10) (or another website for your favorite organism).
+2. Go to [the Arabidopsis page on Phytozome](https://phytozome-next.jgi.doe.gov/info/Athaliana_TAIR10)
 3. Click `JBrowse`.
 4. Go to `File` > `Open track file or URL` > `Select Files...` to find your files.
 5. Click `Open`!
@@ -325,11 +326,15 @@ So far, these steps may have been quite abstract. Let's make it more visual. We 
 
 That's wonderful! You should see red and blue (forward and reverse) blocks aligning with the exons of the annotated gene models of *A. thaliana*. Also notice that some reads will be beautifully split over two or more introns. Good RNA-seq mapping should align predominantly to exons. If this is not the case, something might be wrong. For example, your RNA sample could have been contaminated with genomic DNA. Another option that could explain mappings to non-annotated regions of the genome, is that the annotation may not be complete. 
 
+::: {.callout-note}
+An alternative genome browser that can display `.bam` files is [IGV](https://igv.org). In IGV the genomes of many model organisms are available, but you can also upload your own genome of interest.
+:::
+
 Obviously, we can't manually inspect all samples and all genes like this, so we will need to count the number of reads in each in gene in each sample. We will do that in the next and final step of today.
 
 ## Counting: `featureCounts`
 
-The `featureCounts` program will .... count (!) the number of reads that map within an annotated feature. Here, we chose to aggregate read count by gene (`-t gene`). Alternative options are transcript and exon (but they may require a different formatting of the annotation file).
+The `featureCounts` program will .... count (!) the number of reads that map within an annotated feature. To do this we need the `.gff` or `.gtf` gene annotation files. These files contain numerous rows with `chromosome`, `start` and `end` coordinates of all annotated features (e.g. genes!). Here, we chose to aggregate read count by gene (`-t gene`). Alternative options are transcript and exon (but they may require a different formatting of the annotation file).
 
 ```{bash filename="bash"}
 #| eval: false
@@ -360,7 +365,17 @@ AT1G01060	1	33379	37871	-	4493	1	2	2	0
 AT1G01070	1	38752	40944	-	2193	1	0	0	0
 ```
 
-The first row records the specific `featureCounts` command that we used to make this table. Ech subsequent row corresponds to a `Geneid`. The first six columns provide gene metadata: geneid, chromosome, start and end coordinates, strand, and gene length. All remaining columns contain the read counts of each sample.
+The first row records the specific `featureCounts` command that we used to make this table. Ech subsequent row corresponds to a `Geneid`. The first six columns provide gene metadata: `geneid`, `chromosome`, `start` and `end` coordinates, `strand`, and `gene length`. All remaining columns contain the read counts of each sample.
+
+::: {.callout-note}
+To use the `featureCounts` table with `DESeq2`, you will need to clean it. First, we don't need the header that starts with `#`. Second, we only need the `geneid` and count columns, nothing else. Third, the sample names should be cleaned from `mapped_reads/sample1_Aligned.sortedByCoord.out.bam` to just `sample1`.
+
+You can do this in many ways. It's possible in `R`, after loading the data, but before starting `DESeq`. It's possible to do this by hand in `Excel`. Finally, you can do it with a number of `unix` commands on the command line:
+
+```bash
+grep -v '#' counts.tsv | cut -f1,7- | sed 's/_Aligned.sortedByCoord.out.bam//g'| sed 's|mapped_reads/||g' | column -t > counts_cleaned.tsv
+```
+:::
 
 ## A note on the specific tools used here
 

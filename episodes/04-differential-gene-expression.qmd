@@ -22,7 +22,7 @@ Download the data from [the repository of this workshop](https://github.com/mish
 #| eval: FALSE
 RNA-seq-workshop
 ├── data/
-│   ├── GLDS38_raw_counts.csv.csv
+│   ├── GLDS38_raw_counts.csv
 │   └── samples_to_condition.csv
 ├── data_processed/
 │   └── Normalized counts will go here
@@ -146,8 +146,8 @@ plotPCA(variance_stabilized_dataset)
 
 Let's break this plot down:
 
-- We see that principal component 1 (`PC1`) explains 60% of the variance, while `PC2` explains 29%. Those are nice scores. However, `PC1` does not seem to separate our two conditions. This means that there's another source of variation in this dataset that we are seemingly unaware of.
-- We see that `PC2` nicely separates our two conditions. This is good!  
+- We see that principal component 1 (`PC1`) explains 60% of the variance, while `PC2` explains 29%. `PC1` does not seem to separate our two conditions. This means that there's a source of variation in this dataset that we are seemingly unaware of.
+- We see that `PC2` nicely separates our two conditions. This is good news. 
 - We see that two samples from `space_flight` cluster very closely together, while one sample is quite a distant from those two. This means that this one replicate behaves a bit differently than the rest. However, since it's still similar to the other two samples on the `PC2` axis, this does not worry me.
 
 If you want to have full control and make the PCA plot yourself in `ggplot`, you can add `returnData=TRUE)`

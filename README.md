@@ -8,7 +8,11 @@ Episodes are written in Quarto markdown files (`episodes/*.qmd`). `bash` command
 
 ## Associated materials
 
-This workshop depends on a [Google Colab notebook](https://colab.research.google.com/drive/1jR2Og_qrUVg-VXNsfqJc5eEILcqHJYAC?usp=share_link) and on an [associated repository](https://github.com/mishapaauw/RNA-seq-workshop-materials) which contains some materials and data.
+This workshop needs the following associated materials:
+
+- [Empty Google Colab notebook](https://colab.research.google.com/drive/1KivSKgH3RkKH4EvP-Q_42Bl2aDwIfv0X?usp=sharing): if you want to write the commands yourself (recommended).
+- [pre-filled Google Colab notebook](https://colab.research.google.com/drive/1jR2Og_qrUVg-VXNsfqJc5eEILcqHJYAC?usp=share_link): if you want to just execute pre-written commands.
+- [Data repository](https://github.com/mishapaauw/RNA-seq-workshop-materials) which contains the Arabidopsis reference genome and small read sets to practice with.
 
 ## TODOs
 
