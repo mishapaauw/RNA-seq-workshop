@@ -18,7 +18,7 @@
     "href": "index.html#schedule",
     "title": "Welcome",
     "section": "Schedule",
-    "text": "Schedule\nFor the March 2026 beta-test run of this workshop, this is the schedule:\n\n\n\n\n\n\n\n\n\nDate\nTime\nLocation\nTopics\n\n\n\n\n02-03-2026\n13:00-17:00\nAmsterdam Sciencepark, B0.209\nExperimental considarations and read mapping\n\n\n04-03-2026\n13:00-17:00\nAmsterdam Sciencepark, B0.208\nDifferential gene expression and enrichment analysis"
+    "text": "Schedule\nFor the April 2026 round of this workshop, this is the schedule:\n\n\n\n\n\n\n\n\n\nDate\nTime\nLocation\nTopics\n\n\n\n\n13-04-2026\n13:00-17:00\nAmsterdam Sciencepark, B0.202\nExperimental considarations and read mapping\n\n\n15-04-2026\n13:00-17:00\nAmsterdam Sciencepark, B0.201\nDifferential gene expression and enrichment analysis"
   },
   {
     "objectID": "index.html#maintainers",
@@ -329,7 +329,7 @@
     "href": "episodes/01-setup.html#differential-gene-expression-with-deseq2",
     "title": "Setting up",
     "section": "Differential gene expression with DESeq2",
-    "text": "Differential gene expression with DESeq2\n\nFor the second of the workshop, we will use R. Please make sure you have R and RStudio installed on your computer. In addition, you will need to install the following packages, via two different routes:\nInstall the following packages via install.packages()\n\n\n\nR\n\ninstall.packages('tidyverse')\ninstall.packages('patchwork')\ninstall.packages('ggrepel')\ninstall.packages(\"pheatmap\")\ninstall.packages(\"tidyheatmap\")\ninstall.packages(\"BiocManager\")\n\n\nInstall the following packages via Bioconductor\n\n\n\nR\n\nBiocManager::install(\"apeglm\")\nBiocManager::install(\"enrichplot\")\nBiocManager::install(\"clusterProfiler\")\nBiocManager::install(\"org.At.tair.db\")\nBiocManager::install(\"DESeq2\")\n\n\nTest whether DESeq2 was installed properly by loading it:\n\n\n\nR\n\nlibrary(DESeq2)\n\n\nDuring the workshop, we will not have time to install the packages, or to troubleshoot installation problems. Please try to install the packages before the workshop. You can always contact the workshop organizers if you run into problems.",
+    "text": "Differential gene expression with DESeq2\n\nFor the second of the workshop, we will use R. Please make sure you have R and RStudio installed on your computer. In addition, you will need to install the following packages, via two different routes:\nInstall the following packages via install.packages()\n\n\n\nR\n\ninstall.packages('tidyverse')\ninstall.packages('patchwork')\ninstall.packages('ggrepel')\ninstall.packages(\"pheatmap\")\ninstall.packages(\"tidyheatmaps\")\ninstall.packages(\"BiocManager\")\n\n\nInstall the following packages via Bioconductor\n\n\n\nR\n\nBiocManager::install(\"apeglm\")\nBiocManager::install(\"enrichplot\")\nBiocManager::install(\"clusterProfiler\")\nBiocManager::install(\"org.At.tair.db\")\nBiocManager::install(\"DESeq2\")\n\n\nTest whether DESeq2 was installed properly by loading it:\n\n\n\nR\n\nlibrary(DESeq2)\n\n\nDuring the workshop, we will not have time to install the packages, or to troubleshoot installation problems. Please try to install the packages before the workshop. You can always contact the workshop organizers if you run into problems.",
     "crumbs": [
       "Setting up"
     ]

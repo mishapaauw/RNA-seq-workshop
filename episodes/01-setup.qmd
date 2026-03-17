@@ -35,7 +35,7 @@ install.packages('tidyverse')
 install.packages('patchwork')
 install.packages('ggrepel')
 install.packages("pheatmap")
-install.packages("tidyheatmap")
+install.packages("tidyheatmaps")
 install.packages("BiocManager")
 ```
 

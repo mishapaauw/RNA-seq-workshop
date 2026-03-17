@@ -29,12 +29,12 @@ After this workshop, you should be able to:
 
 ## Schedule
 
-For the March 2026 beta-test run of this workshop, this is the schedule:
+For the April 2026 round of this workshop, this is the schedule:
 
 | Date | Time | Location | Topics | 
 | ---  | ---  | --- | --- |
-| 02-03-2026  | 13:00-17:00 | Amsterdam Sciencepark, B0.209 | Experimental considarations and read mapping |
-| 04-03-2026  | 13:00-17:00 | Amsterdam Sciencepark, B0.208 | Differential gene expression and enrichment analysis |
+| 13-04-2026  | 13:00-17:00 | Amsterdam Sciencepark, B0.202 | Experimental considarations and read mapping |
+| 15-04-2026  | 13:00-17:00 | Amsterdam Sciencepark, B0.201 | Differential gene expression and enrichment analysis |
 
 ## Maintainers
 
