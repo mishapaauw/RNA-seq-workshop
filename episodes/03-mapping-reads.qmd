@@ -182,10 +182,32 @@ So, for RNA-seq we need splice-aware aligners. Can you come up with an experimen
 :::
 
 ::: {.callout-caution title="Solution" collapse="true" icon="false"}
-In experiments where we don't need to think about exon-intron boundaries. This is the case when the reads originate from genomic DNA, for example for whole genome sequencing experiments, or enrichment sequencing experiments like Chip-Seq. 
+In experiments where we don't need to think about exon-intron boundaries. This is the case when the reads originate from genomic DNA, for example for whole genome sequencing experiments, or enrichment sequencing experiments like Chip-Seq. We also don't need a splice-aware aligner if we map RNA-seq reads from organisms that don't have introns, such as bacteria.
 :::
 
-To use an aligner, we must first get the **reference genome** (e.g. via [NCBI Genomes](https://www.ncbi.nlm.nih.gov/datasets/genome/), [ENSEMBL](https://www.ensembl.org/info/data/ftp/index.html), [ENSEMBL Plants](https://plants.ensembl.org/info/data/ftp/index.html) or various organism specific databases), in `.fa` or `.fasta` format. You will also need an annotation file with all the predicted gene models (`.gff` or `.gtf`format). For this workshop, the *A. thaliana* reference genome was included in the workshop materials. 
+To use an alignment tool, we must first get the **reference genome** (e.g. via [NCBI Genomes](https://www.ncbi.nlm.nih.gov/datasets/genome/), [ENSEMBL](https://www.ensembl.org/info/data/ftp/index.html), [ENSEMBL Plants](https://plants.ensembl.org/info/data/ftp/index.html) or various organism specific databases), in `.fa` or `.fasta` format. A genome assembly contains the entire genome sequence of an organism as plain text, organized by chromosome (for 'high-quality' assemblies) or many some unplaced contigs (for 'draft' genomes). You will also need an annotation file with all the predicted gene models (`.gff` or `.gtf`format). For this workshop, the *A. thaliana* reference genome and annotation are included in the workshop materials. 
+
+Let's have a quick look at the reference genome:
+
+```bash
+head genome/TAIR10.fasta # <1>
+>1 dna:chromosome chromosome:TAIR10:1:1:30427671:1 REF
+CCCTAAACCCTAAACCCTAAACCCTAAACCTCTGAATCCTTAATCCCTAAATCCCTAAAT
+CTTTAAATCCTACATCCATGAATCCCTAAATACCTAATTCCCTAAACCCGAAACCGGTTT (...)
+
+grep ">" genome/TAIR10.fasta # <2>
+>1 dna:chromosome chromosome:TAIR10:1:1:30427671:1 REF
+>2 dna:chromosome chromosome:TAIR10:2:1:19698289:1 REF
+>3 dna:chromosome chromosome:TAIR10:3:1:23459830:1 REF
+>4 dna:chromosome chromosome:TAIR10:4:1:18585056:1 REF
+>5 dna:chromosome chromosome:TAIR10:5:1:26975502:1 REF
+>Mt dna:chromosome chromosome:TAIR10:Mt:1:366924:1 REF
+>Pt dna:chromosome chromosome:TAIR10:Pt:1:154478:1 REF
+```
+1. Look at the first 10 lines: a fasta header starting with `>`, chromosome number, and some metadata. Then, the sequence of that chromosome starts.
+2. Search for the character `>`, which is an essential part of a fasta sequence header. We then see a list of chromosomes included in this genome assembly.
+
+Ok, our Arabidopsis genome assemblies contains 5 chromosomes, and the genomes of the organelles: mitochondria (`Mt`) and plastid (`Pt`).
 
 Before we start mapping we need to *index* the reference genome. Indexing the genome prepares the genome in a way that allows a computer to search it efficiently. The genome, a multi-million basepair long string of text, is encoded into a different, computer-friendly datastructure such as a suffix tree. The details of this procedure are beyond the scope of this workshop, but it's important to do it. The *Arabidopsis thaliana* genome is already present in the notebook. We make the index using `STAR`:
 

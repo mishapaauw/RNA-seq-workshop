@@ -264,7 +264,15 @@ This graph is rather complex but very interesting! Let's break the most importan
 
 ## Performing enrichment analysis on webservers
 
-Some people find it easier to use webservers for GO term enrichment. Of course, that's also possible. For example, [g:Profiler](http://biit.cs.ut.ee/gprofiler/gost) is an excellent webserver where you can simply paste a list of geneIDs, select your organism of study, hit `Run query`, and visually inspect the results. One big advantage of this webserver is that it contains GO annotations of hundreds of organisms, including many that are not available on `Bioconductor` for R-based analysis.
+It's also possible to perform GO term enrichment on webservers. While less reproducible than doing GO term enrichment with code, it is indeed a fast way to explore many gene lists. On these webservers, you can simply paste a list of geneIDs, select your organism, and visually inspect the results quickly.
+
+Some popular options are:
+
+- [g:Profiler](http://biit.cs.ut.ee/gprofiler/gost) 
+- [ShinyGO](https://bioinformatics.sdstate.edu/go/) 
+- [AgriGO](https://systemsbiology.cau.edu.cn/agriGOv2/index.php)
+
+A big advantage of such webservers is that it contains GO annotations of hundreds of organisms, including many that are not available on `Bioconductor` for R-based analysis.
 
 ## Concluding remarks
 
