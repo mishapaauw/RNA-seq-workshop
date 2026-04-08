@@ -13,7 +13,7 @@ The main goal of most RNA-seq experiments is to discover which genes are differe
 
 ## Reading the count table into DESeq2
 
-In this tutorial, we will explore the transcriptomes of root samples of *A. thaliana* plants that were treated with different plant hormones. Control samples were not treated with any plant hormone. The experimental design is simple: there are three replicates in each condition: `control` (no hormone), `aba` (abscisic acid), `meja` (methyl-jasmonate), `acc` (the precursor of the hormone ethylene), and `auxin`.
+In this tutorial, we will explore the transcriptomes of root samples of *Arabidopsis thaliana* plants that were treated with different plant hormones. Control samples were not treated with any plant hormone. The experimental design is simple: there are three replicates in each condition: `control` (no hormone), `aba` (abscisic acid), `meja` (methyl-jasmonate), `acc` (the precursor of the hormone ethylene), and `auxin`.
 
 ::: {.callout-note}
 Download the data from [the repository of this workshop](https://github.com/mishapaauw/RNA-seq-workshop/tree/main/data). Store the files in a folder on your computer. See below for a good workshop folder setup:
@@ -332,7 +332,7 @@ write.csv(results_aba_vs_control, 'data_processed/aba_vs_control.csv', quote = F
 3. Turn results table into a data frame, generate a `genes` column from the rownames, make a new column with `-log10` transformed p-values, then sort by adjusted p-value.
 4. Write to a file!
 
-There is a row for each gene in this dataframe. We'll discuss the most important columns below:
+In this dataframe, there is a row for each gene that appears in the Arabidopsis genome annotation. We'll discuss the most important columns below:
 
 - `baseMean`: is the mean of the normalized counts, across all samples. 
 - `log2FoldChange`: is a way to describe how much the gene expression changes between the two conditions tested. 
@@ -385,7 +385,7 @@ DESeq2 allows for the *shrinkage* of log2FoldChanges values towards zero **if** 
 
 ### Volcano plots
 
-One way to visualize DEG results is to display them in a Volcano plot. Such a plot shows a measure of effect size (`log2FoldChange`) versus a measure of significance (`padj`). There are [tools available](https://goedhart.shinyapps.io/VolcaNoseR/) (developed by Joachim Goedhart, assistant professor at SILS) to help you make such a plot using the DEG list we just saved as a `.csv` file. But we can also make volcano plots ourselves in `R`:
+One way to visualize DEG results is to display them in a Volcano plot. Such a plot shows a measure of effect size (`log2FoldChange`) versus a measure of significance (`padj`). There are [tools available](https://goedhart.shinyapps.io/VolcaNoseR/) (developed by Joachim Goedhart, assistant professor at SILS) to help you make such a plot. But we can also make volcano plots ourselves in `R`:
 
 First we will make a 'quick and dirty' plot using the `EnhancedVolcano` package:
 
@@ -442,7 +442,7 @@ ggsave("results/volcano_plot_aba_vs_control.png", volcano, width = 14, height = 
 volcano 
 ```
 
-We can plot the DESeq2-normalized counts of two genes, just to confirm that the volcano plot is correct. We pick one that is highly upregulated in `aba` treated sanmples (AT5G52310), and one that is strongly downregulated (AT2G38310). 
+We can plot the DESeq2-normalized counts of two genes, just to confirm that the volcano plot is correct. We pick one that is highly upregulated in `aba` treated samples (AT5G52310), and one that is strongly downregulated (AT2G38310). 
 
 ```{R filename="R"}
 #| fig-width: 4
@@ -465,7 +465,7 @@ Yep, that seems about right.
 
 ### Heatmap
 
-Alternatively, we could also display the expression levels of the DEGs in a heatmap. With the following code, we make a 'tidy' dataframe from the variance stabilised counts, and select only the genes that we consider DEGs. Remember, these are the genes that passed both a `padj` threshold and `log2FoldChange` threshold.
+Alternatively, we could also display the expression levels of the DEGs in a heatmap. With the following code, we make a 'tidy' dataframe from the variance stabilised counts, and select only the genes that we consider DEGs. Remember, these are the genes that passed both a `padj` threshold and `log2FoldChange` threshold in the `aba` vs `control` contrast.
 
 ```{R filename="R"}
 variance_stabilised_df <- variance_stabilised_counts %>%
@@ -498,8 +498,7 @@ heatmap <- tidyheatmap(df = vsd_selection,
             cluster_rows = TRUE, # <2>
             color_legend_n = 7,
             show_rownames = FALSE,
-            show_colnames = TRUE,
-)
+            show_colnames = TRUE)
 
 heatmap
 ```
@@ -508,7 +507,6 @@ heatmap
 2. This argument makes sure that genes with a similar expression pattern are clustered together in the heatmap.
 
 That looks pretty good. We can see that there are two clusters of genes: those expressed higher in the `aba` condition with respect to `control`, and those higher expressed in the `aba` condition with respect to `control`. We can ask `tidyheatmaps` to add a little gap between these two clusters by adding `cutree_rows = 2` as an argument.
-:
 
 ```{R filename="R"}
 heatmap <- tidyheatmap(df = vsd_selection,
@@ -522,8 +520,7 @@ heatmap <- tidyheatmap(df = vsd_selection,
             color_legend_n = 7,
             show_rownames = FALSE,
             show_colnames = TRUE,
-            cutree_rows = 2
-)
+            cutree_rows = 2)
 
 ggsave("results/heatmap_aba_DEGs.png", heatmap, width = 14, height = 8, units = "cm")
 

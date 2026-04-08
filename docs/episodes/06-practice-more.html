@@ -218,12 +218,12 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <section id="the-datasets" class="level2">
 <h2 class="anchored" data-anchor-id="the-datasets">The datasets</h2>
 <ol type="1">
-<li><p><span class="emoji" data-emoji="seedling">🌱</span> :<span class="emoji" data-emoji="rocket">🚀</span>: <strong>The Plant Scientist #1: Arabidopsis seedlings that experienced spaceflight</strong></p>
+<li><p><span class="emoji" data-emoji="seedling">🌱</span> <span class="emoji" data-emoji="rocket">🚀</span> <strong>The Plant Scientist #1: Arabidopsis seedlings that experienced spaceflight</strong></p>
 <ul>
 <li>Experiment ID: <code>GLDS38</code></li>
 <li>Experimental factors:
 <ul>
-<li><code>condition</code>, with levels: <code>space_flight</code> and <code>ground_control</code></li>
+<li><code>condition</code>, with two levels: <code>space_flight</code> and <code>ground_control</code></li>
 </ul></li>
 </ul></li>
 <li><p><span class="emoji" data-emoji="corn">🌽</span> <span class="emoji" data-emoji="seedling">🌱</span> <strong>The Plant Scientist #2: maize plants infected with the fungus <em>Ustilago maydis</em></strong></p>
@@ -276,7 +276,7 @@ Note
 </div>
 </div>
 <div class="callout-body-container callout-body">
-<p>For studies with multiple experimental factors, it’s often useful to <em>combine</em> different factors into a new variable. Then, you design formula becomes as simple as <code>~ condition</code>.</p>
+<p>For studies with multiple experimental factors, it’s often useful to <em>combine</em> different factors into a new variable. Then, your design formula becomes as simple as <code>~ condition</code>.</p>
 <div class="cell">
 <div class="code-with-filename">
 <div class="code-with-filename-file">

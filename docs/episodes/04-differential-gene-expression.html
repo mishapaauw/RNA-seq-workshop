@@ -260,7 +260,7 @@ window.Quarto = {
 <p>The main goal of most RNA-seq experiments is to discover which genes are differentially expressed between different groups (treatments, tissues, genotypes): the list of differentially expressed genes (DEGs). After the previous section, we now have a count table with the number of reads that map to each gene in each sample. How do we get to our goal from this table? We will need to use statistical models! In this section, we will use the <code>DESeq2</code> package in <code>R</code> for differential gene expression analysis. Several other packages with different statistical models and assumptions exist (e.g.&nbsp;<code>EdgeR</code> and <code>Limma</code>): we pick <code>DESeq2</code> because it is robust, widely-used, and user friendly.</p>
 <section id="reading-the-count-table-into-deseq2" class="level2">
 <h2 class="anchored" data-anchor-id="reading-the-count-table-into-deseq2">Reading the count table into DESeq2</h2>
-<p>In this tutorial, we will explore the transcriptomes of root samples of <em>A. thaliana</em> plants that were treated with different plant hormones. Control samples were not treated with any plant hormone. The experimental design is simple: there are three replicates in each condition: <code>control</code> (no hormone), <code>aba</code> (abscisic acid), <code>meja</code> (methyl-jasmonate), <code>acc</code> (the precursor of the hormone ethylene), and <code>auxin</code>.</p>
+<p>In this tutorial, we will explore the transcriptomes of root samples of <em>Arabidopsis thaliana</em> plants that were treated with different plant hormones. Control samples were not treated with any plant hormone. The experimental design is simple: there are three replicates in each condition: <code>control</code> (no hormone), <code>aba</code> (abscisic acid), <code>meja</code> (methyl-jasmonate), <code>acc</code> (the precursor of the hormone ethylene), and <code>auxin</code>.</p>
 <div class="callout callout-style-default callout-note callout-titled">
 <div class="callout-header d-flex align-content-center">
 <div class="callout-icon-container">
@@ -820,7 +820,7 @@ low counts [2]     : 3111, 12%
 6 4.605456e-236</code></pre>
 </div>
 </div>
-<p>There is a row for each gene in this dataframe. We’ll discuss the most important columns below:</p>
+<p>In this dataframe, there is a row for each gene that appears in the Arabidopsis genome annotation. We’ll discuss the most important columns below:</p>
 <ul>
 <li><code>baseMean</code>: is the mean of the normalized counts, across all samples.</li>
 <li><code>log2FoldChange</code>: is a way to describe how much the gene expression changes between the two conditions tested.</li>
@@ -918,7 +918,7 @@ Solution
 </section>
 <section id="volcano-plots" class="level3">
 <h3 class="anchored" data-anchor-id="volcano-plots">Volcano plots</h3>
-<p>One way to visualize DEG results is to display them in a Volcano plot. Such a plot shows a measure of effect size (<code>log2FoldChange</code>) versus a measure of significance (<code>padj</code>). There are <a href="https://goedhart.shinyapps.io/VolcaNoseR/">tools available</a> (developed by Joachim Goedhart, assistant professor at SILS) to help you make such a plot using the DEG list we just saved as a <code>.csv</code> file. But we can also make volcano plots ourselves in <code>R</code>:</p>
+<p>One way to visualize DEG results is to display them in a Volcano plot. Such a plot shows a measure of effect size (<code>log2FoldChange</code>) versus a measure of significance (<code>padj</code>). There are <a href="https://goedhart.shinyapps.io/VolcaNoseR/">tools available</a> (developed by Joachim Goedhart, assistant professor at SILS) to help you make such a plot. But we can also make volcano plots ourselves in <code>R</code>:</p>
 <p>First we will make a ‘quick and dirty’ plot using the <code>EnhancedVolcano</code> package:</p>
 <div class="cell">
 <div class="code-with-filename">
@@ -992,7 +992,7 @@ Solution
 </div>
 </div>
 </div>
-<p>We can plot the DESeq2-normalized counts of two genes, just to confirm that the volcano plot is correct. We pick one that is highly upregulated in <code>aba</code> treated sanmples (AT5G52310), and one that is strongly downregulated (AT2G38310).</p>
+<p>We can plot the DESeq2-normalized counts of two genes, just to confirm that the volcano plot is correct. We pick one that is highly upregulated in <code>aba</code> treated samples (AT5G52310), and one that is strongly downregulated (AT2G38310).</p>
 <div class="cell">
 <div class="code-with-filename">
 <div class="code-with-filename-file">
@@ -1030,7 +1030,7 @@ Solution
 </section>
 <section id="heatmap" class="level3">
 <h3 class="anchored" data-anchor-id="heatmap">Heatmap</h3>
-<p>Alternatively, we could also display the expression levels of the DEGs in a heatmap. With the following code, we make a ‘tidy’ dataframe from the variance stabilised counts, and select only the genes that we consider DEGs. Remember, these are the genes that passed both a <code>padj</code> threshold and <code>log2FoldChange</code> threshold.</p>
+<p>Alternatively, we could also display the expression levels of the DEGs in a heatmap. With the following code, we make a ‘tidy’ dataframe from the variance stabilised counts, and select only the genes that we consider DEGs. Remember, these are the genes that passed both a <code>padj</code> threshold and <code>log2FoldChange</code> threshold in the <code>aba</code> vs <code>control</code> contrast.</p>
 <div class="cell">
 <div class="code-with-filename">
 <div class="code-with-filename-file">
@@ -1069,10 +1069,9 @@ Solution
 <button class="code-annotation-anchor" data-target-cell="annotated-cell-21" data-target-annotation="2">2</button><span id="annotated-cell-21-10" class="code-annotation-target"><a href="#annotated-cell-21-10" aria-hidden="true" tabindex="-1"></a>            <span class="at">cluster_rows =</span> <span class="cn">TRUE</span>,</span>
 <span id="annotated-cell-21-11"><a href="#annotated-cell-21-11" aria-hidden="true" tabindex="-1"></a>            <span class="at">color_legend_n =</span> <span class="dv">7</span>,</span>
 <span id="annotated-cell-21-12"><a href="#annotated-cell-21-12" aria-hidden="true" tabindex="-1"></a>            <span class="at">show_rownames =</span> <span class="cn">FALSE</span>,</span>
-<span id="annotated-cell-21-13"><a href="#annotated-cell-21-13" aria-hidden="true" tabindex="-1"></a>            <span class="at">show_colnames =</span> <span class="cn">TRUE</span>,</span>
-<span id="annotated-cell-21-14"><a href="#annotated-cell-21-14" aria-hidden="true" tabindex="-1"></a>)</span>
-<span id="annotated-cell-21-15"><a href="#annotated-cell-21-15" aria-hidden="true" tabindex="-1"></a></span>
-<span id="annotated-cell-21-16"><a href="#annotated-cell-21-16" aria-hidden="true" tabindex="-1"></a>heatmap</span><div class="code-annotation-gutter-bg"></div><div class="code-annotation-gutter"></div></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<span id="annotated-cell-21-13"><a href="#annotated-cell-21-13" aria-hidden="true" tabindex="-1"></a>            <span class="at">show_colnames =</span> <span class="cn">TRUE</span>)</span>
+<span id="annotated-cell-21-14"><a href="#annotated-cell-21-14" aria-hidden="true" tabindex="-1"></a></span>
+<span id="annotated-cell-21-15"><a href="#annotated-cell-21-15" aria-hidden="true" tabindex="-1"></a>heatmap</span><div class="code-annotation-gutter-bg"></div><div class="code-annotation-gutter"></div></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
 <div class="cell-annotation">
 <dl class="code-annotation-container-hidden code-annotation-container-grid">
@@ -1094,7 +1093,7 @@ Solution
 </div>
 </div>
 </div>
-<p>That looks pretty good. We can see that there are two clusters of genes: those expressed higher in the <code>aba</code> condition with respect to <code>control</code>, and those higher expressed in the <code>aba</code> condition with respect to <code>control</code>. We can ask <code>tidyheatmaps</code> to add a little gap between these two clusters by adding <code>cutree_rows = 2</code> as an argument. :</p>
+<p>That looks pretty good. We can see that there are two clusters of genes: those expressed higher in the <code>aba</code> condition with respect to <code>control</code>, and those higher expressed in the <code>aba</code> condition with respect to <code>control</code>. We can ask <code>tidyheatmaps</code> to add a little gap between these two clusters by adding <code>cutree_rows = 2</code> as an argument.</p>
 <div class="cell">
 <div class="code-with-filename">
 <div class="code-with-filename-file">
@@ -1111,12 +1110,11 @@ Solution
 <span id="annotated-cell-22-9"><a href="#annotated-cell-22-9" aria-hidden="true" tabindex="-1"></a>            <span class="at">color_legend_n =</span> <span class="dv">7</span>,</span>
 <span id="annotated-cell-22-10"><a href="#annotated-cell-22-10" aria-hidden="true" tabindex="-1"></a>            <span class="at">show_rownames =</span> <span class="cn">FALSE</span>,</span>
 <span id="annotated-cell-22-11"><a href="#annotated-cell-22-11" aria-hidden="true" tabindex="-1"></a>            <span class="at">show_colnames =</span> <span class="cn">TRUE</span>,</span>
-<span id="annotated-cell-22-12"><a href="#annotated-cell-22-12" aria-hidden="true" tabindex="-1"></a>            <span class="at">cutree_rows =</span> <span class="dv">2</span></span>
-<span id="annotated-cell-22-13"><a href="#annotated-cell-22-13" aria-hidden="true" tabindex="-1"></a>)</span>
-<span id="annotated-cell-22-14"><a href="#annotated-cell-22-14" aria-hidden="true" tabindex="-1"></a></span>
-<span id="annotated-cell-22-15"><a href="#annotated-cell-22-15" aria-hidden="true" tabindex="-1"></a><span class="fu">ggsave</span>(<span class="st">"results/heatmap_aba_DEGs.png"</span>, heatmap, <span class="at">width =</span> <span class="dv">14</span>, <span class="at">height =</span> <span class="dv">8</span>, <span class="at">units =</span> <span class="st">"cm"</span>)</span>
-<span id="annotated-cell-22-16"><a href="#annotated-cell-22-16" aria-hidden="true" tabindex="-1"></a></span>
-<span id="annotated-cell-22-17"><a href="#annotated-cell-22-17" aria-hidden="true" tabindex="-1"></a>heatmap</span><div class="code-annotation-gutter-bg"></div><div class="code-annotation-gutter"></div></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<span id="annotated-cell-22-12"><a href="#annotated-cell-22-12" aria-hidden="true" tabindex="-1"></a>            <span class="at">cutree_rows =</span> <span class="dv">2</span>)</span>
+<span id="annotated-cell-22-13"><a href="#annotated-cell-22-13" aria-hidden="true" tabindex="-1"></a></span>
+<span id="annotated-cell-22-14"><a href="#annotated-cell-22-14" aria-hidden="true" tabindex="-1"></a><span class="fu">ggsave</span>(<span class="st">"results/heatmap_aba_DEGs.png"</span>, heatmap, <span class="at">width =</span> <span class="dv">14</span>, <span class="at">height =</span> <span class="dv">8</span>, <span class="at">units =</span> <span class="st">"cm"</span>)</span>
+<span id="annotated-cell-22-15"><a href="#annotated-cell-22-15" aria-hidden="true" tabindex="-1"></a></span>
+<span id="annotated-cell-22-16"><a href="#annotated-cell-22-16" aria-hidden="true" tabindex="-1"></a>heatmap</span><div class="code-annotation-gutter-bg"></div><div class="code-annotation-gutter"></div></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
 <div class="cell-annotation">
 <dl class="code-annotation-container-hidden code-annotation-container-grid">

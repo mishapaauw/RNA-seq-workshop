@@ -18,11 +18,11 @@ Practice dataset #1 is very simple: it has one experimental factor, just like th
 
 ## The datasets
 
-1. :seedling: ::rocket:: **The Plant Scientist #1: Arabidopsis seedlings that experienced spaceflight**
+1. :seedling: :rocket: **The Plant Scientist #1: Arabidopsis seedlings that experienced spaceflight**
 
     - Experiment ID: `GLDS38`
     - Experimental factors:
-        - `condition`, with levels: `space_flight` and `ground_control`
+        - `condition`, with two levels: `space_flight` and `ground_control`
 
 2. :corn: :seedling: **The Plant Scientist #2: maize plants infected with the fungus *Ustilago maydis***
 
@@ -57,7 +57,7 @@ You can follow the `DESeq2` episode with these new datasets. Broadly, these are 
 5. Select a group of DEGs to dive into the biological intepretation via GO term enrichment.
 
 ::: {.callout-note Title="Hint"}
-For studies with multiple experimental factors, it's often useful to _combine_ different factors into a new variable. Then, you design formula becomes as simple as `~ condition`.
+For studies with multiple experimental factors, it's often useful to _combine_ different factors into a new variable. Then, your design formula becomes as simple as `~ condition`.
 
 ```{R filename = "R"}
 #| eval: FALSE
