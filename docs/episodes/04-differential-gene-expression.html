@@ -219,14 +219,14 @@ window.Quarto = {
   <ul class="collapse">
   <li><a href="#creating-the-dds-object" id="toc-creating-the-dds-object" class="nav-link" data-scroll-target="#creating-the-dds-object">Creating the <code>dds</code> object</a></li>
   </ul></li>
-  <li><a href="#assesing-the-quality-of-an-rna-seq-experiment-via-pca" id="toc-assesing-the-quality-of-an-rna-seq-experiment-via-pca" class="nav-link" data-scroll-target="#assesing-the-quality-of-an-rna-seq-experiment-via-pca">Assesing the quality of an RNA-seq experiment via PCA</a>
+  <li><a href="#inspecting-sample-clustering-via-pca" id="toc-inspecting-sample-clustering-via-pca" class="nav-link" data-scroll-target="#inspecting-sample-clustering-via-pca">Inspecting sample clustering via PCA</a>
   <ul class="collapse">
   <li><a href="#performing-variance-stabilization" id="toc-performing-variance-stabilization" class="nav-link" data-scroll-target="#performing-variance-stabilization">Performing variance stabilization</a></li>
   <li><a href="#performing-the-pca" id="toc-performing-the-pca" class="nav-link" data-scroll-target="#performing-the-pca">Performing the PCA</a></li>
   </ul></li>
   <li><a href="#differential-gene-expression-analysis" id="toc-differential-gene-expression-analysis" class="nav-link" data-scroll-target="#differential-gene-expression-analysis">Differential gene expression analysis</a>
   <ul class="collapse">
-  <li><a href="#lists-of-degs" id="toc-lists-of-degs" class="nav-link" data-scroll-target="#lists-of-degs">Lists of DEGs</a></li>
+  <li><a href="#lists-of-degs-between-two-treatments" id="toc-lists-of-degs-between-two-treatments" class="nav-link" data-scroll-target="#lists-of-degs-between-two-treatments">Lists of DEGs between two treatments</a></li>
   <li><a href="#volcano-plots" id="toc-volcano-plots" class="nav-link" data-scroll-target="#volcano-plots">Volcano plots</a></li>
   <li><a href="#heatmap" id="toc-heatmap" class="nav-link" data-scroll-target="#heatmap">Heatmap</a></li>
   </ul></li>
@@ -260,7 +260,7 @@ window.Quarto = {
 <p>The main goal of most RNA-seq experiments is to discover which genes are differentially expressed between different groups (treatments, tissues, genotypes): the list of differentially expressed genes (DEGs). After the previous section, we now have a count table with the number of reads that map to each gene in each sample. How do we get to our goal from this table? We will need to use statistical models! In this section, we will use the <code>DESeq2</code> package in <code>R</code> for differential gene expression analysis. Several other packages with different statistical models and assumptions exist (e.g.&nbsp;<code>EdgeR</code> and <code>Limma</code>): we pick <code>DESeq2</code> because it is robust, widely-used, and user friendly.</p>
 <section id="reading-the-count-table-into-deseq2" class="level2">
 <h2 class="anchored" data-anchor-id="reading-the-count-table-into-deseq2">Reading the count table into DESeq2</h2>
-<p>In this tutorial, we will explore the transcriptomes of <em>A. thaliana</em> plants that experienced microgravity by growing on the International Space Station, while control plants were grown on earth. The experimental design is simple: there are three replicates in both conditions <code>space_flight</code> and <code>ground_control</code>.</p>
+<p>In this tutorial, we will explore the transcriptomes of root samples of <em>A. thaliana</em> plants that were treated with different plant hormones. Control samples were not treated with any plant hormone. The experimental design is simple: there are three replicates in each condition: <code>control</code> (no hormone), <code>aba</code> (abscisic acid), <code>meja</code> (methyl-jasmonate), <code>acc</code> (the precursor of the hormone ethylene), and <code>auxin</code>.</p>
 <div class="callout callout-style-default callout-note callout-titled">
 <div class="callout-header d-flex align-content-center">
 <div class="callout-icon-container">
@@ -275,8 +275,8 @@ Note
 <div class="cell">
 <div class="sourceCode cell-code" id="cb1"><pre class="sourceCode bash code-with-copy"><code class="sourceCode bash"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="ex">RNA-seq-workshop</span></span>
 <span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a><span class="ex">├──</span> data/</span>
-<span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a><span class="ex">│</span>   ├── GLDS38_raw_counts.csv</span>
-<span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a><span class="ex">│</span>   └── samples_to_condition.csv</span>
+<span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a><span class="ex">│</span>   ├── Deforges_2019-raw-counts.csv</span>
+<span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a><span class="ex">│</span>   └── Deforges_2019-experiment-design.csv</span>
 <span id="cb1-5"><a href="#cb1-5" aria-hidden="true" tabindex="-1"></a><span class="ex">├──</span> data_processed/</span>
 <span id="cb1-6"><a href="#cb1-6" aria-hidden="true" tabindex="-1"></a><span class="ex">│</span>   └── Normalized counts will go here</span>
 <span id="cb1-7"><a href="#cb1-7" aria-hidden="true" tabindex="-1"></a><span class="ex">├──</span> results/</span>
@@ -304,11 +304,11 @@ Note
 <div class="code-with-filename-file">
 <pre><strong>R</strong></pre>
 </div>
-<div class="sourceCode cell-code" id="annotated-cell-2"><pre class="sourceCode r code-annotation-code code-with-copy code-annotated"><code class="sourceCode r"><button class="code-annotation-anchor" data-target-cell="annotated-cell-2" data-target-annotation="1">1</button><span id="annotated-cell-2-1" class="code-annotation-target"><a href="#annotated-cell-2-1" aria-hidden="true" tabindex="-1"></a>raw_counts <span class="ot">&lt;-</span> <span class="fu">read.csv</span>(<span class="st">"data/GLDS38_raw_counts.csv"</span>, <span class="at">header =</span> T, <span class="at">stringsAsFactors =</span> F)</span>
+<div class="sourceCode cell-code" id="annotated-cell-2"><pre class="sourceCode r code-annotation-code code-with-copy code-annotated"><code class="sourceCode r"><button class="code-annotation-anchor" data-target-cell="annotated-cell-2" data-target-annotation="1">1</button><span id="annotated-cell-2-1" class="code-annotation-target"><a href="#annotated-cell-2-1" aria-hidden="true" tabindex="-1"></a>raw_counts <span class="ot">&lt;-</span> <span class="fu">read.csv</span>(<span class="st">"data/Deforges_2019-raw-counts.csv"</span>, <span class="at">header =</span> T, <span class="at">stringsAsFactors =</span> F)</span>
 <span id="annotated-cell-2-2"><a href="#annotated-cell-2-2" aria-hidden="true" tabindex="-1"></a></span>
-<button class="code-annotation-anchor" data-target-cell="annotated-cell-2" data-target-annotation="2">2</button><span id="annotated-cell-2-3" class="code-annotation-target"><a href="#annotated-cell-2-3" aria-hidden="true" tabindex="-1"></a>raw_counts <span class="ot">&lt;-</span> raw_counts <span class="sc">%&gt;%</span> <span class="fu">column_to_rownames</span>(<span class="st">"gene"</span>)</span>
+<button class="code-annotation-anchor" data-target-cell="annotated-cell-2" data-target-annotation="2">2</button><span id="annotated-cell-2-3" class="code-annotation-target"><a href="#annotated-cell-2-3" aria-hidden="true" tabindex="-1"></a>raw_counts <span class="ot">&lt;-</span> raw_counts <span class="sc">%&gt;%</span> <span class="fu">column_to_rownames</span>(<span class="st">"Geneid"</span>)</span>
 <span id="annotated-cell-2-4"><a href="#annotated-cell-2-4" aria-hidden="true" tabindex="-1"></a></span>
-<span id="annotated-cell-2-5"><a href="#annotated-cell-2-5" aria-hidden="true" tabindex="-1"></a>metadata <span class="ot">&lt;-</span> <span class="fu">read.csv</span>(<span class="st">"data/samples_to_condition.csv"</span>, <span class="at">header =</span> T)</span>
+<span id="annotated-cell-2-5"><a href="#annotated-cell-2-5" aria-hidden="true" tabindex="-1"></a>metadata <span class="ot">&lt;-</span> <span class="fu">read.csv</span>(<span class="st">"data/Deforges_2019-experiment-design.csv"</span>, <span class="at">header =</span> T)</span>
 <span id="annotated-cell-2-6"><a href="#annotated-cell-2-6" aria-hidden="true" tabindex="-1"></a></span>
 <span id="annotated-cell-2-7"><a href="#annotated-cell-2-7" aria-hidden="true" tabindex="-1"></a>raw_counts[<span class="dv">1</span><span class="sc">:</span><span class="dv">4</span>,<span class="dv">1</span><span class="sc">:</span><span class="dv">4</span>]</span><div class="code-annotation-gutter-bg"></div><div class="code-annotation-gutter"></div></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
@@ -316,25 +316,20 @@ Note
 <dl class="code-annotation-container-hidden code-annotation-container-grid">
 <dt data-target-cell="annotated-cell-2" data-target-annotation="1">1</dt>
 <dd>
-<span data-code-cell="annotated-cell-2" data-code-lines="1" data-code-annotation="1">Make sure you use the correct path to where your data is stored. Depending on your folder structure, you may not need the <code>../</code> and you could use <code>data/GLDS38_raw_counts.csv</code> instead.</span>
+<span data-code-cell="annotated-cell-2" data-code-lines="1" data-code-annotation="1">Make sure you use the correct path to where your data is stored. Depending on your folder structure, you may need to adapt the filepath. Here, we use: <code>data/Deforges_2019-raw-counts.csv</code>.</span>
 </dd>
 <dt data-target-cell="annotated-cell-2" data-target-annotation="2">2</dt>
 <dd>
-<span data-code-cell="annotated-cell-2" data-code-lines="3" data-code-annotation="2">Here, we store the column <code>gene</code> as row names instead of a dedicated column.</span>
+<span data-code-cell="annotated-cell-2" data-code-lines="3" data-code-annotation="2">Here, we store the column <code>Geneid</code> as row names instead of a dedicated column.</span>
 </dd>
 </dl>
 </div>
 <div class="cell-output cell-output-stdout">
-<pre><code>          Atha_WT_Col_0_sl_FLT_Rep1_G1S1 Atha_WT_Col_0_sl_FLT_Rep2_G1S2
-AT1G01010                            339                            383
-AT1G01020                            126                            117
-AT1G01030                            153                            158
-AT1G01040                           1238                            442
-          Atha_WT_Col_0_sl_FLT_Rep3_G1S3 Atha_WT_Col_0_sl_GC_Rep1_G2S1
-AT1G01010                            363                           650
-AT1G01020                             89                            60
-AT1G01030                            143                            97
-AT1G01040                            543                           783</code></pre>
+<pre><code>          root_control_1 root_control_2 root_control_3 root_auxin_1
+AT1G01010           2029           1481           2694         2450
+AT1G01020           1626           1608           1895         1816
+AT1G01030            150            230            375          149
+AT1G01040           3174           2599           4260         3753</code></pre>
 </div>
 </div>
 <p>That looks good! Now, it’s important to note that <code>DESeq2</code> expects the sample names (columns in count table) to <em>exactly match</em> the sample names in the metadata file, and be in the <em>same order</em>! For this small dataset, we can inspect that by eye. In addition, and probably useful for larger datasets, we can use the <code>all()</code> function to check this.</p>
@@ -346,13 +341,13 @@ AT1G01040                            543                           783</code></p
 <div class="sourceCode cell-code" id="cb4"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a><span class="fu">head</span>(metadata)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
 <div class="cell-output cell-output-stdout">
-<pre><code>                     sample_name      condition
-1 Atha_WT_Col_0_sl_FLT_Rep1_G1S1   space_flight
-2 Atha_WT_Col_0_sl_FLT_Rep2_G1S2   space_flight
-3 Atha_WT_Col_0_sl_FLT_Rep3_G1S3   space_flight
-4  Atha_WT_Col_0_sl_GC_Rep1_G2S1 ground_control
-5  Atha_WT_Col_0_sl_GC_Rep2_G2S2 ground_control
-6  Atha_WT_Col_0_sl_GC_Rep3_G2S3 ground_control</code></pre>
+<pre><code>          sample condition
+1 root_control_1   control
+2 root_control_2   control
+3 root_control_3   control
+4   root_auxin_1     auxin
+5   root_auxin_2     auxin
+6   root_auxin_3     auxin</code></pre>
 </div>
 </div>
 <div class="cell">
@@ -376,7 +371,7 @@ AT1G01040                            543                           783</code></p
 </div>
 <section id="creating-the-dds-object" class="level3">
 <h3 class="anchored" data-anchor-id="creating-the-dds-object">Creating the <code>dds</code> object</h3>
-<p>We are now ready to create a <code>DESeqDataSet</code> object, commonly abbreviated as <code>dds</code>. The <code>dds</code> object will contain our count tables and metadata, but later, also the normalized counts and differentially expressed gene lists. As such, the <code>dds</code> objects help us keep things neat in our RStudio session. To make one, we need to specify our experimental design ‘formula’. In this tutorial, there’s only one variable: the design formula will be as simple as <code>~ condition</code>. However, in multi-factor experiments it can include additional variables, can also include unwanted sources of variation such as RNA isolation batch, the researcher who extracted RNA, or on which table the plants were grown. Including these factors in the design formula will help DESeq2 to account for these soures of variation, allowing more accurate estimation of the primary condition’s effect. For example, in an experiment with a potential batch effect, treatments, and different genotypes: <code>~ batch + treatment + genotype</code>. If you also want to model the <em>interaction</em>, that is whether the treatment effect varies by genotype, change the <code>+</code> to a <code>*</code>: <code>~ batch + treatment * genotype</code>.</p>
+<p>We are now ready to create a <code>DESeqDataSet</code> object, commonly abbreviated as <code>dds</code>. The <code>dds</code> object will contain our count tables and metadata, but later, also the normalized counts and differentially expressed gene lists. As such, the <code>dds</code> objects help us keep things neat in our RStudio session. To make one, we need to specify our experimental design ‘formula’. In this tutorial, there’s only one variable: the design formula will be as simple as <code>~ condition</code>. However, in multi-factor experiments it can include additional experimental variables, but also include unwanted sources of variation such as RNA isolation batch. Including these factors in the design formula will help DESeq2 to account for these soures of variation, allowing more accurate estimation of the primary condition’s effect. For example, in an experiment with a potential batch effect, treatments, and different genotypes: <code>~ batch + treatment + genotype</code>. If you also want to model the <em>interaction</em>, that is whether the treatment effect varies by genotype, change the <code>+</code> to a <code>*</code>: <code>~ batch + treatment * genotype</code>.</p>
 <div class="cell">
 <div class="code-with-filename">
 <div class="code-with-filename-file">
@@ -393,8 +388,8 @@ design formula are characters, converting to factors</code></pre>
 </div>
 </section>
 </section>
-<section id="assesing-the-quality-of-an-rna-seq-experiment-via-pca" class="level2">
-<h2 class="anchored" data-anchor-id="assesing-the-quality-of-an-rna-seq-experiment-via-pca">Assesing the quality of an RNA-seq experiment via PCA</h2>
+<section id="inspecting-sample-clustering-via-pca" class="level2">
+<h2 class="anchored" data-anchor-id="inspecting-sample-clustering-via-pca">Inspecting sample clustering via PCA</h2>
 <p>As essential step in RNA-seq analysis is to inspect similarity between samples. In particular, we should confirm that <strong>replicates with the same treatment are similar to each other</strong>, and make sure that <strong>the experimental condition is the major source of variation in the data</strong>. In addition, these quality-control explorations will also help identify if any samples behalve as outliers, or whether there may have been a sample swap. We will use <strong>Principal Component Analysis (PCA)</strong> to do this. PCA is a dimensionality reduction technique that transforms complex high-dimensional data (like expression of thousands of genes) into a limited number of new variables (‘principal components’) that capture the most variation in the dataset.</p>
 <section id="performing-variance-stabilization" class="level3">
 <h3 class="anchored" data-anchor-id="performing-variance-stabilization">Performing variance stabilization</h3>
@@ -476,16 +471,6 @@ design formula are characters, converting to factors</code></pre>
 </div>
 <div class="sourceCode cell-code" id="cb12"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb12-1"><a href="#cb12-1" aria-hidden="true" tabindex="-1"></a><span class="fu">plotPCA</span>(variance_stabilized_dataset)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
-<div class="cell-output cell-output-stderr">
-<pre><code>using ntop=500 top features by variance</code></pre>
-</div>
-<div class="cell-output cell-output-stderr">
-<pre><code>Warning: `aes_string()` was deprecated in ggplot2 3.0.0.
-ℹ Please use tidy evaluation idioms with `aes()`.
-ℹ See also `vignette("ggplot2-in-packages")` for more information.
-ℹ The deprecated feature was likely used in the DESeq2 package.
-  Please report the issue to the authors.</code></pre>
-</div>
 <div class="cell-output-display">
 <div>
 <figure class="figure">
@@ -496,17 +481,19 @@ design formula are characters, converting to factors</code></pre>
 </div>
 <p>Let’s break this plot down:</p>
 <ul>
-<li>We see that principal component 1 (<code>PC1</code>) explains 60% of the variance, while <code>PC2</code> explains 29%. <code>PC1</code> does not seem to separate our two conditions. This means that there’s a source of variation in this dataset that we are seemingly unaware of.</li>
-<li>We see that <code>PC2</code> nicely separates our two conditions. This is good news.</li>
-<li>We see that two samples from <code>space_flight</code> cluster very closely together, while one sample is quite a distant from those two. This means that this one replicate behaves a bit differently than the rest. However, since it’s still similar to the other two samples on the <code>PC2</code> axis, this does not worry me.</li>
+<li>We see that principal component 1 (<code>PC1</code>) explains 61% of the variance, while <code>PC2</code> explains 27%.</li>
+<li><code>PC1</code> separates the <code>aba</code> samples from all other conditions.</li>
+<li><code>PC2</code> separates <code>meja</code> and <code>auxin</code> treated sampled from the <code>control</code> samples, both in a different direction.</li>
+<li><code>acc</code> treated samples seem to cluster together with <code>control</code> samples. So it looks like the impact of <code>acc</code> on the Arabidopsis transcriptome is limited.</li>
+<li>Different replicates from the same treatment plot close together in PCA space: that’s good news.</li>
 </ul>
-<p>If you want to have full control and make the PCA plot yourself in <code>ggplot</code>, you can add <code>returnData=TRUE)</code></p>
+<p>If you want to have full control and make the PCA plot yourself in <code>ggplot2</code>, you can add <code>returnData=TRUE)</code>. You can then save the PCA coordinates in a dataframe, ready for manual plotting.</p>
 <div class="cell">
 <div class="code-with-filename">
 <div class="code-with-filename-file">
 <pre><strong>R</strong></pre>
 </div>
-<div class="sourceCode cell-code" id="cb15"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb15-1"><a href="#cb15-1" aria-hidden="true" tabindex="-1"></a>pca_data <span class="ot">&lt;-</span> <span class="fu">plotPCA</span>(variance_stabilized_dataset, <span class="at">returnData=</span><span class="cn">TRUE</span>) </span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb13"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb13-1"><a href="#cb13-1" aria-hidden="true" tabindex="-1"></a>pca_data <span class="ot">&lt;-</span> <span class="fu">plotPCA</span>(variance_stabilized_dataset, <span class="at">returnData=</span><span class="cn">TRUE</span>) </span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
 </div>
 <p>While it is impossible to give examples of all situations that can occur in PCAs, we highlight a few below in fake PCA plots:</p>
@@ -517,32 +504,32 @@ design formula are characters, converting to factors</code></pre>
 <div class="code-with-filename-file">
 <pre><strong>R</strong></pre>
 </div>
-<div class="sourceCode cell-code" id="cb16"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb16-1"><a href="#cb16-1" aria-hidden="true" tabindex="-1"></a>df_swap <span class="ot">&lt;-</span> <span class="fu">data.frame</span>(</span>
-<span id="cb16-2"><a href="#cb16-2" aria-hidden="true" tabindex="-1"></a>  <span class="at">PC1 =</span> <span class="fu">c</span>(<span class="fu">rnorm</span>(<span class="dv">5</span>, <span class="at">mean =</span> <span class="dv">1</span>, <span class="at">sd =</span> <span class="fl">0.2</span>),   </span>
-<span id="cb16-3"><a href="#cb16-3" aria-hidden="true" tabindex="-1"></a>          <span class="fu">rnorm</span>(<span class="dv">5</span>, <span class="at">mean =</span> <span class="sc">-</span><span class="dv">2</span>, <span class="at">sd =</span> <span class="fl">0.2</span>)), </span>
-<span id="cb16-4"><a href="#cb16-4" aria-hidden="true" tabindex="-1"></a>  <span class="at">PC2 =</span> <span class="fu">c</span>(<span class="fu">rnorm</span>(<span class="dv">5</span>, <span class="at">mean =</span> <span class="fl">0.4</span>, <span class="at">sd =</span> <span class="fl">0.2</span>),</span>
-<span id="cb16-5"><a href="#cb16-5" aria-hidden="true" tabindex="-1"></a>          <span class="fu">rnorm</span>(<span class="dv">5</span>, <span class="at">mean =</span> <span class="fl">0.3</span>, <span class="at">sd =</span> <span class="fl">0.2</span>)),</span>
-<span id="cb16-6"><a href="#cb16-6" aria-hidden="true" tabindex="-1"></a>  <span class="at">genotype =</span> <span class="fu">c</span>(<span class="fu">rep</span>(<span class="st">"WT"</span>, <span class="dv">4</span>), <span class="st">"mutant"</span>, <span class="fu">rep</span>(<span class="st">"mutant"</span>, <span class="dv">4</span>), <span class="st">"WT"</span>))</span>
-<span id="cb16-7"><a href="#cb16-7" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb16-8"><a href="#cb16-8" aria-hidden="true" tabindex="-1"></a>df_weak_sep <span class="ot">&lt;-</span> <span class="fu">data.frame</span>(</span>
-<span id="cb16-9"><a href="#cb16-9" aria-hidden="true" tabindex="-1"></a>  <span class="at">PC1 =</span> <span class="fu">c</span>(<span class="fu">rnorm</span>(<span class="dv">5</span>, <span class="at">mean =</span> <span class="fl">0.2</span>, <span class="at">sd =</span> <span class="fl">0.45</span>),   </span>
-<span id="cb16-10"><a href="#cb16-10" aria-hidden="true" tabindex="-1"></a>          <span class="fu">rnorm</span>(<span class="dv">5</span>, <span class="at">mean =</span> <span class="dv">0</span>, <span class="at">sd =</span> <span class="fl">0.6</span>)), </span>
-<span id="cb16-11"><a href="#cb16-11" aria-hidden="true" tabindex="-1"></a>  <span class="at">PC2 =</span> <span class="fu">c</span>(<span class="fu">rnorm</span>(<span class="dv">5</span>, <span class="at">mean =</span> <span class="dv">0</span>, <span class="at">sd =</span> <span class="fl">0.25</span>),</span>
-<span id="cb16-12"><a href="#cb16-12" aria-hidden="true" tabindex="-1"></a>          <span class="fu">rnorm</span>(<span class="dv">5</span>, <span class="at">mean =</span> <span class="dv">0</span>, <span class="at">sd =</span> <span class="fl">0.25</span>)),</span>
-<span id="cb16-13"><a href="#cb16-13" aria-hidden="true" tabindex="-1"></a>  <span class="at">genotype =</span> <span class="fu">rep</span>(<span class="fu">c</span>(<span class="st">"WT"</span>, <span class="st">"mutant"</span>), <span class="at">each =</span> <span class="dv">5</span>)</span>
-<span id="cb16-14"><a href="#cb16-14" aria-hidden="true" tabindex="-1"></a>)</span>
-<span id="cb16-15"><a href="#cb16-15" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb16-16"><a href="#cb16-16" aria-hidden="true" tabindex="-1"></a>p1 <span class="ot">&lt;-</span> df_swap <span class="sc">%&gt;%</span> <span class="fu">ggplot</span>(<span class="fu">aes</span>(<span class="at">x =</span> PC1, <span class="at">y =</span> PC2, <span class="at">colour =</span> genotype)) <span class="sc">+</span> <span class="fu">geom_point</span>() <span class="sc">+</span></span>
-<span id="cb16-17"><a href="#cb16-17" aria-hidden="true" tabindex="-1"></a>  <span class="fu">xlab</span>(<span class="st">"PC1 (48%)"</span>) <span class="sc">+</span></span>
-<span id="cb16-18"><a href="#cb16-18" aria-hidden="true" tabindex="-1"></a>  <span class="fu">ylab</span>(<span class="st">"PC2 (13%)"</span>) <span class="sc">+</span></span>
-<span id="cb16-19"><a href="#cb16-19" aria-hidden="true" tabindex="-1"></a>  <span class="fu">ggtitle</span>(<span class="st">"Sample swap"</span>)</span>
-<span id="cb16-20"><a href="#cb16-20" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb16-21"><a href="#cb16-21" aria-hidden="true" tabindex="-1"></a>p2 <span class="ot">&lt;-</span> df_weak_sep <span class="sc">%&gt;%</span> <span class="fu">ggplot</span>(<span class="fu">aes</span>(<span class="at">x =</span> PC1, <span class="at">y =</span> PC2, <span class="at">colour =</span> genotype)) <span class="sc">+</span> <span class="fu">geom_point</span>() <span class="sc">+</span></span>
-<span id="cb16-22"><a href="#cb16-22" aria-hidden="true" tabindex="-1"></a>    <span class="fu">xlab</span>(<span class="st">"PC1 (12%)"</span>) <span class="sc">+</span></span>
-<span id="cb16-23"><a href="#cb16-23" aria-hidden="true" tabindex="-1"></a>    <span class="fu">ylab</span>(<span class="st">"PC2 (4%)"</span>) <span class="sc">+</span></span>
-<span id="cb16-24"><a href="#cb16-24" aria-hidden="true" tabindex="-1"></a>    <span class="fu">ggtitle</span>(<span class="st">"Weak separation"</span>)</span>
-<span id="cb16-25"><a href="#cb16-25" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb16-26"><a href="#cb16-26" aria-hidden="true" tabindex="-1"></a>p1 <span class="sc">|</span> p2</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb14"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb14-1"><a href="#cb14-1" aria-hidden="true" tabindex="-1"></a>df_swap <span class="ot">&lt;-</span> <span class="fu">data.frame</span>(</span>
+<span id="cb14-2"><a href="#cb14-2" aria-hidden="true" tabindex="-1"></a>  <span class="at">PC1 =</span> <span class="fu">c</span>(<span class="fu">rnorm</span>(<span class="dv">5</span>, <span class="at">mean =</span> <span class="dv">1</span>, <span class="at">sd =</span> <span class="fl">0.2</span>),   </span>
+<span id="cb14-3"><a href="#cb14-3" aria-hidden="true" tabindex="-1"></a>          <span class="fu">rnorm</span>(<span class="dv">5</span>, <span class="at">mean =</span> <span class="sc">-</span><span class="dv">2</span>, <span class="at">sd =</span> <span class="fl">0.2</span>)), </span>
+<span id="cb14-4"><a href="#cb14-4" aria-hidden="true" tabindex="-1"></a>  <span class="at">PC2 =</span> <span class="fu">c</span>(<span class="fu">rnorm</span>(<span class="dv">5</span>, <span class="at">mean =</span> <span class="fl">0.4</span>, <span class="at">sd =</span> <span class="fl">0.2</span>),</span>
+<span id="cb14-5"><a href="#cb14-5" aria-hidden="true" tabindex="-1"></a>          <span class="fu">rnorm</span>(<span class="dv">5</span>, <span class="at">mean =</span> <span class="fl">0.3</span>, <span class="at">sd =</span> <span class="fl">0.2</span>)),</span>
+<span id="cb14-6"><a href="#cb14-6" aria-hidden="true" tabindex="-1"></a>  <span class="at">genotype =</span> <span class="fu">c</span>(<span class="fu">rep</span>(<span class="st">"WT"</span>, <span class="dv">4</span>), <span class="st">"mutant"</span>, <span class="fu">rep</span>(<span class="st">"mutant"</span>, <span class="dv">4</span>), <span class="st">"WT"</span>))</span>
+<span id="cb14-7"><a href="#cb14-7" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb14-8"><a href="#cb14-8" aria-hidden="true" tabindex="-1"></a>df_weak_sep <span class="ot">&lt;-</span> <span class="fu">data.frame</span>(</span>
+<span id="cb14-9"><a href="#cb14-9" aria-hidden="true" tabindex="-1"></a>  <span class="at">PC1 =</span> <span class="fu">c</span>(<span class="fu">rnorm</span>(<span class="dv">5</span>, <span class="at">mean =</span> <span class="fl">0.2</span>, <span class="at">sd =</span> <span class="fl">0.45</span>),   </span>
+<span id="cb14-10"><a href="#cb14-10" aria-hidden="true" tabindex="-1"></a>          <span class="fu">rnorm</span>(<span class="dv">5</span>, <span class="at">mean =</span> <span class="dv">0</span>, <span class="at">sd =</span> <span class="fl">0.6</span>)), </span>
+<span id="cb14-11"><a href="#cb14-11" aria-hidden="true" tabindex="-1"></a>  <span class="at">PC2 =</span> <span class="fu">c</span>(<span class="fu">rnorm</span>(<span class="dv">5</span>, <span class="at">mean =</span> <span class="dv">0</span>, <span class="at">sd =</span> <span class="fl">0.25</span>),</span>
+<span id="cb14-12"><a href="#cb14-12" aria-hidden="true" tabindex="-1"></a>          <span class="fu">rnorm</span>(<span class="dv">5</span>, <span class="at">mean =</span> <span class="dv">0</span>, <span class="at">sd =</span> <span class="fl">0.25</span>)),</span>
+<span id="cb14-13"><a href="#cb14-13" aria-hidden="true" tabindex="-1"></a>  <span class="at">genotype =</span> <span class="fu">rep</span>(<span class="fu">c</span>(<span class="st">"WT"</span>, <span class="st">"mutant"</span>), <span class="at">each =</span> <span class="dv">5</span>)</span>
+<span id="cb14-14"><a href="#cb14-14" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb14-15"><a href="#cb14-15" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb14-16"><a href="#cb14-16" aria-hidden="true" tabindex="-1"></a>p1 <span class="ot">&lt;-</span> df_swap <span class="sc">%&gt;%</span> <span class="fu">ggplot</span>(<span class="fu">aes</span>(<span class="at">x =</span> PC1, <span class="at">y =</span> PC2, <span class="at">colour =</span> genotype)) <span class="sc">+</span> <span class="fu">geom_point</span>() <span class="sc">+</span></span>
+<span id="cb14-17"><a href="#cb14-17" aria-hidden="true" tabindex="-1"></a>  <span class="fu">xlab</span>(<span class="st">"PC1 (48%)"</span>) <span class="sc">+</span></span>
+<span id="cb14-18"><a href="#cb14-18" aria-hidden="true" tabindex="-1"></a>  <span class="fu">ylab</span>(<span class="st">"PC2 (13%)"</span>) <span class="sc">+</span></span>
+<span id="cb14-19"><a href="#cb14-19" aria-hidden="true" tabindex="-1"></a>  <span class="fu">ggtitle</span>(<span class="st">"Sample swap"</span>)</span>
+<span id="cb14-20"><a href="#cb14-20" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb14-21"><a href="#cb14-21" aria-hidden="true" tabindex="-1"></a>p2 <span class="ot">&lt;-</span> df_weak_sep <span class="sc">%&gt;%</span> <span class="fu">ggplot</span>(<span class="fu">aes</span>(<span class="at">x =</span> PC1, <span class="at">y =</span> PC2, <span class="at">colour =</span> genotype)) <span class="sc">+</span> <span class="fu">geom_point</span>() <span class="sc">+</span></span>
+<span id="cb14-22"><a href="#cb14-22" aria-hidden="true" tabindex="-1"></a>    <span class="fu">xlab</span>(<span class="st">"PC1 (12%)"</span>) <span class="sc">+</span></span>
+<span id="cb14-23"><a href="#cb14-23" aria-hidden="true" tabindex="-1"></a>    <span class="fu">ylab</span>(<span class="st">"PC2 (4%)"</span>) <span class="sc">+</span></span>
+<span id="cb14-24"><a href="#cb14-24" aria-hidden="true" tabindex="-1"></a>    <span class="fu">ggtitle</span>(<span class="st">"Weak separation"</span>)</span>
+<span id="cb14-25"><a href="#cb14-25" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb14-26"><a href="#cb14-26" aria-hidden="true" tabindex="-1"></a>p1 <span class="sc">|</span> p2</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details>
 </div>
 <div class="cell-output-display">
@@ -561,26 +548,26 @@ design formula are characters, converting to factors</code></pre>
 <div class="code-with-filename-file">
 <pre><strong>R</strong></pre>
 </div>
-<div class="sourceCode cell-code" id="cb17"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb17-1"><a href="#cb17-1" aria-hidden="true" tabindex="-1"></a>df_confounding_1 <span class="ot">&lt;-</span> <span class="fu">data.frame</span>(</span>
-<span id="cb17-2"><a href="#cb17-2" aria-hidden="true" tabindex="-1"></a>  <span class="at">PC1 =</span> <span class="fu">c</span>(<span class="fu">rnorm</span>(<span class="dv">5</span>, <span class="at">mean =</span> <span class="dv">1</span>, <span class="at">sd =</span> <span class="fl">0.45</span>),   </span>
-<span id="cb17-3"><a href="#cb17-3" aria-hidden="true" tabindex="-1"></a>          <span class="fu">rnorm</span>(<span class="dv">5</span>, <span class="at">mean =</span> <span class="sc">-</span><span class="dv">1</span>, <span class="at">sd =</span> <span class="fl">0.6</span>)), </span>
-<span id="cb17-4"><a href="#cb17-4" aria-hidden="true" tabindex="-1"></a>  <span class="at">PC2 =</span> <span class="fu">c</span>(<span class="fu">rnorm</span>(<span class="dv">5</span>, <span class="at">mean =</span> <span class="dv">0</span>, <span class="at">sd =</span> <span class="fl">0.25</span>),</span>
-<span id="cb17-5"><a href="#cb17-5" aria-hidden="true" tabindex="-1"></a>          <span class="fu">rnorm</span>(<span class="dv">5</span>, <span class="at">mean =</span> <span class="dv">0</span>, <span class="at">sd =</span> <span class="fl">0.25</span>)),</span>
-<span id="cb17-6"><a href="#cb17-6" aria-hidden="true" tabindex="-1"></a>  <span class="at">genotype =</span> <span class="fu">rep</span>(<span class="fu">c</span>(<span class="st">"WT"</span>, <span class="st">"mutant"</span>), <span class="at">each =</span> <span class="dv">5</span>),</span>
-<span id="cb17-7"><a href="#cb17-7" aria-hidden="true" tabindex="-1"></a>  <span class="at">gender =</span> <span class="fu">rep</span>(<span class="fu">c</span>(<span class="st">"male"</span>, <span class="st">"female"</span>), <span class="at">each =</span> <span class="dv">5</span>)</span>
-<span id="cb17-8"><a href="#cb17-8" aria-hidden="true" tabindex="-1"></a>)</span>
-<span id="cb17-9"><a href="#cb17-9" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb17-10"><a href="#cb17-10" aria-hidden="true" tabindex="-1"></a>p1 <span class="ot">&lt;-</span> df_confounding_1 <span class="sc">%&gt;%</span> <span class="fu">ggplot</span>(<span class="fu">aes</span>(<span class="at">x =</span> PC1, <span class="at">y =</span> PC2, <span class="at">colour =</span> genotype)) <span class="sc">+</span> <span class="fu">geom_point</span>() <span class="sc">+</span></span>
-<span id="cb17-11"><a href="#cb17-11" aria-hidden="true" tabindex="-1"></a>  <span class="fu">xlab</span>(<span class="st">"PC1 (48%)"</span>) <span class="sc">+</span></span>
-<span id="cb17-12"><a href="#cb17-12" aria-hidden="true" tabindex="-1"></a>  <span class="fu">ylab</span>(<span class="st">"PC2 (13%)"</span>) <span class="sc">+</span></span>
-<span id="cb17-13"><a href="#cb17-13" aria-hidden="true" tabindex="-1"></a>  <span class="fu">ggtitle</span>(<span class="st">"Genotype effect ..."</span>)</span>
-<span id="cb17-14"><a href="#cb17-14" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb17-15"><a href="#cb17-15" aria-hidden="true" tabindex="-1"></a>p2 <span class="ot">&lt;-</span> df_confounding_1 <span class="sc">%&gt;%</span> <span class="fu">ggplot</span>(<span class="fu">aes</span>(<span class="at">x =</span> PC1, <span class="at">y =</span> PC2, <span class="at">colour =</span> gender)) <span class="sc">+</span> <span class="fu">geom_point</span>() <span class="sc">+</span></span>
-<span id="cb17-16"><a href="#cb17-16" aria-hidden="true" tabindex="-1"></a>  <span class="fu">xlab</span>(<span class="st">"PC1 (48%)"</span>) <span class="sc">+</span></span>
-<span id="cb17-17"><a href="#cb17-17" aria-hidden="true" tabindex="-1"></a>  <span class="fu">ylab</span>(<span class="st">"PC2 (13%)"</span>) <span class="sc">+</span></span>
-<span id="cb17-18"><a href="#cb17-18" aria-hidden="true" tabindex="-1"></a>  <span class="fu">ggtitle</span>(<span class="st">"... or gender effect?"</span>)</span>
-<span id="cb17-19"><a href="#cb17-19" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb17-20"><a href="#cb17-20" aria-hidden="true" tabindex="-1"></a>p1 <span class="sc">|</span> p2</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb15"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb15-1"><a href="#cb15-1" aria-hidden="true" tabindex="-1"></a>df_confounding_1 <span class="ot">&lt;-</span> <span class="fu">data.frame</span>(</span>
+<span id="cb15-2"><a href="#cb15-2" aria-hidden="true" tabindex="-1"></a>  <span class="at">PC1 =</span> <span class="fu">c</span>(<span class="fu">rnorm</span>(<span class="dv">5</span>, <span class="at">mean =</span> <span class="dv">1</span>, <span class="at">sd =</span> <span class="fl">0.45</span>),   </span>
+<span id="cb15-3"><a href="#cb15-3" aria-hidden="true" tabindex="-1"></a>          <span class="fu">rnorm</span>(<span class="dv">5</span>, <span class="at">mean =</span> <span class="sc">-</span><span class="dv">1</span>, <span class="at">sd =</span> <span class="fl">0.6</span>)), </span>
+<span id="cb15-4"><a href="#cb15-4" aria-hidden="true" tabindex="-1"></a>  <span class="at">PC2 =</span> <span class="fu">c</span>(<span class="fu">rnorm</span>(<span class="dv">5</span>, <span class="at">mean =</span> <span class="dv">0</span>, <span class="at">sd =</span> <span class="fl">0.25</span>),</span>
+<span id="cb15-5"><a href="#cb15-5" aria-hidden="true" tabindex="-1"></a>          <span class="fu">rnorm</span>(<span class="dv">5</span>, <span class="at">mean =</span> <span class="dv">0</span>, <span class="at">sd =</span> <span class="fl">0.25</span>)),</span>
+<span id="cb15-6"><a href="#cb15-6" aria-hidden="true" tabindex="-1"></a>  <span class="at">genotype =</span> <span class="fu">rep</span>(<span class="fu">c</span>(<span class="st">"WT"</span>, <span class="st">"mutant"</span>), <span class="at">each =</span> <span class="dv">5</span>),</span>
+<span id="cb15-7"><a href="#cb15-7" aria-hidden="true" tabindex="-1"></a>  <span class="at">gender =</span> <span class="fu">rep</span>(<span class="fu">c</span>(<span class="st">"male"</span>, <span class="st">"female"</span>), <span class="at">each =</span> <span class="dv">5</span>)</span>
+<span id="cb15-8"><a href="#cb15-8" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb15-9"><a href="#cb15-9" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb15-10"><a href="#cb15-10" aria-hidden="true" tabindex="-1"></a>p1 <span class="ot">&lt;-</span> df_confounding_1 <span class="sc">%&gt;%</span> <span class="fu">ggplot</span>(<span class="fu">aes</span>(<span class="at">x =</span> PC1, <span class="at">y =</span> PC2, <span class="at">colour =</span> genotype)) <span class="sc">+</span> <span class="fu">geom_point</span>() <span class="sc">+</span></span>
+<span id="cb15-11"><a href="#cb15-11" aria-hidden="true" tabindex="-1"></a>  <span class="fu">xlab</span>(<span class="st">"PC1 (48%)"</span>) <span class="sc">+</span></span>
+<span id="cb15-12"><a href="#cb15-12" aria-hidden="true" tabindex="-1"></a>  <span class="fu">ylab</span>(<span class="st">"PC2 (13%)"</span>) <span class="sc">+</span></span>
+<span id="cb15-13"><a href="#cb15-13" aria-hidden="true" tabindex="-1"></a>  <span class="fu">ggtitle</span>(<span class="st">"Genotype effect ..."</span>)</span>
+<span id="cb15-14"><a href="#cb15-14" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb15-15"><a href="#cb15-15" aria-hidden="true" tabindex="-1"></a>p2 <span class="ot">&lt;-</span> df_confounding_1 <span class="sc">%&gt;%</span> <span class="fu">ggplot</span>(<span class="fu">aes</span>(<span class="at">x =</span> PC1, <span class="at">y =</span> PC2, <span class="at">colour =</span> gender)) <span class="sc">+</span> <span class="fu">geom_point</span>() <span class="sc">+</span></span>
+<span id="cb15-16"><a href="#cb15-16" aria-hidden="true" tabindex="-1"></a>  <span class="fu">xlab</span>(<span class="st">"PC1 (48%)"</span>) <span class="sc">+</span></span>
+<span id="cb15-17"><a href="#cb15-17" aria-hidden="true" tabindex="-1"></a>  <span class="fu">ylab</span>(<span class="st">"PC2 (13%)"</span>) <span class="sc">+</span></span>
+<span id="cb15-18"><a href="#cb15-18" aria-hidden="true" tabindex="-1"></a>  <span class="fu">ggtitle</span>(<span class="st">"... or gender effect?"</span>)</span>
+<span id="cb15-19"><a href="#cb15-19" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb15-20"><a href="#cb15-20" aria-hidden="true" tabindex="-1"></a>p1 <span class="sc">|</span> p2</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details>
 </div>
 <div class="cell-output-display">
@@ -623,16 +610,16 @@ Solution
 <div class="code-with-filename-file">
 <pre><strong>R</strong></pre>
 </div>
-<div class="sourceCode cell-code" id="cb18"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb18-1"><a href="#cb18-1" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(pheatmap)</span>
-<span id="cb18-2"><a href="#cb18-2" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb18-3"><a href="#cb18-3" aria-hidden="true" tabindex="-1"></a>correlation_matrix <span class="ot">&lt;-</span> <span class="fu">cor</span>(variance_stabilised_counts)</span>
-<span id="cb18-4"><a href="#cb18-4" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb18-5"><a href="#cb18-5" aria-hidden="true" tabindex="-1"></a>metadata_2 <span class="ot">&lt;-</span> metadata <span class="sc">%&gt;%</span> <span class="fu">column_to_rownames</span>(<span class="st">"sample_name"</span>)</span>
-<span id="cb18-6"><a href="#cb18-6" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb18-7"><a href="#cb18-7" aria-hidden="true" tabindex="-1"></a><span class="fu">pheatmap</span>(correlation_matrix, <span class="at">annotation_row =</span> metadata_2, </span>
-<span id="cb18-8"><a href="#cb18-8" aria-hidden="true" tabindex="-1"></a>         <span class="at">clustering_distance_rows =</span> <span class="st">"correlation"</span>, </span>
-<span id="cb18-9"><a href="#cb18-9" aria-hidden="true" tabindex="-1"></a>         <span class="at">clustering_distance_cols =</span> <span class="st">"correlation"</span>, </span>
-<span id="cb18-10"><a href="#cb18-10" aria-hidden="true" tabindex="-1"></a>         <span class="at">display_numbers =</span> <span class="cn">TRUE</span>, <span class="at">fontsize =</span> <span class="dv">7</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb16"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb16-1"><a href="#cb16-1" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(pheatmap)</span>
+<span id="cb16-2"><a href="#cb16-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb16-3"><a href="#cb16-3" aria-hidden="true" tabindex="-1"></a>correlation_matrix <span class="ot">&lt;-</span> <span class="fu">cor</span>(variance_stabilised_counts)</span>
+<span id="cb16-4"><a href="#cb16-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb16-5"><a href="#cb16-5" aria-hidden="true" tabindex="-1"></a>metadata_2 <span class="ot">&lt;-</span> metadata <span class="sc">%&gt;%</span> <span class="fu">column_to_rownames</span>(<span class="st">"sample"</span>)</span>
+<span id="cb16-6"><a href="#cb16-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb16-7"><a href="#cb16-7" aria-hidden="true" tabindex="-1"></a><span class="fu">pheatmap</span>(correlation_matrix, <span class="at">annotation_row =</span> metadata_2, </span>
+<span id="cb16-8"><a href="#cb16-8" aria-hidden="true" tabindex="-1"></a>         <span class="at">clustering_distance_rows =</span> <span class="st">"correlation"</span>, </span>
+<span id="cb16-9"><a href="#cb16-9" aria-hidden="true" tabindex="-1"></a>         <span class="at">clustering_distance_cols =</span> <span class="st">"correlation"</span>, </span>
+<span id="cb16-10"><a href="#cb16-10" aria-hidden="true" tabindex="-1"></a>         <span class="at">display_numbers =</span> <span class="cn">TRUE</span>, <span class="at">fontsize =</span> <span class="dv">7</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
 <div class="cell-output-display">
 <div>
@@ -642,7 +629,11 @@ Solution
 </div>
 </div>
 </div>
-<p>We can see that all the <code>ground_control</code> and <code>space_flight</code> samples cluster together. For example, <code>ground_control</code> samples have a 0.98 or greater correlation with each other, while they have a slightly lower correlation with <code>space_flight</code> samples. However, the samples still have a high correlation also accross the different treatment. This shows that the transcriptomes are actually highly similar, regardless of treatment, probably because the majority of genes is not differentially expressed.</p>
+<ul>
+<li><p>We can see that all the replicate samples with the same treatment cluster together, For example, <code>aba</code> samples have a 0.99 correlation with each other, while they have a slightly lower correlation to samples with a different treatments.</p></li>
+<li><p>Just like in the PCA <code>control</code> and <code>acc</code> samples cluster together, indicating that there is little impact of <code>acc</code> treatment on the transcriptome of Arabidopsis roots.</p></li>
+<li><p>All samples still have a high correlation across the different treatments. This shows that the transcriptomes are actually highly similar, regardless of treatment, probably because the majority of genes is not differentially expressed.</p></li>
+</ul>
 </div>
 </div>
 </div>
@@ -650,13 +641,13 @@ Solution
 </section>
 <section id="differential-gene-expression-analysis" class="level2">
 <h2 class="anchored" data-anchor-id="differential-gene-expression-analysis">Differential gene expression analysis</h2>
-<p><code>DESeq2</code> handles all steps of DEG analysis, from sample normalization (e.g., to account for difference in sequencing depth per sample) to the statistical models and tests in one function. Easy! We run this function with the <code>dds</code> object as input, while storing the output in the <code>dds</code> object as well. In this way, we will ‘fill’ the <code>dds</code> object with the new analysis. <code>R</code> will now print all the individual steps that the <code>DESeq()</code> function performed for us.</p>
+<p><code>DESeq2</code> handles all steps of DEG analysis, from sample normalization (e.g., to account for difference in sequencing depth per sample) to the statistical models and tests in one function: <code>DESeq()</code>. Easy! We run this function with the <code>dds</code> object as input, while storing the output in the <code>dds</code> object as well. In this way, we will ‘update’ the <code>dds</code> object with the new analysis. <code>R</code> will now print all the individual steps that the <code>DESeq()</code> function performed for us.</p>
 <div class="cell">
 <div class="code-with-filename">
 <div class="code-with-filename-file">
 <pre><strong>R</strong></pre>
 </div>
-<div class="sourceCode cell-code" id="cb19"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb19-1"><a href="#cb19-1" aria-hidden="true" tabindex="-1"></a>dds <span class="ot">&lt;-</span> <span class="fu">DESeq</span>(dds)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb17"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb17-1"><a href="#cb17-1" aria-hidden="true" tabindex="-1"></a>dds <span class="ot">&lt;-</span> <span class="fu">DESeq</span>(dds)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
 <div class="cell-output cell-output-stderr">
 <pre><code>estimating size factors</code></pre>
@@ -683,13 +674,13 @@ Solution
 <div class="code-with-filename-file">
 <pre><strong>R</strong></pre>
 </div>
-<div class="sourceCode cell-code" id="cb26"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb26-1"><a href="#cb26-1" aria-hidden="true" tabindex="-1"></a>norm_counts <span class="ot">&lt;-</span> <span class="fu">counts</span>(dds, <span class="at">normalized =</span> <span class="cn">TRUE</span>)</span>
-<span id="cb26-2"><a href="#cb26-2" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb26-3"><a href="#cb26-3" aria-hidden="true" tabindex="-1"></a>norm_counts <span class="ot">&lt;-</span> norm_counts <span class="sc">%&gt;%</span> </span>
-<span id="cb26-4"><a href="#cb26-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">as.data.frame</span>() <span class="sc">%&gt;%</span></span>
-<span id="cb26-5"><a href="#cb26-5" aria-hidden="true" tabindex="-1"></a>  <span class="fu">rownames_to_column</span>(<span class="st">"gene_id"</span>) </span>
-<span id="cb26-6"><a href="#cb26-6" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb26-7"><a href="#cb26-7" aria-hidden="true" tabindex="-1"></a><span class="fu">write.csv</span>(norm_counts, <span class="at">file =</span> <span class="st">"data_processed/normalized_counts.csv"</span>, <span class="at">row.names =</span> <span class="cn">FALSE</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb24"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb24-1"><a href="#cb24-1" aria-hidden="true" tabindex="-1"></a>norm_counts <span class="ot">&lt;-</span> <span class="fu">counts</span>(dds, <span class="at">normalized =</span> <span class="cn">TRUE</span>)</span>
+<span id="cb24-2"><a href="#cb24-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb24-3"><a href="#cb24-3" aria-hidden="true" tabindex="-1"></a>norm_counts <span class="ot">&lt;-</span> norm_counts <span class="sc">%&gt;%</span> </span>
+<span id="cb24-4"><a href="#cb24-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">as.data.frame</span>() <span class="sc">%&gt;%</span></span>
+<span id="cb24-5"><a href="#cb24-5" aria-hidden="true" tabindex="-1"></a>  <span class="fu">rownames_to_column</span>(<span class="st">"gene_id"</span>) </span>
+<span id="cb24-6"><a href="#cb24-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb24-7"><a href="#cb24-7" aria-hidden="true" tabindex="-1"></a><span class="fu">write.csv</span>(norm_counts, <span class="at">file =</span> <span class="st">"data_processed/normalized_counts.csv"</span>, <span class="at">row.names =</span> <span class="cn">FALSE</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
 </div>
 <div class="callout callout-style-default callout-tip no-icon callout-titled" title="Question">
@@ -717,35 +708,35 @@ Solution
 </div>
 <div id="callout-5" class="callout-5-contents callout-collapse collapse">
 <div class="callout-body-container callout-body">
-<p>You would make a boxplot of all the read counts per sample, for both raw counts and normalized counts.</p>
+<p>You could make a boxplot of all the read counts per sample, for both raw counts and normalized counts.</p>
 <div class="cell">
 <div class="code-with-filename">
 <div class="code-with-filename-file">
 <pre><strong>R</strong></pre>
 </div>
-<div class="sourceCode cell-code" id="cb27"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb27-1"><a href="#cb27-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Get the raw counts and the normalized counts</span></span>
-<span id="cb27-2"><a href="#cb27-2" aria-hidden="true" tabindex="-1"></a>raw_counts <span class="ot">&lt;-</span> <span class="fu">counts</span>(dds, <span class="at">normalized=</span><span class="cn">FALSE</span>)</span>
-<span id="cb27-3"><a href="#cb27-3" aria-hidden="true" tabindex="-1"></a>normalized_counts <span class="ot">&lt;-</span> <span class="fu">counts</span>(dds, <span class="at">normalized=</span><span class="cn">TRUE</span>) </span>
-<span id="cb27-4"><a href="#cb27-4" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb27-5"><a href="#cb27-5" aria-hidden="true" tabindex="-1"></a><span class="co"># Convert matrices to tidy format to visualize difference between raw and scaled counts</span></span>
-<span id="cb27-6"><a href="#cb27-6" aria-hidden="true" tabindex="-1"></a>tidy_raw <span class="ot">&lt;-</span>  raw_counts <span class="sc">%&gt;%</span> </span>
-<span id="cb27-7"><a href="#cb27-7" aria-hidden="true" tabindex="-1"></a>    <span class="fu">as.data.frame</span>() <span class="sc">%&gt;%</span> </span>
-<span id="cb27-8"><a href="#cb27-8" aria-hidden="true" tabindex="-1"></a>    <span class="fu">rownames_to_column</span>(<span class="st">"Gene"</span>) <span class="sc">%&gt;%</span> </span>
-<span id="cb27-9"><a href="#cb27-9" aria-hidden="true" tabindex="-1"></a>    <span class="fu">pivot_longer</span>(<span class="at">cols =</span> <span class="sc">-</span>Gene, <span class="at">names_to =</span> <span class="st">"Sample"</span>, <span class="at">values_to =</span> <span class="st">"counts"</span>) <span class="sc">%&gt;%</span> </span>
-<span id="cb27-10"><a href="#cb27-10" aria-hidden="true" tabindex="-1"></a>    <span class="fu">mutate</span>(<span class="at">dataset =</span> <span class="st">"raw"</span>)</span>
-<span id="cb27-11"><a href="#cb27-11" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb27-12"><a href="#cb27-12" aria-hidden="true" tabindex="-1"></a>tidy_normalized <span class="ot">&lt;-</span> normalized_counts <span class="sc">%&gt;%</span> </span>
-<span id="cb27-13"><a href="#cb27-13" aria-hidden="true" tabindex="-1"></a>  <span class="fu">as.data.frame</span>() <span class="sc">%&gt;%</span> </span>
-<span id="cb27-14"><a href="#cb27-14" aria-hidden="true" tabindex="-1"></a>  <span class="fu">rownames_to_column</span>(<span class="st">"Gene"</span>) <span class="sc">%&gt;%</span> </span>
-<span id="cb27-15"><a href="#cb27-15" aria-hidden="true" tabindex="-1"></a>  <span class="fu">pivot_longer</span>(<span class="at">cols =</span> <span class="sc">-</span>Gene, <span class="at">names_to =</span> <span class="st">"Sample"</span>, <span class="at">values_to =</span> <span class="st">"counts"</span>) <span class="sc">%&gt;%</span> </span>
-<span id="cb27-16"><a href="#cb27-16" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(<span class="at">dataset =</span> <span class="st">"normalized"</span>)</span>
-<span id="cb27-17"><a href="#cb27-17" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb27-18"><a href="#cb27-18" aria-hidden="true" tabindex="-1"></a>tidy_total <span class="ot">&lt;-</span> <span class="fu">rbind</span>(tidy_raw, tidy_normalized)</span>
-<span id="cb27-19"><a href="#cb27-19" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb27-20"><a href="#cb27-20" aria-hidden="true" tabindex="-1"></a><span class="co"># boxplot shows that the medians of the samples moved closer to log10(2)</span></span>
-<span id="cb27-21"><a href="#cb27-21" aria-hidden="true" tabindex="-1"></a>tidy_total <span class="sc">%&gt;%</span> </span>
-<span id="cb27-22"><a href="#cb27-22" aria-hidden="true" tabindex="-1"></a>  <span class="fu">ggplot</span>(<span class="fu">aes</span>(<span class="at">x =</span> Sample, <span class="at">y =</span> <span class="fu">log10</span>(counts <span class="sc">+</span> <span class="dv">1</span>))) <span class="sc">+</span></span>
-<span id="cb27-23"><a href="#cb27-23" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_boxplot</span>(<span class="fu">aes</span>(<span class="at">fill =</span> dataset)) <span class="sc">+</span> <span class="fu">facet_wrap</span>(<span class="sc">~</span> dataset)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb25"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb25-1"><a href="#cb25-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Get the raw counts and the normalized counts</span></span>
+<span id="cb25-2"><a href="#cb25-2" aria-hidden="true" tabindex="-1"></a>raw_counts <span class="ot">&lt;-</span> <span class="fu">counts</span>(dds, <span class="at">normalized=</span><span class="cn">FALSE</span>)</span>
+<span id="cb25-3"><a href="#cb25-3" aria-hidden="true" tabindex="-1"></a>normalized_counts <span class="ot">&lt;-</span> <span class="fu">counts</span>(dds, <span class="at">normalized=</span><span class="cn">TRUE</span>) </span>
+<span id="cb25-4"><a href="#cb25-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb25-5"><a href="#cb25-5" aria-hidden="true" tabindex="-1"></a><span class="co"># Convert matrices to tidy format to visualize difference between raw and scaled counts</span></span>
+<span id="cb25-6"><a href="#cb25-6" aria-hidden="true" tabindex="-1"></a>tidy_raw <span class="ot">&lt;-</span>  raw_counts <span class="sc">%&gt;%</span> </span>
+<span id="cb25-7"><a href="#cb25-7" aria-hidden="true" tabindex="-1"></a>    <span class="fu">as.data.frame</span>() <span class="sc">%&gt;%</span> </span>
+<span id="cb25-8"><a href="#cb25-8" aria-hidden="true" tabindex="-1"></a>    <span class="fu">rownames_to_column</span>(<span class="st">"Gene"</span>) <span class="sc">%&gt;%</span> </span>
+<span id="cb25-9"><a href="#cb25-9" aria-hidden="true" tabindex="-1"></a>    <span class="fu">pivot_longer</span>(<span class="at">cols =</span> <span class="sc">-</span>Gene, <span class="at">names_to =</span> <span class="st">"Sample"</span>, <span class="at">values_to =</span> <span class="st">"counts"</span>) <span class="sc">%&gt;%</span> </span>
+<span id="cb25-10"><a href="#cb25-10" aria-hidden="true" tabindex="-1"></a>    <span class="fu">mutate</span>(<span class="at">dataset =</span> <span class="st">"raw"</span>)</span>
+<span id="cb25-11"><a href="#cb25-11" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb25-12"><a href="#cb25-12" aria-hidden="true" tabindex="-1"></a>tidy_normalized <span class="ot">&lt;-</span> normalized_counts <span class="sc">%&gt;%</span> </span>
+<span id="cb25-13"><a href="#cb25-13" aria-hidden="true" tabindex="-1"></a>  <span class="fu">as.data.frame</span>() <span class="sc">%&gt;%</span> </span>
+<span id="cb25-14"><a href="#cb25-14" aria-hidden="true" tabindex="-1"></a>  <span class="fu">rownames_to_column</span>(<span class="st">"Gene"</span>) <span class="sc">%&gt;%</span> </span>
+<span id="cb25-15"><a href="#cb25-15" aria-hidden="true" tabindex="-1"></a>  <span class="fu">pivot_longer</span>(<span class="at">cols =</span> <span class="sc">-</span>Gene, <span class="at">names_to =</span> <span class="st">"Sample"</span>, <span class="at">values_to =</span> <span class="st">"counts"</span>) <span class="sc">%&gt;%</span> </span>
+<span id="cb25-16"><a href="#cb25-16" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(<span class="at">dataset =</span> <span class="st">"normalized"</span>)</span>
+<span id="cb25-17"><a href="#cb25-17" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb25-18"><a href="#cb25-18" aria-hidden="true" tabindex="-1"></a>tidy_total <span class="ot">&lt;-</span> <span class="fu">rbind</span>(tidy_raw, tidy_normalized)</span>
+<span id="cb25-19"><a href="#cb25-19" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb25-20"><a href="#cb25-20" aria-hidden="true" tabindex="-1"></a><span class="co"># boxplot shows that the medians of the samples moved closer to log10(2)</span></span>
+<span id="cb25-21"><a href="#cb25-21" aria-hidden="true" tabindex="-1"></a>tidy_total <span class="sc">%&gt;%</span> </span>
+<span id="cb25-22"><a href="#cb25-22" aria-hidden="true" tabindex="-1"></a>  <span class="fu">ggplot</span>(<span class="fu">aes</span>(<span class="at">x =</span> Sample, <span class="at">y =</span> <span class="fu">log10</span>(counts <span class="sc">+</span> <span class="dv">1</span>))) <span class="sc">+</span></span>
+<span id="cb25-23"><a href="#cb25-23" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_boxplot</span>(<span class="fu">aes</span>(<span class="at">fill =</span> dataset)) <span class="sc">+</span> <span class="fu">facet_wrap</span>(<span class="sc">~</span> dataset)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
 <div class="cell-output-display">
 <div>
@@ -759,73 +750,74 @@ Solution
 </div>
 </div>
 </div>
-<section id="lists-of-degs" class="level3">
-<h3 class="anchored" data-anchor-id="lists-of-degs">Lists of DEGs</h3>
-<p>Now, to extract the list of DEGs from the <code>dds</code> we run another line of code. The argument <code>alpha</code> is used to specify the <em>p</em>-value cutoff for significance, the default value is <code>alpha = 0.1</code>. We will use 0.05 here. We will also sort the table on <em>p</em>-value:</p>
+<section id="lists-of-degs-between-two-treatments" class="level3">
+<h3 class="anchored" data-anchor-id="lists-of-degs-between-two-treatments">Lists of DEGs between two treatments</h3>
+<p>Now, we are ready to extract lists of differentially expressed genes between two treatments from the <code>dds</code> object. We will the use <code>results()</code> function to do so. First, we will specify the <em>contrast</em> that we want to test. The argument <code>alpha</code> is used to specify the <em>p</em>-value cutoff for significance, the default value is <code>alpha = 0.1</code>. We will use 0.05 here. We will also sort the table on <em>p</em>-value:</p>
 <div class="cell">
 <div class="code-with-filename">
 <div class="code-with-filename-file">
 <pre><strong>R</strong></pre>
 </div>
-<div class="sourceCode cell-code" id="annotated-cell-15"><pre class="sourceCode r code-annotation-code code-with-copy code-annotated"><code class="sourceCode r"><button class="code-annotation-anchor" data-target-cell="annotated-cell-15" data-target-annotation="1">1</button><span id="annotated-cell-15-1" class="code-annotation-target"><a href="#annotated-cell-15-1" aria-hidden="true" tabindex="-1"></a>res <span class="ot">&lt;-</span> <span class="fu">results</span>(dds, <span class="at">alpha =</span> <span class="fl">0.05</span>)</span>
-<span id="annotated-cell-15-2"><a href="#annotated-cell-15-2" aria-hidden="true" tabindex="-1"></a></span>
-<button class="code-annotation-anchor" data-target-cell="annotated-cell-15" data-target-annotation="2">2</button><span id="annotated-cell-15-3" class="code-annotation-target"><a href="#annotated-cell-15-3" aria-hidden="true" tabindex="-1"></a><span class="fu">summary</span>(res)</span>
-<span id="annotated-cell-15-4"><a href="#annotated-cell-15-4" aria-hidden="true" tabindex="-1"></a></span>
-<button class="code-annotation-anchor" data-target-cell="annotated-cell-15" data-target-annotation="3">3</button><span id="annotated-cell-15-5" class="code-annotation-target"><a href="#annotated-cell-15-5" aria-hidden="true" tabindex="-1"></a>results <span class="ot">&lt;-</span> res <span class="sc">%&gt;%</span></span>
-<span id="annotated-cell-15-6"><a href="#annotated-cell-15-6" aria-hidden="true" tabindex="-1"></a>  <span class="fu">as.data.frame</span>() <span class="sc">%&gt;%</span> </span>
-<span id="annotated-cell-15-7"><a href="#annotated-cell-15-7" aria-hidden="true" tabindex="-1"></a>  <span class="fu">rownames_to_column</span>(<span class="st">"genes"</span>) <span class="sc">%&gt;%</span></span>
-<span id="annotated-cell-15-8"><a href="#annotated-cell-15-8" aria-hidden="true" tabindex="-1"></a>  <span class="fu">arrange</span>(padj) </span>
-<span id="annotated-cell-15-9"><a href="#annotated-cell-15-9" aria-hidden="true" tabindex="-1"></a></span>
-<span id="annotated-cell-15-10"><a href="#annotated-cell-15-10" aria-hidden="true" tabindex="-1"></a><span class="fu">head</span>(results) </span>
-<span id="annotated-cell-15-11"><a href="#annotated-cell-15-11" aria-hidden="true" tabindex="-1"></a></span>
-<button class="code-annotation-anchor" data-target-cell="annotated-cell-15" data-target-annotation="4">4</button><span id="annotated-cell-15-12" class="code-annotation-target"><a href="#annotated-cell-15-12" aria-hidden="true" tabindex="-1"></a><span class="fu">write.csv</span>(results, <span class="st">'data_processed/all_genes_spaceflight_vs_ground.csv'</span>, <span class="at">quote =</span> <span class="cn">FALSE</span>, <span class="at">row.names =</span> <span class="cn">FALSE</span>)</span><div class="code-annotation-gutter-bg"></div><div class="code-annotation-gutter"></div></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="annotated-cell-15"><pre class="sourceCode r code-annotation-code code-with-copy code-annotated"><code class="sourceCode r"><span id="annotated-cell-15-1"><a href="#annotated-cell-15-1" aria-hidden="true" tabindex="-1"></a>contrast_to_test <span class="ot">&lt;-</span>  <span class="fu">c</span>(<span class="st">"condition"</span>, <span class="st">"aba"</span>, <span class="st">"control"</span>)</span>
+<button class="code-annotation-anchor" data-target-cell="annotated-cell-15" data-target-annotation="1">1</button><span id="annotated-cell-15-2" class="code-annotation-target"><a href="#annotated-cell-15-2" aria-hidden="true" tabindex="-1"></a>res_aba_vs_control <span class="ot">&lt;-</span> <span class="fu">results</span>(dds, <span class="at">contrast=</span>contrast_to_test, <span class="at">alpha =</span> <span class="fl">0.05</span>)</span>
+<span id="annotated-cell-15-3"><a href="#annotated-cell-15-3" aria-hidden="true" tabindex="-1"></a></span>
+<button class="code-annotation-anchor" data-target-cell="annotated-cell-15" data-target-annotation="2">2</button><span id="annotated-cell-15-4" class="code-annotation-target"><a href="#annotated-cell-15-4" aria-hidden="true" tabindex="-1"></a><span class="fu">summary</span>(res_aba_vs_control)</span>
+<span id="annotated-cell-15-5"><a href="#annotated-cell-15-5" aria-hidden="true" tabindex="-1"></a></span>
+<button class="code-annotation-anchor" data-target-cell="annotated-cell-15" data-target-annotation="3">3</button><span id="annotated-cell-15-6" class="code-annotation-target"><a href="#annotated-cell-15-6" aria-hidden="true" tabindex="-1"></a>results_aba_vs_control <span class="ot">&lt;-</span> res_aba_vs_control <span class="sc">%&gt;%</span></span>
+<span id="annotated-cell-15-7"><a href="#annotated-cell-15-7" aria-hidden="true" tabindex="-1"></a>  <span class="fu">as.data.frame</span>() <span class="sc">%&gt;%</span> </span>
+<span id="annotated-cell-15-8"><a href="#annotated-cell-15-8" aria-hidden="true" tabindex="-1"></a>  <span class="fu">rownames_to_column</span>(<span class="st">"gene"</span>) <span class="sc">%&gt;%</span></span>
+<span id="annotated-cell-15-9"><a href="#annotated-cell-15-9" aria-hidden="true" tabindex="-1"></a>  <span class="fu">arrange</span>(padj) </span>
+<span id="annotated-cell-15-10"><a href="#annotated-cell-15-10" aria-hidden="true" tabindex="-1"></a></span>
+<span id="annotated-cell-15-11"><a href="#annotated-cell-15-11" aria-hidden="true" tabindex="-1"></a><span class="fu">head</span>(results_aba_vs_control) </span>
+<span id="annotated-cell-15-12"><a href="#annotated-cell-15-12" aria-hidden="true" tabindex="-1"></a></span>
+<button class="code-annotation-anchor" data-target-cell="annotated-cell-15" data-target-annotation="4">4</button><span id="annotated-cell-15-13" class="code-annotation-target"><a href="#annotated-cell-15-13" aria-hidden="true" tabindex="-1"></a><span class="fu">write.csv</span>(results_aba_vs_control, <span class="st">'data_processed/aba_vs_control.csv'</span>, <span class="at">quote =</span> <span class="cn">FALSE</span>, <span class="at">row.names =</span> <span class="cn">FALSE</span>)</span><div class="code-annotation-gutter-bg"></div><div class="code-annotation-gutter"></div></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
 <div class="cell-annotation">
 <dl class="code-annotation-container-hidden code-annotation-container-grid">
 <dt data-target-cell="annotated-cell-15" data-target-annotation="1">1</dt>
 <dd>
-<span data-code-cell="annotated-cell-15" data-code-lines="1" data-code-annotation="1">Generate results table</span>
+<span data-code-cell="annotated-cell-15" data-code-lines="2" data-code-annotation="1">Generate results table</span>
 </dd>
 <dt data-target-cell="annotated-cell-15" data-target-annotation="2">2</dt>
 <dd>
-<span data-code-cell="annotated-cell-15" data-code-lines="3" data-code-annotation="2">Print a quick summary of the results: how many genes are significantly differentially expressed?</span>
+<span data-code-cell="annotated-cell-15" data-code-lines="4" data-code-annotation="2">Print a quick summary of the results: how many genes are significantly differentially expressed?</span>
 </dd>
 <dt data-target-cell="annotated-cell-15" data-target-annotation="3">3</dt>
 <dd>
-<span data-code-cell="annotated-cell-15" data-code-lines="5" data-code-annotation="3">Turn results table into a data frame, generate a <code>genes</code> column from the rownames, make a new column with <code>-log10</code> transformed p-values, then sort by adjusted p-value.</span>
+<span data-code-cell="annotated-cell-15" data-code-lines="6" data-code-annotation="3">Turn results table into a data frame, generate a <code>genes</code> column from the rownames, make a new column with <code>-log10</code> transformed p-values, then sort by adjusted p-value.</span>
 </dd>
 <dt data-target-cell="annotated-cell-15" data-target-annotation="4">4</dt>
 <dd>
-<span data-code-cell="annotated-cell-15" data-code-lines="12" data-code-annotation="4">Write to a file!</span>
+<span data-code-cell="annotated-cell-15" data-code-lines="13" data-code-annotation="4">Write to a file!</span>
 </dd>
 </dl>
 </div>
 <div class="cell-output cell-output-stdout">
 <pre><code>
-out of 30151 with nonzero total read count
+out of 26832 with nonzero total read count
 adjusted p-value &lt; 0.05
-LFC &gt; 0 (up)       : 1792, 5.9%
-LFC &lt; 0 (down)     : 1557, 5.2%
-outliers [1]       : 16, 0.053%
-low counts [2]     : 7564, 25%
-(mean count &lt; 8)
+LFC &gt; 0 (up)       : 5276, 20%
+LFC &lt; 0 (down)     : 5099, 19%
+outliers [1]       : 8, 0.03%
+low counts [2]     : 3111, 12%
+(mean count &lt; 2)
 [1] see 'cooksCutoff' argument of ?results
 [2] see 'independentFiltering' argument of ?results
 
-      genes  baseMean log2FoldChange     lfcSE      stat       pvalue
-1 AT5G04120  456.5672       3.626601 0.2462679  14.72625 4.373346e-49
-2 AT2G28780 1964.3983      -3.630964 0.3295509 -11.01792 3.132194e-28
-3 AT1G62280  217.8345      -3.901515 0.3558769 -10.96310 5.749324e-28
-4 AT1G32450 5241.0272      -3.468312 0.3201042 -10.83495 2.350980e-27
-5 AT1G30530  708.2953       2.033682 0.1938999  10.48831 9.776462e-26
-6 AT1G15380  739.4577      -2.714855 0.2601611 -10.43529 1.710992e-25
-          padj
-1 9.871079e-45
-2 3.534838e-24
-3 4.325600e-24
-4 1.326599e-23
-5 4.413291e-22
-6 6.436465e-22</code></pre>
+       gene  baseMean log2FoldChange     lfcSE      stat        pvalue
+1 AT1G52690 15517.069       9.921450 0.2179358  45.52464  0.000000e+00
+2 AT4G27410  4165.375       4.188831 0.1075092  38.96252  0.000000e+00
+3 AT2G15970 33541.245       4.348850 0.1184050  36.72861 2.552906e-295
+4 AT2G38310 10542.478      -3.866008 0.1104888 -34.99005 3.187644e-268
+5 AT3G17790  3420.915       3.316818 0.1000675  33.14579 6.511395e-241
+6 AT5G52300  2675.359      10.110645 0.3058389  33.05873 1.165299e-239
+           padj
+1  0.000000e+00
+2  0.000000e+00
+3 2.017902e-291
+4 1.889715e-264
+5 3.088094e-237
+6 4.605456e-236</code></pre>
 </div>
 </div>
 <p>There is a row for each gene in this dataframe. We’ll discuss the most important columns below:</p>
@@ -911,7 +903,7 @@ Solution
 </table>
 <p><strong>3:</strong></p>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb29"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb29-1"><a href="#cb29-1" aria-hidden="true" tabindex="-1"></a><span class="fu">log2</span>(<span class="dv">230</span><span class="sc">/</span><span class="dv">75</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb27"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb27-1"><a href="#cb27-1" aria-hidden="true" tabindex="-1"></a><span class="fu">log2</span>(<span class="dv">230</span><span class="sc">/</span><span class="dv">75</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>[1] 1.616671</code></pre>
 </div>
@@ -923,74 +915,74 @@ Solution
 <h4 class="anchored" data-anchor-id="shrinkage-of-fold-changes">Shrinkage of fold changes</h4>
 <p>DESeq2 allows for the <em>shrinkage</em> of log2FoldChanges values towards zero <strong>if</strong> the information for a gene is low (e.g.&nbsp;low amount of counts). See <a href="https://bioconductor.org/packages/release/bioc/vignettes/DESeq2/inst/doc/DESeq2.html#log-fold-change-shrinkage-for-visualization-and-ranking">DESeq2 vignette</a> for more information. In this workshop, we will skip this step.</p>
 </section>
-<section id="extra-contrasts" class="level4">
-<h4 class="anchored" data-anchor-id="extra-contrasts">Extra contrasts</h4>
-<p>In our simple experimental setup, only one contrast is possible: <code>space_flight</code> vs <code>ground_control</code>. That’s why would could simply call <code>res &lt;- results(dds, alpha = 0.05)</code> to generate our results table. If we would have had another condition, for example, the plants were also grown with Martian gravity levels, we could have specified the contrast we wanted to test:</p>
-<div class="cell">
-<div class="code-with-filename">
-<div class="code-with-filename-file">
-<pre><strong>R</strong></pre>
-</div>
-<div class="sourceCode cell-code" id="cb31"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb31-1"><a href="#cb31-1" aria-hidden="true" tabindex="-1"></a>contrast_to_test <span class="ot">&lt;-</span>  <span class="fu">c</span>(<span class="st">"condition"</span>, <span class="st">"martian_gravity"</span>, <span class="st">"ground_control"</span>)</span>
-<span id="cb31-2"><a href="#cb31-2" aria-hidden="true" tabindex="-1"></a>res_martian_vs_ground <span class="ot">&lt;-</span> <span class="fu">results</span>(dds, <span class="at">contrast=</span>contrast_to_test, <span class="at">alpha =</span> <span class="fl">0.05</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-</div>
-</div>
-</section>
 </section>
 <section id="volcano-plots" class="level3">
 <h3 class="anchored" data-anchor-id="volcano-plots">Volcano plots</h3>
-<p>One way to visualize DEG results is to display them in a Volcano plot. Such a plot shows a measure of effect size (<code>log2FoldChange</code>) versus a measure of significance (<code>padj</code>). There are <a href="https://goedhart.shinyapps.io/VolcaNoseR/">tools available</a> (developed by Joachim Goedhart, assistant professor at SILS) to help you make such a plot using the DEG list we just saved as a <code>.csv</code> file. Alternatively, we can make one ourselves for full control of the plot:</p>
+<p>One way to visualize DEG results is to display them in a Volcano plot. Such a plot shows a measure of effect size (<code>log2FoldChange</code>) versus a measure of significance (<code>padj</code>). There are <a href="https://goedhart.shinyapps.io/VolcaNoseR/">tools available</a> (developed by Joachim Goedhart, assistant professor at SILS) to help you make such a plot using the DEG list we just saved as a <code>.csv</code> file. But we can also make volcano plots ourselves in <code>R</code>:</p>
+<p>First we will make a ‘quick and dirty’ plot using the <code>EnhancedVolcano</code> package:</p>
 <div class="cell">
 <div class="code-with-filename">
 <div class="code-with-filename-file">
 <pre><strong>R</strong></pre>
 </div>
-<div class="sourceCode cell-code" id="cb32"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb32-1"><a href="#cb32-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Define fold change and p-value cutoffs</span></span>
-<span id="cb32-2"><a href="#cb32-2" aria-hidden="true" tabindex="-1"></a>lfc_cutoff <span class="ot">&lt;-</span> <span class="dv">1</span></span>
-<span id="cb32-3"><a href="#cb32-3" aria-hidden="true" tabindex="-1"></a>padj_cutoff <span class="ot">&lt;-</span> <span class="fl">0.05</span></span>
-<span id="cb32-4"><a href="#cb32-4" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb32-5"><a href="#cb32-5" aria-hidden="true" tabindex="-1"></a><span class="co"># Make new categorical variable containing significance information</span></span>
-<span id="cb32-6"><a href="#cb32-6" aria-hidden="true" tabindex="-1"></a>results <span class="ot">&lt;-</span> results <span class="sc">%&gt;%</span> </span>
-<span id="cb32-7"><a href="#cb32-7" aria-hidden="true" tabindex="-1"></a>        <span class="fu">mutate</span>(<span class="at">significance =</span> <span class="fu">case_when</span>(</span>
-<span id="cb32-8"><a href="#cb32-8" aria-hidden="true" tabindex="-1"></a>          padj <span class="sc">&lt;</span> padj_cutoff <span class="sc">&amp;</span> log2FoldChange <span class="sc">&gt;</span> lfc_cutoff <span class="sc">~</span> <span class="st">'Significantly upregulated'</span>,</span>
-<span id="cb32-9"><a href="#cb32-9" aria-hidden="true" tabindex="-1"></a>          padj <span class="sc">&lt;</span> padj_cutoff <span class="sc">&amp;</span> log2FoldChange <span class="sc">&lt;</span> <span class="sc">-</span>lfc_cutoff <span class="sc">~</span> <span class="st">'Significantly downregulated'</span>,</span>
-<span id="cb32-10"><a href="#cb32-10" aria-hidden="true" tabindex="-1"></a>          padj <span class="sc">&lt;</span> padj_cutoff <span class="sc">~</span> <span class="st">'Significant but small effect size'</span>,</span>
-<span id="cb32-11"><a href="#cb32-11" aria-hidden="true" tabindex="-1"></a>          <span class="cn">TRUE</span> <span class="sc">~</span> <span class="st">'Not significant'</span></span>
-<span id="cb32-12"><a href="#cb32-12" aria-hidden="true" tabindex="-1"></a>        ))</span>
-<span id="cb32-13"><a href="#cb32-13" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb32-14"><a href="#cb32-14" aria-hidden="true" tabindex="-1"></a>DEGs <span class="ot">&lt;-</span> results <span class="sc">%&gt;%</span> <span class="fu">filter</span>(significance <span class="sc">==</span> <span class="st">"Significantly upregulated"</span> <span class="sc">|</span> significance <span class="sc">==</span> <span class="st">"Significantly downregulated"</span>)</span>
-<span id="cb32-15"><a href="#cb32-15" aria-hidden="true" tabindex="-1"></a><span class="fu">write.csv</span>(DEGs, <span class="st">'data_processed/DEGs_spaceflight_vs_ground.csv'</span>, <span class="at">quote =</span> <span class="cn">FALSE</span>, <span class="at">row.names =</span> <span class="cn">FALSE</span>)</span>
-<span id="cb32-16"><a href="#cb32-16" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb32-17"><a href="#cb32-17" aria-hidden="true" tabindex="-1"></a>colors <span class="ot">&lt;-</span> <span class="fu">c</span>(<span class="st">"Significantly upregulated"</span> <span class="ot">=</span> <span class="st">"#E69F00"</span>, </span>
-<span id="cb32-18"><a href="#cb32-18" aria-hidden="true" tabindex="-1"></a>            <span class="st">"Significantly downregulated"</span> <span class="ot">=</span> <span class="st">"#56B4E9"</span>, </span>
-<span id="cb32-19"><a href="#cb32-19" aria-hidden="true" tabindex="-1"></a>            <span class="st">"Not significant"</span> <span class="ot">=</span> <span class="st">"gray80"</span>, </span>
-<span id="cb32-20"><a href="#cb32-20" aria-hidden="true" tabindex="-1"></a>            <span class="st">"Significant but small effect size"</span> <span class="ot">=</span> <span class="st">'grey50'</span>)</span>
-<span id="cb32-21"><a href="#cb32-21" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb32-22"><a href="#cb32-22" aria-hidden="true" tabindex="-1"></a><span class="co"># select top 10 genes to highlight</span></span>
-<span id="cb32-23"><a href="#cb32-23" aria-hidden="true" tabindex="-1"></a>top_genes <span class="ot">&lt;-</span> results[<span class="dv">1</span><span class="sc">:</span><span class="dv">10</span>, ]</span>
-<span id="cb32-24"><a href="#cb32-24" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb32-25"><a href="#cb32-25" aria-hidden="true" tabindex="-1"></a>volcano <span class="ot">&lt;-</span> results <span class="sc">%&gt;%</span> </span>
-<span id="cb32-26"><a href="#cb32-26" aria-hidden="true" tabindex="-1"></a>  <span class="fu">ggplot</span>(<span class="fu">aes</span>(<span class="at">x =</span> log2FoldChange, <span class="at">y =</span> <span class="sc">-</span><span class="fu">log10</span>(padj), <span class="at">colour =</span> significance)) <span class="sc">+</span></span>
-<span id="cb32-27"><a href="#cb32-27" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_point</span>(<span class="at">alpha =</span> <span class="fl">0.5</span>, <span class="at">size =</span> <span class="fl">0.8</span>) <span class="sc">+</span> </span>
-<span id="cb32-28"><a href="#cb32-28" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_hline</span>(<span class="fu">aes</span>(<span class="at">yintercept =</span> <span class="sc">-</span><span class="fu">log10</span>(padj_cutoff)), <span class="at">linetype =</span> <span class="st">"dashed"</span>) <span class="sc">+</span></span>
-<span id="cb32-29"><a href="#cb32-29" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_vline</span>(<span class="fu">aes</span>(<span class="at">xintercept =</span> lfc_cutoff), <span class="at">linetype =</span> <span class="st">"dashed"</span>) <span class="sc">+</span></span>
-<span id="cb32-30"><a href="#cb32-30" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_vline</span>(<span class="fu">aes</span>(<span class="at">xintercept =</span> <span class="sc">-</span>lfc_cutoff), <span class="at">linetype =</span> <span class="st">"dashed"</span>) <span class="sc">+</span></span>
-<span id="cb32-31"><a href="#cb32-31" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_point</span>(<span class="at">data =</span> top_genes, <span class="at">shape =</span> <span class="dv">21</span>,<span class="at">fill =</span> <span class="cn">NA</span>, <span class="at">color =</span> <span class="st">"black"</span>) <span class="sc">+</span>  <span class="co"># Highlight top10</span></span>
-<span id="cb32-32"><a href="#cb32-32" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_text_repel</span>(<span class="at">data =</span> top_genes, <span class="fu">aes</span>(<span class="at">label =</span> genes), <span class="at">size =</span> <span class="dv">2</span>, <span class="at">min.segment.length =</span> <span class="dv">0</span>) <span class="sc">+</span></span>
-<span id="cb32-33"><a href="#cb32-33" aria-hidden="true" tabindex="-1"></a>  <span class="fu">scale_color_manual</span>(<span class="at">values=</span>colors) <span class="sc">+</span></span>
-<span id="cb32-34"><a href="#cb32-34" aria-hidden="true" tabindex="-1"></a>  <span class="fu">xlim</span>(<span class="fu">c</span>(<span class="sc">-</span><span class="dv">10</span>,<span class="dv">10</span>)) <span class="sc">+</span></span>
-<span id="cb32-35"><a href="#cb32-35" aria-hidden="true" tabindex="-1"></a>  <span class="fu">theme_bw</span>() </span>
-<span id="cb32-36"><a href="#cb32-36" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb32-37"><a href="#cb32-37" aria-hidden="true" tabindex="-1"></a><span class="fu">ggsave</span>(<span class="st">"results/volcano_plot.png"</span>, volcano, <span class="at">width =</span> <span class="dv">14</span>, <span class="at">height =</span> <span class="dv">8</span>, <span class="at">units =</span> <span class="st">"cm"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb29"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb29-1"><a href="#cb29-1" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(EnhancedVolcano)</span>
+<span id="cb29-2"><a href="#cb29-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb29-3"><a href="#cb29-3" aria-hidden="true" tabindex="-1"></a><span class="fu">EnhancedVolcano</span>(res_aba_vs_control,</span>
+<span id="cb29-4"><a href="#cb29-4" aria-hidden="true" tabindex="-1"></a>                <span class="at">lab =</span> <span class="fu">rownames</span>(res_aba_vs_control),</span>
+<span id="cb29-5"><a href="#cb29-5" aria-hidden="true" tabindex="-1"></a>                <span class="at">x =</span> <span class="st">'log2FoldChange'</span>,</span>
+<span id="cb29-6"><a href="#cb29-6" aria-hidden="true" tabindex="-1"></a>                <span class="at">y =</span> <span class="st">'padj'</span>,</span>
+<span id="cb29-7"><a href="#cb29-7" aria-hidden="true" tabindex="-1"></a>                <span class="at">legendPosition   =</span> <span class="st">'right'</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
-<div class="cell-output cell-output-stderr">
-<pre><code>Warning: Removed 10262 rows containing missing values or values outside the scale range
-(`geom_point()`).</code></pre>
+<div class="cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="04-differential-gene-expression_files/figure-html/unnamed-chunk-19-1.png" class="img-fluid figure-img" width="768"></p>
+</figure>
 </div>
-<div class="sourceCode cell-code" id="cb34"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb34-1"><a href="#cb34-1" aria-hidden="true" tabindex="-1"></a>volcano </span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-<div class="cell-output cell-output-stderr">
-<pre><code>Warning: Removed 10262 rows containing missing values or values outside the scale range
-(`geom_point()`).</code></pre>
+</div>
+</div>
+<p>It works, but it’s not very beautiful. We can make one ourselves using <code>ggplot2</code> for full control of the plot:</p>
+<div class="cell">
+<div class="code-with-filename">
+<div class="code-with-filename-file">
+<pre><strong>R</strong></pre>
+</div>
+<div class="sourceCode cell-code" id="cb30"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb30-1"><a href="#cb30-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Define fold change and p-value cutoffs</span></span>
+<span id="cb30-2"><a href="#cb30-2" aria-hidden="true" tabindex="-1"></a>lfc_cutoff <span class="ot">&lt;-</span> <span class="dv">2</span></span>
+<span id="cb30-3"><a href="#cb30-3" aria-hidden="true" tabindex="-1"></a>padj_cutoff <span class="ot">&lt;-</span> <span class="fl">0.05</span></span>
+<span id="cb30-4"><a href="#cb30-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb30-5"><a href="#cb30-5" aria-hidden="true" tabindex="-1"></a><span class="co"># Make new categorical variable containing significance information</span></span>
+<span id="cb30-6"><a href="#cb30-6" aria-hidden="true" tabindex="-1"></a>results_aba_vs_control <span class="ot">&lt;-</span> results_aba_vs_control <span class="sc">%&gt;%</span> </span>
+<span id="cb30-7"><a href="#cb30-7" aria-hidden="true" tabindex="-1"></a>        <span class="fu">mutate</span>(<span class="at">significance =</span> <span class="fu">case_when</span>(</span>
+<span id="cb30-8"><a href="#cb30-8" aria-hidden="true" tabindex="-1"></a>          padj <span class="sc">&lt;</span> padj_cutoff <span class="sc">&amp;</span> log2FoldChange <span class="sc">&gt;</span> lfc_cutoff <span class="sc">~</span> <span class="st">'Significantly upregulated'</span>,</span>
+<span id="cb30-9"><a href="#cb30-9" aria-hidden="true" tabindex="-1"></a>          padj <span class="sc">&lt;</span> padj_cutoff <span class="sc">&amp;</span> log2FoldChange <span class="sc">&lt;</span> <span class="sc">-</span>lfc_cutoff <span class="sc">~</span> <span class="st">'Significantly downregulated'</span>,</span>
+<span id="cb30-10"><a href="#cb30-10" aria-hidden="true" tabindex="-1"></a>          padj <span class="sc">&lt;</span> padj_cutoff <span class="sc">~</span> <span class="st">'Significant but small effect size'</span>,</span>
+<span id="cb30-11"><a href="#cb30-11" aria-hidden="true" tabindex="-1"></a>          <span class="cn">TRUE</span> <span class="sc">~</span> <span class="st">'Not significant'</span></span>
+<span id="cb30-12"><a href="#cb30-12" aria-hidden="true" tabindex="-1"></a>        ))</span>
+<span id="cb30-13"><a href="#cb30-13" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb30-14"><a href="#cb30-14" aria-hidden="true" tabindex="-1"></a>colors <span class="ot">&lt;-</span> <span class="fu">c</span>(<span class="st">"Significantly upregulated"</span> <span class="ot">=</span> <span class="st">"#E69F00"</span>, </span>
+<span id="cb30-15"><a href="#cb30-15" aria-hidden="true" tabindex="-1"></a>            <span class="st">"Significantly downregulated"</span> <span class="ot">=</span> <span class="st">"#56B4E9"</span>, </span>
+<span id="cb30-16"><a href="#cb30-16" aria-hidden="true" tabindex="-1"></a>            <span class="st">"Not significant"</span> <span class="ot">=</span> <span class="st">"gray80"</span>, </span>
+<span id="cb30-17"><a href="#cb30-17" aria-hidden="true" tabindex="-1"></a>            <span class="st">"Significant but small effect size"</span> <span class="ot">=</span> <span class="st">'grey50'</span>)</span>
+<span id="cb30-18"><a href="#cb30-18" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb30-19"><a href="#cb30-19" aria-hidden="true" tabindex="-1"></a><span class="co"># select top 10 genes to highlight</span></span>
+<span id="cb30-20"><a href="#cb30-20" aria-hidden="true" tabindex="-1"></a>top_genes <span class="ot">&lt;-</span> results_aba_vs_control[<span class="dv">1</span><span class="sc">:</span><span class="dv">10</span>, ]</span>
+<span id="cb30-21"><a href="#cb30-21" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb30-22"><a href="#cb30-22" aria-hidden="true" tabindex="-1"></a>volcano <span class="ot">&lt;-</span> results_aba_vs_control <span class="sc">%&gt;%</span> </span>
+<span id="cb30-23"><a href="#cb30-23" aria-hidden="true" tabindex="-1"></a>  <span class="fu">ggplot</span>(<span class="fu">aes</span>(<span class="at">x =</span> log2FoldChange, <span class="at">y =</span> <span class="sc">-</span><span class="fu">log10</span>(padj), <span class="at">colour =</span> significance)) <span class="sc">+</span></span>
+<span id="cb30-24"><a href="#cb30-24" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_point</span>(<span class="at">alpha =</span> <span class="fl">0.5</span>, <span class="at">size =</span> <span class="dv">1</span>) <span class="sc">+</span> </span>
+<span id="cb30-25"><a href="#cb30-25" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_hline</span>(<span class="fu">aes</span>(<span class="at">yintercept =</span> <span class="sc">-</span><span class="fu">log10</span>(padj_cutoff)), <span class="at">linetype =</span> <span class="st">"dashed"</span>) <span class="sc">+</span></span>
+<span id="cb30-26"><a href="#cb30-26" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_vline</span>(<span class="fu">aes</span>(<span class="at">xintercept =</span> lfc_cutoff), <span class="at">linetype =</span> <span class="st">"dashed"</span>) <span class="sc">+</span></span>
+<span id="cb30-27"><a href="#cb30-27" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_vline</span>(<span class="fu">aes</span>(<span class="at">xintercept =</span> <span class="sc">-</span>lfc_cutoff), <span class="at">linetype =</span> <span class="st">"dashed"</span>) <span class="sc">+</span></span>
+<span id="cb30-28"><a href="#cb30-28" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_point</span>(<span class="at">data =</span> top_genes, <span class="at">shape =</span> <span class="dv">21</span>, <span class="at">fill =</span> <span class="cn">NA</span>, <span class="at">color =</span> <span class="st">"black"</span>, <span class="at">size =</span> <span class="fl">1.2</span>) <span class="sc">+</span>  </span>
+<span id="cb30-29"><a href="#cb30-29" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_text_repel</span>(<span class="at">data =</span> top_genes, <span class="fu">aes</span>(<span class="at">label =</span> gene), <span class="at">size =</span> <span class="dv">3</span>, <span class="at">min.segment.length =</span> <span class="dv">0</span>) <span class="sc">+</span></span>
+<span id="cb30-30"><a href="#cb30-30" aria-hidden="true" tabindex="-1"></a>  <span class="fu">scale_color_manual</span>(<span class="at">values=</span>colors) <span class="sc">+</span></span>
+<span id="cb30-31"><a href="#cb30-31" aria-hidden="true" tabindex="-1"></a>  <span class="fu">xlim</span>(<span class="fu">c</span>(<span class="sc">-</span><span class="dv">10</span>,<span class="dv">10</span>)) <span class="sc">+</span></span>
+<span id="cb30-32"><a href="#cb30-32" aria-hidden="true" tabindex="-1"></a>  <span class="fu">theme_bw</span>() </span>
+<span id="cb30-33"><a href="#cb30-33" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb30-34"><a href="#cb30-34" aria-hidden="true" tabindex="-1"></a><span class="fu">ggsave</span>(<span class="st">"results/volcano_plot_aba_vs_control.png"</span>, volcano, <span class="at">width =</span> <span class="dv">14</span>, <span class="at">height =</span> <span class="dv">8</span>, <span class="at">units =</span> <span class="st">"cm"</span>)</span>
+<span id="cb30-35"><a href="#cb30-35" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb30-36"><a href="#cb30-36" aria-hidden="true" tabindex="-1"></a>volcano </span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
 <div class="cell-output-display">
 <div>
@@ -1000,21 +992,21 @@ Solution
 </div>
 </div>
 </div>
-<p>We can plot the DESeq2-normalized counts of two genes, just to confirm whether the volcano plot is correct. We pick one that is highly upregulated in <code>space_flight</code>conditions (AT5G04120), and one that is strongly downregulated (AT1G62280).</p>
+<p>We can plot the DESeq2-normalized counts of two genes, just to confirm that the volcano plot is correct. We pick one that is highly upregulated in <code>aba</code> treated sanmples (AT5G52310), and one that is strongly downregulated (AT2G38310).</p>
 <div class="cell">
 <div class="code-with-filename">
 <div class="code-with-filename-file">
 <pre><strong>R</strong></pre>
 </div>
-<div class="sourceCode cell-code" id="cb36"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb36-1"><a href="#cb36-1" aria-hidden="true" tabindex="-1"></a>gene_1 <span class="ot">&lt;-</span> <span class="fu">plotCounts</span>(dds, <span class="at">gene=</span><span class="st">"AT5G04120"</span>, <span class="at">intgroup=</span><span class="st">"condition"</span>, </span>
-<span id="cb36-2"><a href="#cb36-2" aria-hidden="true" tabindex="-1"></a>                <span class="at">returnData=</span><span class="cn">TRUE</span>)</span>
-<span id="cb36-3"><a href="#cb36-3" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb36-4"><a href="#cb36-4" aria-hidden="true" tabindex="-1"></a>gene_2 <span class="ot">&lt;-</span> <span class="fu">plotCounts</span>(dds, <span class="at">gene=</span><span class="st">"AT1G62280"</span>, <span class="at">intgroup=</span><span class="st">"condition"</span>, </span>
-<span id="cb36-5"><a href="#cb36-5" aria-hidden="true" tabindex="-1"></a>                        <span class="at">returnData=</span><span class="cn">TRUE</span>)</span>
-<span id="cb36-6"><a href="#cb36-6" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb36-7"><a href="#cb36-7" aria-hidden="true" tabindex="-1"></a>gene_1 <span class="sc">%&gt;%</span> <span class="fu">ggplot</span>(<span class="fu">aes</span>(<span class="at">x =</span> condition, <span class="at">y =</span> count, <span class="at">colour =</span> condition)) <span class="sc">+</span></span>
-<span id="cb36-8"><a href="#cb36-8" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_jitter</span>(<span class="at">width =</span> <span class="fl">0.05</span>) <span class="sc">+</span></span>
-<span id="cb36-9"><a href="#cb36-9" aria-hidden="true" tabindex="-1"></a>  <span class="fu">theme_bw</span>()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb31"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb31-1"><a href="#cb31-1" aria-hidden="true" tabindex="-1"></a>gene_1 <span class="ot">&lt;-</span> <span class="fu">plotCounts</span>(dds, <span class="at">gene=</span><span class="st">"AT5G52310"</span>, <span class="at">intgroup=</span><span class="st">"condition"</span>, </span>
+<span id="cb31-2"><a href="#cb31-2" aria-hidden="true" tabindex="-1"></a>                <span class="at">returnData=</span><span class="cn">TRUE</span>)</span>
+<span id="cb31-3"><a href="#cb31-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb31-4"><a href="#cb31-4" aria-hidden="true" tabindex="-1"></a>gene_2 <span class="ot">&lt;-</span> <span class="fu">plotCounts</span>(dds, <span class="at">gene=</span><span class="st">"AT2G38310"</span>, <span class="at">intgroup=</span><span class="st">"condition"</span>, </span>
+<span id="cb31-5"><a href="#cb31-5" aria-hidden="true" tabindex="-1"></a>                        <span class="at">returnData=</span><span class="cn">TRUE</span>)</span>
+<span id="cb31-6"><a href="#cb31-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb31-7"><a href="#cb31-7" aria-hidden="true" tabindex="-1"></a>gene_1 <span class="sc">%&gt;%</span> <span class="fu">ggplot</span>(<span class="fu">aes</span>(<span class="at">x =</span> condition, <span class="at">y =</span> count, <span class="at">colour =</span> condition)) <span class="sc">+</span></span>
+<span id="cb31-8"><a href="#cb31-8" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_jitter</span>(<span class="at">width =</span> <span class="fl">0.05</span>) <span class="sc">+</span></span>
+<span id="cb31-9"><a href="#cb31-9" aria-hidden="true" tabindex="-1"></a>  <span class="fu">theme_bw</span>()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
 <div class="cell-output-display">
 <div>
@@ -1023,9 +1015,9 @@ Solution
 </figure>
 </div>
 </div>
-<div class="sourceCode cell-code" id="cb37"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb37-1"><a href="#cb37-1" aria-hidden="true" tabindex="-1"></a>gene_2 <span class="sc">%&gt;%</span> <span class="fu">ggplot</span>(<span class="fu">aes</span>(<span class="at">x =</span> condition, <span class="at">y =</span> count, <span class="at">colour =</span> condition)) <span class="sc">+</span></span>
-<span id="cb37-2"><a href="#cb37-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_jitter</span>(<span class="at">width =</span> <span class="fl">0.05</span>) <span class="sc">+</span></span>
-<span id="cb37-3"><a href="#cb37-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">theme_bw</span>()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb32"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb32-1"><a href="#cb32-1" aria-hidden="true" tabindex="-1"></a>gene_2 <span class="sc">%&gt;%</span> <span class="fu">ggplot</span>(<span class="fu">aes</span>(<span class="at">x =</span> condition, <span class="at">y =</span> count, <span class="at">colour =</span> condition)) <span class="sc">+</span></span>
+<span id="cb32-2"><a href="#cb32-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_jitter</span>(<span class="at">width =</span> <span class="fl">0.05</span>) <span class="sc">+</span></span>
+<span id="cb32-3"><a href="#cb32-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">theme_bw</span>()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output-display">
 <div>
 <figure class="figure">
@@ -1038,22 +1030,25 @@ Solution
 </section>
 <section id="heatmap" class="level3">
 <h3 class="anchored" data-anchor-id="heatmap">Heatmap</h3>
-<p>Alternatively, we could also display the expression levels of the DEGs in a heatmap. With the following code, we make a ‘tidy’ dataframe from the variance stabilised counts, and select only the genes that we consider DEGs. Remember, these are the genes that passed both a <code>padj</code> threshold and <code>log2FoldChange</code> threshold above.</p>
+<p>Alternatively, we could also display the expression levels of the DEGs in a heatmap. With the following code, we make a ‘tidy’ dataframe from the variance stabilised counts, and select only the genes that we consider DEGs. Remember, these are the genes that passed both a <code>padj</code> threshold and <code>log2FoldChange</code> threshold.</p>
 <div class="cell">
 <div class="code-with-filename">
 <div class="code-with-filename-file">
 <pre><strong>R</strong></pre>
 </div>
-<div class="sourceCode cell-code" id="cb38"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb38-1"><a href="#cb38-1" aria-hidden="true" tabindex="-1"></a>variance_stabilised_df <span class="ot">&lt;-</span> variance_stabilised_counts <span class="sc">%&gt;%</span> </span>
-<span id="cb38-2"><a href="#cb38-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">as.data.frame</span>() <span class="sc">%&gt;%</span> </span>
-<span id="cb38-3"><a href="#cb38-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">rownames_to_column</span>(<span class="st">"gene"</span>) <span class="sc">%&gt;%</span> </span>
-<span id="cb38-4"><a href="#cb38-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">pivot_longer</span>(<span class="at">cols =</span> <span class="sc">-</span> gene, <span class="at">names_to =</span> <span class="st">"sample"</span>, <span class="at">values_to =</span> <span class="st">"count"</span>)</span>
-<span id="cb38-5"><a href="#cb38-5" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb38-6"><a href="#cb38-6" aria-hidden="true" tabindex="-1"></a>selection <span class="ot">&lt;-</span> DEGs<span class="sc">$</span>genes</span>
-<span id="cb38-7"><a href="#cb38-7" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb38-8"><a href="#cb38-8" aria-hidden="true" tabindex="-1"></a>vsd_selection <span class="ot">&lt;-</span> variance_stabilised_df <span class="sc">%&gt;%</span> </span>
-<span id="cb38-9"><a href="#cb38-9" aria-hidden="true" tabindex="-1"></a>                    <span class="fu">filter</span>(gene <span class="sc">%in%</span> selection) <span class="sc">%&gt;%</span></span>
-<span id="cb38-10"><a href="#cb38-10" aria-hidden="true" tabindex="-1"></a>                    <span class="fu">merge</span>(metadata, <span class="at">by.x =</span> <span class="st">"sample"</span>, <span class="at">by.y =</span> <span class="st">"sample_name"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb33"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb33-1"><a href="#cb33-1" aria-hidden="true" tabindex="-1"></a>variance_stabilised_df <span class="ot">&lt;-</span> variance_stabilised_counts <span class="sc">%&gt;%</span></span>
+<span id="cb33-2"><a href="#cb33-2" aria-hidden="true" tabindex="-1"></a>        <span class="fu">as.data.frame</span>() <span class="sc">%&gt;%</span> </span>
+<span id="cb33-3"><a href="#cb33-3" aria-hidden="true" tabindex="-1"></a>        <span class="fu">rownames_to_column</span>(<span class="st">"gene"</span>)  <span class="sc">%&gt;%</span></span>
+<span id="cb33-4"><a href="#cb33-4" aria-hidden="true" tabindex="-1"></a>        <span class="fu">pivot_longer</span>(<span class="at">cols =</span> <span class="sc">-</span> gene, <span class="at">names_to =</span> <span class="st">"sample"</span>, <span class="at">values_to =</span> <span class="st">"count"</span>)</span>
+<span id="cb33-5"><a href="#cb33-5" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb33-6"><a href="#cb33-6" aria-hidden="true" tabindex="-1"></a>aba_selection <span class="ot">&lt;-</span> results_aba_vs_control <span class="sc">%&gt;%</span> </span>
+<span id="cb33-7"><a href="#cb33-7" aria-hidden="true" tabindex="-1"></a>        <span class="fu">filter</span>(padj <span class="sc">&lt;</span> padj_cutoff) <span class="sc">%&gt;%</span></span>
+<span id="cb33-8"><a href="#cb33-8" aria-hidden="true" tabindex="-1"></a>        <span class="fu">filter</span>(<span class="fu">abs</span>(log2FoldChange) <span class="sc">&gt;</span> lfc_cutoff) <span class="sc">%&gt;%</span> </span>
+<span id="cb33-9"><a href="#cb33-9" aria-hidden="true" tabindex="-1"></a>        <span class="fu">pull</span>(gene)</span>
+<span id="cb33-10"><a href="#cb33-10" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb33-11"><a href="#cb33-11" aria-hidden="true" tabindex="-1"></a>vsd_selection <span class="ot">&lt;-</span> variance_stabilised_df <span class="sc">%&gt;%</span> </span>
+<span id="cb33-12"><a href="#cb33-12" aria-hidden="true" tabindex="-1"></a>                    <span class="fu">filter</span>(gene <span class="sc">%in%</span> aba_selection) <span class="sc">%&gt;%</span></span>
+<span id="cb33-13"><a href="#cb33-13" aria-hidden="true" tabindex="-1"></a>                    <span class="fu">merge</span>(metadata, <span class="at">by =</span> <span class="st">"sample"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
 </div>
 <p>Then, we draw a heatmap using the <code>tidyheatmaps</code> package. Essentially, this is a <code>tidyverse</code>-style wrapper of the more famous heatmap package <code>pheatmap</code>.</p>
@@ -1062,32 +1057,32 @@ Solution
 <div class="code-with-filename-file">
 <pre><strong>R</strong></pre>
 </div>
-<div class="sourceCode cell-code" id="annotated-cell-22"><pre class="sourceCode r code-annotation-code code-with-copy code-annotated"><code class="sourceCode r"><span id="annotated-cell-22-1"><a href="#annotated-cell-22-1" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(tidyheatmaps)</span>
-<span id="annotated-cell-22-2"><a href="#annotated-cell-22-2" aria-hidden="true" tabindex="-1"></a></span>
-<span id="annotated-cell-22-3"><a href="#annotated-cell-22-3" aria-hidden="true" tabindex="-1"></a>heatmap <span class="ot">&lt;-</span> <span class="fu">tidyheatmap</span>(<span class="at">df =</span> vsd_selection,</span>
-<span id="annotated-cell-22-4"><a href="#annotated-cell-22-4" aria-hidden="true" tabindex="-1"></a>            <span class="at">rows =</span> gene,</span>
-<span id="annotated-cell-22-5"><a href="#annotated-cell-22-5" aria-hidden="true" tabindex="-1"></a>            <span class="at">columns =</span> sample,</span>
-<span id="annotated-cell-22-6"><a href="#annotated-cell-22-6" aria-hidden="true" tabindex="-1"></a>            <span class="at">values =</span> count,</span>
-<button class="code-annotation-anchor" data-target-cell="annotated-cell-22" data-target-annotation="1">1</button><span id="annotated-cell-22-7" class="code-annotation-target"><a href="#annotated-cell-22-7" aria-hidden="true" tabindex="-1"></a>            <span class="at">scale =</span> <span class="st">"row"</span>,</span>
-<span id="annotated-cell-22-8"><a href="#annotated-cell-22-8" aria-hidden="true" tabindex="-1"></a>            <span class="at">annotation_col =</span> <span class="fu">c</span>(condition),</span>
-<span id="annotated-cell-22-9"><a href="#annotated-cell-22-9" aria-hidden="true" tabindex="-1"></a>            <span class="at">gaps_col =</span> condition,</span>
-<button class="code-annotation-anchor" data-target-cell="annotated-cell-22" data-target-annotation="2">2</button><span id="annotated-cell-22-10" class="code-annotation-target"><a href="#annotated-cell-22-10" aria-hidden="true" tabindex="-1"></a>            <span class="at">cluster_rows =</span> <span class="cn">TRUE</span>,</span>
-<span id="annotated-cell-22-11"><a href="#annotated-cell-22-11" aria-hidden="true" tabindex="-1"></a>            <span class="co"># cluster_cols = TRUE,</span></span>
-<span id="annotated-cell-22-12"><a href="#annotated-cell-22-12" aria-hidden="true" tabindex="-1"></a>            <span class="at">color_legend_n =</span> <span class="dv">7</span>,</span>
-<span id="annotated-cell-22-13"><a href="#annotated-cell-22-13" aria-hidden="true" tabindex="-1"></a>            <span class="at">show_rownames =</span> <span class="cn">FALSE</span>,</span>
-<span id="annotated-cell-22-14"><a href="#annotated-cell-22-14" aria-hidden="true" tabindex="-1"></a>            <span class="at">show_colnames =</span> <span class="cn">FALSE</span></span>
-<span id="annotated-cell-22-15"><a href="#annotated-cell-22-15" aria-hidden="true" tabindex="-1"></a>)</span>
-<span id="annotated-cell-22-16"><a href="#annotated-cell-22-16" aria-hidden="true" tabindex="-1"></a>heatmap</span><div class="code-annotation-gutter-bg"></div><div class="code-annotation-gutter"></div></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="annotated-cell-21"><pre class="sourceCode r code-annotation-code code-with-copy code-annotated"><code class="sourceCode r"><span id="annotated-cell-21-1"><a href="#annotated-cell-21-1" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(tidyheatmaps)</span>
+<span id="annotated-cell-21-2"><a href="#annotated-cell-21-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="annotated-cell-21-3"><a href="#annotated-cell-21-3" aria-hidden="true" tabindex="-1"></a>heatmap <span class="ot">&lt;-</span> <span class="fu">tidyheatmap</span>(<span class="at">df =</span> vsd_selection,</span>
+<span id="annotated-cell-21-4"><a href="#annotated-cell-21-4" aria-hidden="true" tabindex="-1"></a>            <span class="at">rows =</span> gene,</span>
+<span id="annotated-cell-21-5"><a href="#annotated-cell-21-5" aria-hidden="true" tabindex="-1"></a>            <span class="at">columns =</span> sample,</span>
+<span id="annotated-cell-21-6"><a href="#annotated-cell-21-6" aria-hidden="true" tabindex="-1"></a>            <span class="at">values =</span> count,</span>
+<button class="code-annotation-anchor" data-target-cell="annotated-cell-21" data-target-annotation="1">1</button><span id="annotated-cell-21-7" class="code-annotation-target"><a href="#annotated-cell-21-7" aria-hidden="true" tabindex="-1"></a>            <span class="at">scale =</span> <span class="st">"row"</span>,</span>
+<span id="annotated-cell-21-8"><a href="#annotated-cell-21-8" aria-hidden="true" tabindex="-1"></a>            <span class="at">annotation_col =</span> <span class="fu">c</span>(condition),</span>
+<span id="annotated-cell-21-9"><a href="#annotated-cell-21-9" aria-hidden="true" tabindex="-1"></a>            <span class="at">gaps_col =</span> condition,</span>
+<button class="code-annotation-anchor" data-target-cell="annotated-cell-21" data-target-annotation="2">2</button><span id="annotated-cell-21-10" class="code-annotation-target"><a href="#annotated-cell-21-10" aria-hidden="true" tabindex="-1"></a>            <span class="at">cluster_rows =</span> <span class="cn">TRUE</span>,</span>
+<span id="annotated-cell-21-11"><a href="#annotated-cell-21-11" aria-hidden="true" tabindex="-1"></a>            <span class="at">color_legend_n =</span> <span class="dv">7</span>,</span>
+<span id="annotated-cell-21-12"><a href="#annotated-cell-21-12" aria-hidden="true" tabindex="-1"></a>            <span class="at">show_rownames =</span> <span class="cn">FALSE</span>,</span>
+<span id="annotated-cell-21-13"><a href="#annotated-cell-21-13" aria-hidden="true" tabindex="-1"></a>            <span class="at">show_colnames =</span> <span class="cn">TRUE</span>,</span>
+<span id="annotated-cell-21-14"><a href="#annotated-cell-21-14" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="annotated-cell-21-15"><a href="#annotated-cell-21-15" aria-hidden="true" tabindex="-1"></a></span>
+<span id="annotated-cell-21-16"><a href="#annotated-cell-21-16" aria-hidden="true" tabindex="-1"></a>heatmap</span><div class="code-annotation-gutter-bg"></div><div class="code-annotation-gutter"></div></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
 <div class="cell-annotation">
 <dl class="code-annotation-container-hidden code-annotation-container-grid">
-<dt data-target-cell="annotated-cell-22" data-target-annotation="1">1</dt>
+<dt data-target-cell="annotated-cell-21" data-target-annotation="1">1</dt>
 <dd>
-<span data-code-cell="annotated-cell-22" data-code-lines="7" data-code-annotation="1">Scaling is very important here! Try removing this line, and see what happens to the heatmap. It will be dominated by some genes that are very highly expressed.</span>
+<span data-code-cell="annotated-cell-21" data-code-lines="7" data-code-annotation="1">Scaling is very important here! Try removing this line, and see what happens to the heatmap. It will be dominated by some genes that are very highly expressed.</span>
 </dd>
-<dt data-target-cell="annotated-cell-22" data-target-annotation="2">2</dt>
+<dt data-target-cell="annotated-cell-21" data-target-annotation="2">2</dt>
 <dd>
-<span data-code-cell="annotated-cell-22" data-code-lines="10" data-code-annotation="2">This argument makes sure that genes with a similar expression pattern are clustered together in the heatmap.</span>
+<span data-code-cell="annotated-cell-21" data-code-lines="10" data-code-annotation="2">This argument makes sure that genes with a similar expression pattern are clustered together in the heatmap.</span>
 </dd>
 </dl>
 </div>
@@ -1099,37 +1094,39 @@ Solution
 </div>
 </div>
 </div>
-<p>That looks pretty good. We can see that there are two clusters of genes: those expressed higher in the <code>spaceflight</code> condition, and those higher expressed in the <code>ground_control</code> condition. We can ask <code>tidyheatmaps</code> to gather genes into such clusters by adding the <code>kmeans_k</code> argument:</p>
+<p>That looks pretty good. We can see that there are two clusters of genes: those expressed higher in the <code>aba</code> condition with respect to <code>control</code>, and those higher expressed in the <code>aba</code> condition with respect to <code>control</code>. We can ask <code>tidyheatmaps</code> to add a little gap between these two clusters by adding <code>cutree_rows = 2</code> as an argument. :</p>
 <div class="cell">
 <div class="code-with-filename">
 <div class="code-with-filename-file">
 <pre><strong>R</strong></pre>
 </div>
-<div class="sourceCode cell-code" id="annotated-cell-23"><pre class="sourceCode r code-annotation-code code-with-copy code-annotated"><code class="sourceCode r"><span id="annotated-cell-23-1"><a href="#annotated-cell-23-1" aria-hidden="true" tabindex="-1"></a>heatmap <span class="ot">&lt;-</span> <span class="fu">tidyheatmap</span>(<span class="at">df =</span> vsd_selection,</span>
-<span id="annotated-cell-23-2"><a href="#annotated-cell-23-2" aria-hidden="true" tabindex="-1"></a>            <span class="at">rows =</span> gene,</span>
-<span id="annotated-cell-23-3"><a href="#annotated-cell-23-3" aria-hidden="true" tabindex="-1"></a>            <span class="at">columns =</span> sample,</span>
-<span id="annotated-cell-23-4"><a href="#annotated-cell-23-4" aria-hidden="true" tabindex="-1"></a>            <span class="at">values =</span> count,</span>
-<span id="annotated-cell-23-5"><a href="#annotated-cell-23-5" aria-hidden="true" tabindex="-1"></a>            <span class="at">scale =</span> <span class="st">"row"</span>, </span>
-<span id="annotated-cell-23-6"><a href="#annotated-cell-23-6" aria-hidden="true" tabindex="-1"></a>            <span class="at">annotation_col =</span> <span class="fu">c</span>(condition),</span>
-<span id="annotated-cell-23-7"><a href="#annotated-cell-23-7" aria-hidden="true" tabindex="-1"></a>            <span class="at">gaps_col =</span> condition,</span>
-<button class="code-annotation-anchor" data-target-cell="annotated-cell-23" data-target-annotation="1">1</button><span id="annotated-cell-23-8" class="code-annotation-target"><a href="#annotated-cell-23-8" aria-hidden="true" tabindex="-1"></a>            <span class="at">kmeans_k =</span> <span class="dv">2</span>,</span>
-<span id="annotated-cell-23-9"><a href="#annotated-cell-23-9" aria-hidden="true" tabindex="-1"></a>            <span class="at">cluster_rows =</span> <span class="cn">TRUE</span>, </span>
-<span id="annotated-cell-23-10"><a href="#annotated-cell-23-10" aria-hidden="true" tabindex="-1"></a>            <span class="co"># cluster_cols = TRUE,</span></span>
-<span id="annotated-cell-23-11"><a href="#annotated-cell-23-11" aria-hidden="true" tabindex="-1"></a>            <span class="at">color_legend_n =</span> <span class="dv">7</span>,</span>
-<button class="code-annotation-anchor" data-target-cell="annotated-cell-23" data-target-annotation="2">2</button><span id="annotated-cell-23-12" class="code-annotation-target"><a href="#annotated-cell-23-12" aria-hidden="true" tabindex="-1"></a>            <span class="at">show_rownames =</span> <span class="cn">TRUE</span>,</span>
-<span id="annotated-cell-23-13"><a href="#annotated-cell-23-13" aria-hidden="true" tabindex="-1"></a>            <span class="at">show_colnames =</span> <span class="cn">FALSE</span></span>
-<span id="annotated-cell-23-14"><a href="#annotated-cell-23-14" aria-hidden="true" tabindex="-1"></a>)</span>
-<span id="annotated-cell-23-15"><a href="#annotated-cell-23-15" aria-hidden="true" tabindex="-1"></a>heatmap</span><div class="code-annotation-gutter-bg"></div><div class="code-annotation-gutter"></div></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="annotated-cell-22"><pre class="sourceCode r code-annotation-code code-with-copy code-annotated"><code class="sourceCode r"><span id="annotated-cell-22-1"><a href="#annotated-cell-22-1" aria-hidden="true" tabindex="-1"></a>heatmap <span class="ot">&lt;-</span> <span class="fu">tidyheatmap</span>(<span class="at">df =</span> vsd_selection,</span>
+<span id="annotated-cell-22-2"><a href="#annotated-cell-22-2" aria-hidden="true" tabindex="-1"></a>            <span class="at">rows =</span> gene,</span>
+<span id="annotated-cell-22-3"><a href="#annotated-cell-22-3" aria-hidden="true" tabindex="-1"></a>            <span class="at">columns =</span> sample,</span>
+<span id="annotated-cell-22-4"><a href="#annotated-cell-22-4" aria-hidden="true" tabindex="-1"></a>            <span class="at">values =</span> count,</span>
+<button class="code-annotation-anchor" data-target-cell="annotated-cell-22" data-target-annotation="1">1</button><span id="annotated-cell-22-5" class="code-annotation-target"><a href="#annotated-cell-22-5" aria-hidden="true" tabindex="-1"></a>            <span class="at">scale =</span> <span class="st">"row"</span>,</span>
+<span id="annotated-cell-22-6"><a href="#annotated-cell-22-6" aria-hidden="true" tabindex="-1"></a>            <span class="at">annotation_col =</span> <span class="fu">c</span>(condition),</span>
+<span id="annotated-cell-22-7"><a href="#annotated-cell-22-7" aria-hidden="true" tabindex="-1"></a>            <span class="at">gaps_col =</span> condition,</span>
+<button class="code-annotation-anchor" data-target-cell="annotated-cell-22" data-target-annotation="2">2</button><span id="annotated-cell-22-8" class="code-annotation-target"><a href="#annotated-cell-22-8" aria-hidden="true" tabindex="-1"></a>            <span class="at">cluster_rows =</span> <span class="cn">TRUE</span>,</span>
+<span id="annotated-cell-22-9"><a href="#annotated-cell-22-9" aria-hidden="true" tabindex="-1"></a>            <span class="at">color_legend_n =</span> <span class="dv">7</span>,</span>
+<span id="annotated-cell-22-10"><a href="#annotated-cell-22-10" aria-hidden="true" tabindex="-1"></a>            <span class="at">show_rownames =</span> <span class="cn">FALSE</span>,</span>
+<span id="annotated-cell-22-11"><a href="#annotated-cell-22-11" aria-hidden="true" tabindex="-1"></a>            <span class="at">show_colnames =</span> <span class="cn">TRUE</span>,</span>
+<span id="annotated-cell-22-12"><a href="#annotated-cell-22-12" aria-hidden="true" tabindex="-1"></a>            <span class="at">cutree_rows =</span> <span class="dv">2</span></span>
+<span id="annotated-cell-22-13"><a href="#annotated-cell-22-13" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="annotated-cell-22-14"><a href="#annotated-cell-22-14" aria-hidden="true" tabindex="-1"></a></span>
+<span id="annotated-cell-22-15"><a href="#annotated-cell-22-15" aria-hidden="true" tabindex="-1"></a><span class="fu">ggsave</span>(<span class="st">"results/heatmap_aba_DEGs.png"</span>, heatmap, <span class="at">width =</span> <span class="dv">14</span>, <span class="at">height =</span> <span class="dv">8</span>, <span class="at">units =</span> <span class="st">"cm"</span>)</span>
+<span id="annotated-cell-22-16"><a href="#annotated-cell-22-16" aria-hidden="true" tabindex="-1"></a></span>
+<span id="annotated-cell-22-17"><a href="#annotated-cell-22-17" aria-hidden="true" tabindex="-1"></a>heatmap</span><div class="code-annotation-gutter-bg"></div><div class="code-annotation-gutter"></div></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
 <div class="cell-annotation">
 <dl class="code-annotation-container-hidden code-annotation-container-grid">
-<dt data-target-cell="annotated-cell-23" data-target-annotation="1">1</dt>
+<dt data-target-cell="annotated-cell-22" data-target-annotation="1">1</dt>
 <dd>
-<span data-code-cell="annotated-cell-23" data-code-lines="8" data-code-annotation="1">This argument is added to perform k-means clustering and gather different genes into <code>n</code> clusters, in this case, 2 clusters.</span>
+<span data-code-cell="annotated-cell-22" data-code-lines="5" data-code-annotation="1">This argument is added to perform k-means clustering and gather different genes into <code>n</code> clusters, in this case, 2 clusters.</span>
 </dd>
-<dt data-target-cell="annotated-cell-23" data-target-annotation="2">2</dt>
+<dt data-target-cell="annotated-cell-22" data-target-annotation="2">2</dt>
 <dd>
-<span data-code-cell="annotated-cell-23" data-code-lines="12" data-code-annotation="2">Since we will be plotting just two clusters, we can set <code>show_rownames</code> to <code>TRUE</code>.</span>
+<span data-code-cell="annotated-cell-22" data-code-lines="8" data-code-annotation="2">Since we will be plotting just two clusters, we can set <code>show_rownames</code> to <code>TRUE</code>.</span>
 </dd>
 </dl>
 </div>
@@ -1141,12 +1138,160 @@ Solution
 </div>
 </div>
 </div>
-<p>This simplifies our heatmap into two clusters, as expected. As you can imagine, more complex (and more interesting!) clustering patterns may emerge when the experimental design gets more complicated.</p>
+<div class="callout callout-style-default callout-tip no-icon callout-titled" title="Challenging exercise">
+<div class="callout-header d-flex align-content-center">
+<div class="callout-icon-container">
+<i class="callout-icon no-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+Challenging exercise
+</div>
+</div>
+<div class="callout-body-container callout-body">
+<p>This heatmap shows just the DEGs of <code>aba</code> vs <code>control</code>. Update the code to make a heatmap including <em>all</em> DEGs of hormone-treated samples vs <code>control</code> conditions.</p>
+</div>
+</div>
+<div class="callout callout-style-default callout-tip no-icon callout-titled" title="Hints">
+<div class="callout-header d-flex align-content-center" data-bs-toggle="collapse" data-bs-target=".callout-9-contents" aria-controls="callout-9" aria-expanded="false" aria-label="Toggle callout">
+<div class="callout-icon-container">
+<i class="callout-icon no-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+Hints
+</div>
+<div class="callout-btn-toggle d-inline-block border-0 py-1 ps-1 pe-0 float-end"><i class="callout-toggle"></i></div>
+</div>
+<div id="callout-9" class="callout-9-contents callout-collapse collapse">
+<div class="callout-body-container callout-body">
+<p>Do make such a heatmap, you need to take the following steps:</p>
+<ol type="1">
+<li>Create result tables of all different hormone treatments vs <code>control</code> samples.</li>
+<li>Extract the gene name lists of DEGs in each condition</li>
+<li>Merge these lists into a master list of all DEGs.</li>
+<li>Subset the variance stabilized dataframe with this master DEG list.</li>
+<li>Create the heatmap.</li>
+</ol>
+</div>
+</div>
+</div>
+<div class="callout callout-style-default callout-caution no-icon callout-titled" title="Solution">
+<div class="callout-header d-flex align-content-center" data-bs-toggle="collapse" data-bs-target=".callout-10-contents" aria-controls="callout-10" aria-expanded="false" aria-label="Toggle callout">
+<div class="callout-icon-container">
+<i class="callout-icon no-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+Solution
+</div>
+<div class="callout-btn-toggle d-inline-block border-0 py-1 ps-1 pe-0 float-end"><i class="callout-toggle"></i></div>
+</div>
+<div id="callout-10" class="callout-10-contents callout-collapse collapse">
+<div class="callout-body-container callout-body">
+<p>First we make result tables for the missing contrasts:</p>
+<div class="cell">
+<div class="code-with-filename">
+<div class="code-with-filename-file">
+<pre><strong>R</strong></pre>
+</div>
+<div class="sourceCode cell-code" id="cb34"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb34-1"><a href="#cb34-1" aria-hidden="true" tabindex="-1"></a>contrast_to_test <span class="ot">&lt;-</span>  <span class="fu">c</span>(<span class="st">"condition"</span>, <span class="st">"auxin"</span>, <span class="st">"control"</span>)</span>
+<span id="cb34-2"><a href="#cb34-2" aria-hidden="true" tabindex="-1"></a>res_auxin_vs_control <span class="ot">&lt;-</span> <span class="fu">results</span>(dds, <span class="at">contrast=</span>contrast_to_test, <span class="at">alpha =</span> <span class="fl">0.05</span>)</span>
+<span id="cb34-3"><a href="#cb34-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb34-4"><a href="#cb34-4" aria-hidden="true" tabindex="-1"></a>contrast_to_test <span class="ot">&lt;-</span>  <span class="fu">c</span>(<span class="st">"condition"</span>, <span class="st">"meja"</span>, <span class="st">"control"</span>)</span>
+<span id="cb34-5"><a href="#cb34-5" aria-hidden="true" tabindex="-1"></a>res_meja_vs_control <span class="ot">&lt;-</span> <span class="fu">results</span>(dds, <span class="at">contrast=</span>contrast_to_test, <span class="at">alpha =</span> <span class="fl">0.05</span>)</span>
+<span id="cb34-6"><a href="#cb34-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb34-7"><a href="#cb34-7" aria-hidden="true" tabindex="-1"></a>contrast_to_test <span class="ot">&lt;-</span>  <span class="fu">c</span>(<span class="st">"condition"</span>, <span class="st">"acc"</span>, <span class="st">"control"</span>)</span>
+<span id="cb34-8"><a href="#cb34-8" aria-hidden="true" tabindex="-1"></a>res_acc_vs_control <span class="ot">&lt;-</span> <span class="fu">results</span>(dds, <span class="at">contrast=</span>contrast_to_test, <span class="at">alpha =</span> <span class="fl">0.05</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+</div>
+<p>Then we take the geneIDs of differentially expressed genes from each results table. It’s a bit repetitive, but it works.</p>
+<div class="cell">
+<div class="code-with-filename">
+<div class="code-with-filename-file">
+<pre><strong>R</strong></pre>
+</div>
+<div class="sourceCode cell-code" id="cb35"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb35-1"><a href="#cb35-1" aria-hidden="true" tabindex="-1"></a>padj_cutoff <span class="ot">=</span> <span class="fl">0.05</span></span>
+<span id="cb35-2"><a href="#cb35-2" aria-hidden="true" tabindex="-1"></a>lfc_cutoff <span class="ot">=</span> <span class="fl">1.5</span></span>
+<span id="cb35-3"><a href="#cb35-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb35-4"><a href="#cb35-4" aria-hidden="true" tabindex="-1"></a>DEGs_aba <span class="ot">&lt;-</span> res_aba_vs_control <span class="sc">%&gt;%</span> </span>
+<span id="cb35-5"><a href="#cb35-5" aria-hidden="true" tabindex="-1"></a>  <span class="fu">as.data.frame</span>() <span class="sc">%&gt;%</span></span>
+<span id="cb35-6"><a href="#cb35-6" aria-hidden="true" tabindex="-1"></a>  <span class="fu">rownames_to_column</span>(<span class="st">"geneID"</span>) <span class="sc">%&gt;%</span> </span>
+<span id="cb35-7"><a href="#cb35-7" aria-hidden="true" tabindex="-1"></a>  <span class="fu">filter</span>(padj <span class="sc">&lt;</span> padj_cutoff) <span class="sc">%&gt;%</span></span>
+<span id="cb35-8"><a href="#cb35-8" aria-hidden="true" tabindex="-1"></a>  <span class="fu">filter</span>(<span class="fu">abs</span>(log2FoldChange) <span class="sc">&gt;</span> lfc_cutoff) <span class="sc">%&gt;%</span> </span>
+<span id="cb35-9"><a href="#cb35-9" aria-hidden="true" tabindex="-1"></a>  <span class="fu">pull</span>(geneID)</span>
+<span id="cb35-10"><a href="#cb35-10" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb35-11"><a href="#cb35-11" aria-hidden="true" tabindex="-1"></a>DEGs_meja <span class="ot">&lt;-</span> res_meja_vs_control <span class="sc">%&gt;%</span> </span>
+<span id="cb35-12"><a href="#cb35-12" aria-hidden="true" tabindex="-1"></a>  <span class="fu">as.data.frame</span>() <span class="sc">%&gt;%</span></span>
+<span id="cb35-13"><a href="#cb35-13" aria-hidden="true" tabindex="-1"></a>  <span class="fu">rownames_to_column</span>(<span class="st">"geneID"</span>) <span class="sc">%&gt;%</span> </span>
+<span id="cb35-14"><a href="#cb35-14" aria-hidden="true" tabindex="-1"></a>  <span class="fu">filter</span>(padj <span class="sc">&lt;</span> padj_cutoff) <span class="sc">%&gt;%</span></span>
+<span id="cb35-15"><a href="#cb35-15" aria-hidden="true" tabindex="-1"></a>  <span class="fu">filter</span>(<span class="fu">abs</span>(log2FoldChange) <span class="sc">&gt;</span> lfc_cutoff) <span class="sc">%&gt;%</span> </span>
+<span id="cb35-16"><a href="#cb35-16" aria-hidden="true" tabindex="-1"></a>  <span class="fu">pull</span>(geneID)</span>
+<span id="cb35-17"><a href="#cb35-17" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb35-18"><a href="#cb35-18" aria-hidden="true" tabindex="-1"></a>DEGs_auxin <span class="ot">&lt;-</span> res_auxin_vs_control <span class="sc">%&gt;%</span> </span>
+<span id="cb35-19"><a href="#cb35-19" aria-hidden="true" tabindex="-1"></a>  <span class="fu">as.data.frame</span>() <span class="sc">%&gt;%</span></span>
+<span id="cb35-20"><a href="#cb35-20" aria-hidden="true" tabindex="-1"></a>  <span class="fu">rownames_to_column</span>(<span class="st">"geneID"</span>) <span class="sc">%&gt;%</span> </span>
+<span id="cb35-21"><a href="#cb35-21" aria-hidden="true" tabindex="-1"></a>  <span class="fu">filter</span>(padj <span class="sc">&lt;</span> padj_cutoff) <span class="sc">%&gt;%</span></span>
+<span id="cb35-22"><a href="#cb35-22" aria-hidden="true" tabindex="-1"></a>  <span class="fu">filter</span>(<span class="fu">abs</span>(log2FoldChange) <span class="sc">&gt;</span> lfc_cutoff) <span class="sc">%&gt;%</span> </span>
+<span id="cb35-23"><a href="#cb35-23" aria-hidden="true" tabindex="-1"></a>  <span class="fu">pull</span>(geneID)</span>
+<span id="cb35-24"><a href="#cb35-24" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb35-25"><a href="#cb35-25" aria-hidden="true" tabindex="-1"></a>DEGs_acc <span class="ot">&lt;-</span> res_acc_vs_control <span class="sc">%&gt;%</span> </span>
+<span id="cb35-26"><a href="#cb35-26" aria-hidden="true" tabindex="-1"></a>  <span class="fu">as.data.frame</span>() <span class="sc">%&gt;%</span></span>
+<span id="cb35-27"><a href="#cb35-27" aria-hidden="true" tabindex="-1"></a>  <span class="fu">rownames_to_column</span>(<span class="st">"geneID"</span>) <span class="sc">%&gt;%</span> </span>
+<span id="cb35-28"><a href="#cb35-28" aria-hidden="true" tabindex="-1"></a>  <span class="fu">filter</span>(padj <span class="sc">&lt;</span> padj_cutoff) <span class="sc">%&gt;%</span></span>
+<span id="cb35-29"><a href="#cb35-29" aria-hidden="true" tabindex="-1"></a>  <span class="fu">filter</span>(<span class="fu">abs</span>(log2FoldChange) <span class="sc">&gt;</span> lfc_cutoff) <span class="sc">%&gt;%</span> </span>
+<span id="cb35-30"><a href="#cb35-30" aria-hidden="true" tabindex="-1"></a>  <span class="fu">pull</span>(geneID)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+</div>
+<p>Then we combine (<code>c()</code>) all four gene lists, and use the <code>unique()</code> function to make sure each gene ID occurs only once. Combining the list is absolutely necessary, using <code>unique()</code> is not, but it allows us to check how many unique DEGs we are about to plot.</p>
+<div class="cell">
+<div class="code-with-filename">
+<div class="code-with-filename-file">
+<pre><strong>R</strong></pre>
+</div>
+<div class="sourceCode cell-code" id="cb36"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb36-1"><a href="#cb36-1" aria-hidden="true" tabindex="-1"></a>all_DEGs <span class="ot">&lt;-</span> <span class="fu">unique</span>(<span class="fu">c</span>(DEGs_aba, DEGs_auxin, DEGs_meja, DEGs_acc))</span>
+<span id="cb36-2"><a href="#cb36-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb36-3"><a href="#cb36-3" aria-hidden="true" tabindex="-1"></a><span class="fu">length</span>(all_DEGs)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<div class="cell-output cell-output-stdout">
+<pre><code>[1] 2865</code></pre>
+</div>
+</div>
+<p>Finally, we can subset the variance stabilized counts and plot the heatmap:</p>
+<div class="cell">
+<div class="code-with-filename">
+<div class="code-with-filename-file">
+<pre><strong>R</strong></pre>
+</div>
+<div class="sourceCode cell-code" id="cb38"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb38-1"><a href="#cb38-1" aria-hidden="true" tabindex="-1"></a>vsd_selection <span class="ot">&lt;-</span> variance_stabilised_df <span class="sc">%&gt;%</span> </span>
+<span id="cb38-2"><a href="#cb38-2" aria-hidden="true" tabindex="-1"></a>                    <span class="fu">filter</span>(gene <span class="sc">%in%</span> all_DEGs) <span class="sc">%&gt;%</span></span>
+<span id="cb38-3"><a href="#cb38-3" aria-hidden="true" tabindex="-1"></a>                    <span class="fu">merge</span>(metadata, <span class="at">by =</span> <span class="st">"sample"</span>)</span>
+<span id="cb38-4"><a href="#cb38-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb38-5"><a href="#cb38-5" aria-hidden="true" tabindex="-1"></a><span class="fu">tidyheatmap</span>(<span class="at">df =</span> vsd_selection,</span>
+<span id="cb38-6"><a href="#cb38-6" aria-hidden="true" tabindex="-1"></a>            <span class="at">rows =</span> gene,</span>
+<span id="cb38-7"><a href="#cb38-7" aria-hidden="true" tabindex="-1"></a>            <span class="at">columns =</span> sample,</span>
+<span id="cb38-8"><a href="#cb38-8" aria-hidden="true" tabindex="-1"></a>            <span class="at">values =</span> count,</span>
+<span id="cb38-9"><a href="#cb38-9" aria-hidden="true" tabindex="-1"></a>            <span class="at">scale =</span> <span class="st">'row'</span>,</span>
+<span id="cb38-10"><a href="#cb38-10" aria-hidden="true" tabindex="-1"></a>            <span class="at">annotation_col =</span> <span class="fu">c</span>(condition),</span>
+<span id="cb38-11"><a href="#cb38-11" aria-hidden="true" tabindex="-1"></a>            <span class="at">gaps_col =</span> condition,</span>
+<span id="cb38-12"><a href="#cb38-12" aria-hidden="true" tabindex="-1"></a>            <span class="at">cluster_rows =</span> <span class="cn">TRUE</span>,</span>
+<span id="cb38-13"><a href="#cb38-13" aria-hidden="true" tabindex="-1"></a>            <span class="at">show_rownames =</span> <span class="cn">TRUE</span>,</span>
+<span id="cb38-14"><a href="#cb38-14" aria-hidden="true" tabindex="-1"></a>            <span class="at">show_colnames =</span> <span class="cn">TRUE</span>,</span>
+<span id="cb38-15"><a href="#cb38-15" aria-hidden="true" tabindex="-1"></a>            <span class="at">cutree_rows =</span> <span class="dv">4</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<div class="cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="04-differential-gene-expression_files/figure-html/unnamed-chunk-28-1.png" class="img-fluid figure-img" width="768"></p>
+</figure>
+</div>
+</div>
+</div>
+</div>
+</div>
+</div>
 </section>
 </section>
 <section id="whats-next" class="level2">
 <h2 class="anchored" data-anchor-id="whats-next">What’s next</h2>
-<p>So far, we managed to find lists of genes that we find interesting. For example, we could be interested in <em>all</em> genes that are differentially expressed between two conditions, or choose to zoom in to only the upregulated or downregulated genes. In the next section, we will look into characterizing lists of genes using overrepresentation analysis. For example, we will look at GO-term enrichment.</p>
+<p>So far, we managed to find lists of differentially expressed genes. In the next section, we will look into characterizing lists of genes using overrepresentation analysis. For example, we will look at GO-term enrichment.</p>
 
 
 </section>

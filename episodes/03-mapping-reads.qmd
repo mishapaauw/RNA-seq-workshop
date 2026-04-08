@@ -189,7 +189,8 @@ To use an alignment tool, we must first get the **reference genome** (e.g. via [
 
 Let's have a quick look at the reference genome:
 
-```bash
+```{bash filename="bash"}
+#| eval: false
 head genome/TAIR10.fasta # <1>
 >1 dna:chromosome chromosome:TAIR10:1:1:30427671:1 REF
 CCCTAAACCCTAAACCCTAAACCCTAAACCTCTGAATCCTTAATCCCTAAATCCCTAAAT

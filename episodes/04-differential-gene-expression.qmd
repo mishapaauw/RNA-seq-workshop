@@ -13,7 +13,7 @@ The main goal of most RNA-seq experiments is to discover which genes are differe
 
 ## Reading the count table into DESeq2
 
-In this tutorial, we will explore the transcriptomes of *A. thaliana* plants that experienced microgravity by growing on the International Space Station, while control plants were grown on earth. The experimental design is simple: there are three replicates in both conditions `space_flight` and `ground_control`.
+In this tutorial, we will explore the transcriptomes of root samples of *A. thaliana* plants that were treated with different plant hormones. Control samples were not treated with any plant hormone. The experimental design is simple: there are three replicates in each condition: `control` (no hormone), `aba` (abscisic acid), `meja` (methyl-jasmonate), `acc` (the precursor of the hormone ethylene), and `auxin`.
 
 ::: {.callout-note}
 Download the data from [the repository of this workshop](https://github.com/mishapaauw/RNA-seq-workshop/tree/main/data). Store the files in a folder on your computer. See below for a good workshop folder setup:
@@ -22,8 +22,8 @@ Download the data from [the repository of this workshop](https://github.com/mish
 #| eval: FALSE
 RNA-seq-workshop
 ├── data/
-│   ├── GLDS38_raw_counts.csv
-│   └── samples_to_condition.csv
+│   ├── Deforges_2019-raw-counts.csv
+│   └── Deforges_2019-experiment-design.csv
 ├── data_processed/
 │   └── Normalized counts will go here
 ├── results/
@@ -47,16 +47,16 @@ library(ggrepel)
 Then, load the count table and metadata file:
 
 ```{R filename = "R"}
-raw_counts <- read.csv("data/GLDS38_raw_counts.csv", header = T, stringsAsFactors = F) # <1>
+raw_counts <- read.csv("data/Deforges_2019-raw-counts.csv", header = T, stringsAsFactors = F) # <1>
 
-raw_counts <- raw_counts %>% column_to_rownames("gene") # <2>
+raw_counts <- raw_counts %>% column_to_rownames("Geneid") # <2>
 
-metadata <- read.csv("data/samples_to_condition.csv", header = T)
+metadata <- read.csv("data/Deforges_2019-experiment-design.csv", header = T)
 
 raw_counts[1:4,1:4]
 ```
-1. Make sure you use the correct path to where your data is stored. Depending on your folder structure, you may not need the `../` and you could use `data/GLDS38_raw_counts.csv` instead.
-2. Here, we store the column `gene` as row names instead of a dedicated column.
+1. Make sure you use the correct path to where your data is stored. Depending on your folder structure, you may need to adapt the filepath. Here, we use: `data/Deforges_2019-raw-counts.csv`.
+2. Here, we store the column `Geneid` as row names instead of a dedicated column.
 
 That looks good! Now, it's important to note that `DESeq2` expects the sample names (columns in count table) to *exactly match* the sample names in the metadata file, and be in the *same order*! For this small dataset, we can inspect that by eye. In addition, and probably useful for larger datasets, we can use the `all()` function to check this.
 
@@ -71,7 +71,7 @@ all(colnames(raw_counts) == metadata$sample) # <1>
 
 ### Creating the `dds` object
 
-We are now ready to create a `DESeqDataSet` object, commonly abbreviated as `dds`. The `dds` object will contain our count tables and metadata, but later, also the normalized counts and differentially expressed gene lists. As such, the `dds` objects help us keep things neat in our RStudio session. To make one, we need to specify our experimental design 'formula'. In this tutorial, there's only one variable: the design formula will be as simple as `~ condition`. However, in multi-factor experiments it can include additional variables, can also include unwanted sources of variation such as RNA isolation batch, the researcher who extracted RNA, or on which table the plants were grown. Including these factors in the design formula will help DESeq2 to account for these soures of variation, allowing more accurate estimation of the primary condition’s effect. For example, in an experiment with a potential batch effect, treatments, and different genotypes: `~ batch + treatment + genotype`. If you also want to model the *interaction*, that is whether the treatment effect varies by genotype, change the `+` to a `*`: `~ batch + treatment * genotype`.
+We are now ready to create a `DESeqDataSet` object, commonly abbreviated as `dds`. The `dds` object will contain our count tables and metadata, but later, also the normalized counts and differentially expressed gene lists. As such, the `dds` objects help us keep things neat in our RStudio session. To make one, we need to specify our experimental design 'formula'. In this tutorial, there's only one variable: the design formula will be as simple as `~ condition`. However, in multi-factor experiments it can include additional experimental variables, but also include unwanted sources of variation such as RNA isolation batch. Including these factors in the design formula will help DESeq2 to account for these soures of variation, allowing more accurate estimation of the primary condition’s effect. For example, in an experiment with a potential batch effect, treatments, and different genotypes: `~ batch + treatment + genotype`. If you also want to model the *interaction*, that is whether the treatment effect varies by genotype, change the `+` to a `*`: `~ batch + treatment * genotype`.
 
 ```{R filename = "R"}
 dds <- DESeqDataSetFromMatrix(countData = raw_counts, 
@@ -79,7 +79,7 @@ dds <- DESeqDataSetFromMatrix(countData = raw_counts,
                               design = ~ condition)
 ```
 
-## Assesing the quality of an RNA-seq experiment via PCA
+## Inspecting sample clustering via PCA
 
 As essential step in RNA-seq analysis is to inspect similarity between samples. In particular, we should confirm that **replicates with the same treatment are similar to each other**, and make sure that **the experimental condition is the major source of variation in the data**. In addition, these quality-control explorations will also help identify if any samples behalve as outliers, or whether there may have been a sample swap. We will use **Principal Component Analysis (PCA)** to do this. PCA is a dimensionality reduction technique that transforms complex high-dimensional data (like expression of thousands of genes) into a limited number of new variables ('principal components') that capture the most variation in the dataset. 
 
@@ -141,16 +141,19 @@ Indeed, we can observe that genes that are highly expressed (have high mean coun
 Okay, finally we are ready to perform the PCA. `DESeq2` makes this very easy for us with a simple function, `plotPCA()`, which directly gives us a PCA plot. 
 
 ```{R filename = "R"}
+#| warning: false
 plotPCA(variance_stabilized_dataset)
 ```
 
 Let's break this plot down:
 
-- We see that principal component 1 (`PC1`) explains 60% of the variance, while `PC2` explains 29%. `PC1` does not seem to separate our two conditions. This means that there's a source of variation in this dataset that we are seemingly unaware of.
-- We see that `PC2` nicely separates our two conditions. This is good news. 
-- We see that two samples from `space_flight` cluster very closely together, while one sample is quite a distant from those two. This means that this one replicate behaves a bit differently than the rest. However, since it's still similar to the other two samples on the `PC2` axis, this does not worry me.
+- We see that principal component 1 (`PC1`) explains 61% of the variance, while `PC2` explains 27%. 
+- `PC1` separates the `aba` samples from all other conditions. 
+- `PC2` separates `meja` and `auxin` treated sampled from the `control` samples, both in a different direction.
+- `acc` treated samples seem to cluster together with `control` samples. So it looks like the impact of `acc` on the Arabidopsis transcriptome is limited.
+- Different replicates from the same treatment plot close together in PCA space: that's good news.
 
-If you want to have full control and make the PCA plot yourself in `ggplot`, you can add `returnData=TRUE)`
+If you want to have full control and make the PCA plot yourself in `ggplot2`, you can add `returnData=TRUE)`. You can then save the PCA coordinates in a dataframe, ready for manual plotting.
 
 ```{R filename = "R"}
 #| eval: false
@@ -232,19 +235,25 @@ library(pheatmap)
 
 correlation_matrix <- cor(variance_stabilised_counts)
 
-metadata_2 <- metadata %>% column_to_rownames("sample_name")
+metadata_2 <- metadata %>% column_to_rownames("sample")
 
 pheatmap(correlation_matrix, annotation_row = metadata_2, 
          clustering_distance_rows = "correlation", 
          clustering_distance_cols = "correlation", 
          display_numbers = TRUE, fontsize = 7)
 ```
-We can see that all the `ground_control` and `space_flight` samples cluster together. For example, `ground_control` samples have a 0.98 or greater correlation with each other, while they have a slightly lower correlation with `space_flight` samples. However, the samples still have a high correlation also accross the different treatment. This shows that the transcriptomes are actually highly similar, regardless of treatment, probably because the majority of genes is not differentially expressed. 
+- We can see that all the replicate samples with the same treatment cluster together,  For example, `aba` samples have a 0.99 correlation with each other, while they have a slightly lower correlation to samples with a different treatments. 
+
+- Just like in the PCA `control` and `acc` samples cluster together, indicating that there is little impact of `acc` treatment on the transcriptome of Arabidopsis roots.
+
+- All samples still have a high correlation across the different treatments. This shows that the transcriptomes are actually highly similar, regardless of treatment, probably because the majority of genes is not differentially expressed.
+
 :::
+
 
 ## Differential gene expression analysis
 
-`DESeq2` handles all steps of DEG analysis, from sample normalization (e.g., to account for difference in sequencing depth per sample) to the statistical models and tests in one function. Easy! We run this function with the `dds` object as input, while storing the output in the `dds` object as well. In this way, we will 'fill' the `dds` object with the new analysis. `R` will now print all the individual steps that the `DESeq()` function performed for us.
+`DESeq2` handles all steps of DEG analysis, from sample normalization (e.g., to account for difference in sequencing depth per sample) to the statistical models and tests in one function: `DESeq()`. Easy! We run this function with the `dds` object as input, while storing the output in the `dds` object as well. In this way, we will 'update' the `dds` object with the new analysis. `R` will now print all the individual steps that the `DESeq()` function performed for us.
 
 ```{R filename="R"}
 dds <- DESeq(dds)
@@ -268,7 +277,7 @@ How would you visualize the effect of the normalization on the distribution of r
 
 ::: {.callout-caution title="Solution" collapse="true" icon="false"}
 
-You would make a boxplot of all the read counts per sample, for both raw counts and normalized counts.
+You could make a boxplot of all the read counts per sample, for both raw counts and normalized counts.
 
 ```{R filename="R"}
 # Get the raw counts and the normalized counts
@@ -299,23 +308,24 @@ tidy_total %>%
 Notice how the median read counts of the normalized datasets are closer together than those of the raw read counts.
 :::
 
-### Lists of DEGs
+### Lists of DEGs between two treatments
 
-Now, to extract the list of DEGs from the `dds` we run another line of code. The argument `alpha` is used to specify the *p*-value cutoff for significance, the default value is `alpha = 0.1`. We will use 0.05 here. We will also sort the table on *p*-value:
+Now, we are ready to extract lists of differentially expressed genes between two treatments from the `dds` object. We will the use `results()` function to do so. First, we will specify the _contrast_ that we want to test. The argument `alpha` is used to specify the *p*-value cutoff for significance, the default value is `alpha = 0.1`. We will use 0.05 here. We will also sort the table on *p*-value:
 
 ```{R filename="R"}
-res <- results(dds, alpha = 0.05) # <1>
+contrast_to_test <-  c("condition", "aba", "control")
+res_aba_vs_control <- results(dds, contrast=contrast_to_test, alpha = 0.05) # <1>
 
-summary(res) # <2>
+summary(res_aba_vs_control) # <2>
 
-results <- res %>%    # <3>
+results_aba_vs_control <- res_aba_vs_control %>%    # <3>
   as.data.frame() %>% 
-  rownames_to_column("genes") %>%
+  rownames_to_column("gene") %>%
   arrange(padj) 
 
-head(results) 
+head(results_aba_vs_control) 
 
-write.csv(results, 'data_processed/all_genes_spaceflight_vs_ground.csv', quote = FALSE, row.names = FALSE) # <4>
+write.csv(results_aba_vs_control, 'data_processed/aba_vs_control.csv', quote = FALSE, row.names = FALSE) # <4>
 ```
 1. Generate results table
 2. Print a quick summary of the results: how many genes are significantly differentially expressed?
@@ -370,29 +380,36 @@ log2(230/75)
 :::
 
 #### Shrinkage of fold changes
+
 DESeq2 allows for the *shrinkage* of log2FoldChanges values towards zero **if** the information for a gene is low (e.g. low amount of counts). See [DESeq2 vignette](https://bioconductor.org/packages/release/bioc/vignettes/DESeq2/inst/doc/DESeq2.html#log-fold-change-shrinkage-for-visualization-and-ranking) for more information. In this workshop, we will skip this step.
-
-#### Extra contrasts
-
-In our simple experimental setup, only one contrast is possible: `space_flight` vs `ground_control`. That's why would could simply call `res <- results(dds, alpha = 0.05)` to generate our results table. If we would have had another condition, for example, the plants were also grown with Martian gravity levels, we could have specified the contrast we wanted to test:
-
-```{R filename="R"}
-#| eval: false
-contrast_to_test <-  c("condition", "martian_gravity", "ground_control")
-res_martian_vs_ground <- results(dds, contrast=contrast_to_test, alpha = 0.05)
-```
 
 ### Volcano plots
 
-One way to visualize DEG results is to display them in a Volcano plot. Such a plot shows a measure of effect size (`log2FoldChange`) versus a measure of significance (`padj`). There are [tools available](https://goedhart.shinyapps.io/VolcaNoseR/) (developed by Joachim Goedhart, assistant professor at SILS) to help you make such a plot using the DEG list we just saved as a `.csv` file. Alternatively, we can make one ourselves for full control of the plot:
+One way to visualize DEG results is to display them in a Volcano plot. Such a plot shows a measure of effect size (`log2FoldChange`) versus a measure of significance (`padj`). There are [tools available](https://goedhart.shinyapps.io/VolcaNoseR/) (developed by Joachim Goedhart, assistant professor at SILS) to help you make such a plot using the DEG list we just saved as a `.csv` file. But we can also make volcano plots ourselves in `R`:
+
+First we will make a 'quick and dirty' plot using the `EnhancedVolcano` package:
 
 ```{R filename="R"}
+#| warning: false
+library(EnhancedVolcano)
+
+EnhancedVolcano(res_aba_vs_control,
+                lab = rownames(res_aba_vs_control),
+                x = 'log2FoldChange',
+                y = 'padj',
+                legendPosition   = 'right')
+``` 
+
+It works, but it's not very beautiful. We can make one ourselves using `ggplot2` for full control of the plot:
+
+```{R filename="R"}
+#| warning: false
 # Define fold change and p-value cutoffs
-lfc_cutoff <- 1
+lfc_cutoff <- 2
 padj_cutoff <- 0.05
 
 # Make new categorical variable containing significance information
-results <- results %>% 
+results_aba_vs_control <- results_aba_vs_control %>% 
         mutate(significance = case_when(
           padj < padj_cutoff & log2FoldChange > lfc_cutoff ~ 'Significantly upregulated',
           padj < padj_cutoff & log2FoldChange < -lfc_cutoff ~ 'Significantly downregulated',
@@ -400,47 +417,46 @@ results <- results %>%
           TRUE ~ 'Not significant'
         ))
 
-DEGs <- results %>% filter(significance == "Significantly upregulated" | significance == "Significantly downregulated")
-write.csv(DEGs, 'data_processed/DEGs_spaceflight_vs_ground.csv', quote = FALSE, row.names = FALSE)
-
 colors <- c("Significantly upregulated" = "#E69F00", 
             "Significantly downregulated" = "#56B4E9", 
             "Not significant" = "gray80", 
             "Significant but small effect size" = 'grey50')
 
 # select top 10 genes to highlight
-top_genes <- results[1:10, ]
+top_genes <- results_aba_vs_control[1:10, ]
 
-volcano <- results %>% 
+volcano <- results_aba_vs_control %>% 
   ggplot(aes(x = log2FoldChange, y = -log10(padj), colour = significance)) +
-  geom_point(alpha = 0.5, size = 0.8) + 
+  geom_point(alpha = 0.5, size = 1) + 
   geom_hline(aes(yintercept = -log10(padj_cutoff)), linetype = "dashed") +
   geom_vline(aes(xintercept = lfc_cutoff), linetype = "dashed") +
   geom_vline(aes(xintercept = -lfc_cutoff), linetype = "dashed") +
-  geom_point(data = top_genes, shape = 21,fill = NA, color = "black") +  # Highlight top10
-  geom_text_repel(data = top_genes, aes(label = genes), size = 2, min.segment.length = 0) +
+  geom_point(data = top_genes, shape = 21, fill = NA, color = "black", size = 1.2) +  
+  geom_text_repel(data = top_genes, aes(label = gene), size = 3, min.segment.length = 0) +
   scale_color_manual(values=colors) +
   xlim(c(-10,10)) +
   theme_bw() 
 
-ggsave("results/volcano_plot.png", volcano, width = 14, height = 8, units = "cm")
+ggsave("results/volcano_plot_aba_vs_control.png", volcano, width = 14, height = 8, units = "cm")
 
 volcano 
 ```
-We can plot the DESeq2-normalized counts of two genes, just to confirm whether the volcano plot is correct. We pick one that is highly upregulated in `space_flight`conditions (AT5G04120), and one that is strongly downregulated (AT1G62280). 
+
+We can plot the DESeq2-normalized counts of two genes, just to confirm that the volcano plot is correct. We pick one that is highly upregulated in `aba` treated sanmples (AT5G52310), and one that is strongly downregulated (AT2G38310). 
 
 ```{R filename="R"}
 #| fig-width: 4
 #| fig-height: 2
-gene_1 <- plotCounts(dds, gene="AT5G04120", intgroup="condition", 
+gene_1 <- plotCounts(dds, gene="AT5G52310", intgroup="condition", 
                 returnData=TRUE)
 
-gene_2 <- plotCounts(dds, gene="AT1G62280", intgroup="condition", 
+gene_2 <- plotCounts(dds, gene="AT2G38310", intgroup="condition", 
                         returnData=TRUE)
 
 gene_1 %>% ggplot(aes(x = condition, y = count, colour = condition)) +
   geom_jitter(width = 0.05) +
   theme_bw()
+
 gene_2 %>% ggplot(aes(x = condition, y = count, colour = condition)) +
   geom_jitter(width = 0.05) +
   theme_bw()
@@ -449,19 +465,22 @@ Yep, that seems about right.
 
 ### Heatmap
 
-Alternatively, we could also display the expression levels of the DEGs in a heatmap. With the following code, we make a 'tidy' dataframe from the variance stabilised counts, and select only the genes that we consider DEGs. Remember, these are the genes that passed both a `padj` threshold and `log2FoldChange` threshold above.
+Alternatively, we could also display the expression levels of the DEGs in a heatmap. With the following code, we make a 'tidy' dataframe from the variance stabilised counts, and select only the genes that we consider DEGs. Remember, these are the genes that passed both a `padj` threshold and `log2FoldChange` threshold.
 
 ```{R filename="R"}
-variance_stabilised_df <- variance_stabilised_counts %>% 
-  as.data.frame() %>% 
-  rownames_to_column("gene") %>% 
-  pivot_longer(cols = - gene, names_to = "sample", values_to = "count")
+variance_stabilised_df <- variance_stabilised_counts %>%
+        as.data.frame() %>% 
+        rownames_to_column("gene")  %>%
+        pivot_longer(cols = - gene, names_to = "sample", values_to = "count")
 
-selection <- DEGs$genes
+aba_selection <- results_aba_vs_control %>% 
+        filter(padj < padj_cutoff) %>%
+        filter(abs(log2FoldChange) > lfc_cutoff) %>% 
+        pull(gene)
 
 vsd_selection <- variance_stabilised_df %>% 
-                    filter(gene %in% selection) %>%
-                    merge(metadata, by.x = "sample", by.y = "sample_name")
+                    filter(gene %in% aba_selection) %>%
+                    merge(metadata, by = "sample")
 ```
 
 Then, we draw a heatmap using the `tidyheatmaps` package. Essentially, this is a `tidyverse`-style wrapper of the more famous heatmap package `pheatmap`.
@@ -477,42 +496,139 @@ heatmap <- tidyheatmap(df = vsd_selection,
             annotation_col = c(condition),
             gaps_col = condition,
             cluster_rows = TRUE, # <2>
-            # cluster_cols = TRUE,
             color_legend_n = 7,
             show_rownames = FALSE,
-            show_colnames = FALSE
+            show_colnames = TRUE,
 )
+
 heatmap
 ```
 
 1. Scaling is very important here! Try removing this line, and see what happens to the heatmap. It will be dominated by some genes that are very highly expressed.
 2. This argument makes sure that genes with a similar expression pattern are clustered together in the heatmap.
 
-That looks pretty good. We can see that there are two clusters of genes: those expressed higher in the `spaceflight` condition, and those higher expressed in the `ground_control` condition. We can ask `tidyheatmaps` to gather genes into such clusters by adding the `kmeans_k` argument:
+That looks pretty good. We can see that there are two clusters of genes: those expressed higher in the `aba` condition with respect to `control`, and those higher expressed in the `aba` condition with respect to `control`. We can ask `tidyheatmaps` to add a little gap between these two clusters by adding `cutree_rows = 2` as an argument.
+:
 
 ```{R filename="R"}
 heatmap <- tidyheatmap(df = vsd_selection,
             rows = gene,
             columns = sample,
             values = count,
-            scale = "row", 
+            scale = "row", # <1>
             annotation_col = c(condition),
             gaps_col = condition,
-            kmeans_k = 2, # <1>
-            cluster_rows = TRUE, 
-            # cluster_cols = TRUE,
+            cluster_rows = TRUE, # <2>
             color_legend_n = 7,
-            show_rownames = TRUE, # <2>
-            show_colnames = FALSE
+            show_rownames = FALSE,
+            show_colnames = TRUE,
+            cutree_rows = 2
 )
+
+ggsave("results/heatmap_aba_DEGs.png", heatmap, width = 14, height = 8, units = "cm")
+
 heatmap
 ```
 
 1. This argument is added to perform k-means clustering and gather different genes into `n` clusters, in this case, 2 clusters.
 2. Since we will be plotting just two clusters, we can set `show_rownames` to `TRUE`.
 
-This simplifies our heatmap into two clusters, as expected. As you can imagine, more complex (and more interesting!) clustering patterns may emerge when the experimental design gets more complicated. 
+::: {.callout-tip title="Challenging exercise" icon="false"}
+This heatmap shows just the DEGs of `aba` vs `control`. Update the code to make a heatmap including _all_ DEGs of hormone-treated samples vs `control` conditions.
+:::
+
+
+::: {.callout-tip title="Hints" collapse="true"icon="false"}
+
+Do make such a heatmap, you need to take the following steps:
+
+1. Create result tables of all different hormone treatments vs `control` samples.
+2. Extract the gene name lists of DEGs in each condition
+3. Merge these lists into a master list of all DEGs.
+4. Subset the variance stabilized dataframe with this master DEG list.
+5. Create the heatmap.
+:::
+
+
+::: {.callout-caution title="Solution" collapse="true" icon="false"}
+
+First we make result tables for the missing contrasts:
+
+```{R filename="R"}
+contrast_to_test <-  c("condition", "auxin", "control")
+res_auxin_vs_control <- results(dds, contrast=contrast_to_test, alpha = 0.05)
+
+contrast_to_test <-  c("condition", "meja", "control")
+res_meja_vs_control <- results(dds, contrast=contrast_to_test, alpha = 0.05)
+
+contrast_to_test <-  c("condition", "acc", "control")
+res_acc_vs_control <- results(dds, contrast=contrast_to_test, alpha = 0.05)
+```
+
+Then we take the geneIDs of differentially expressed genes from each results table. It's a bit repetitive, but it works. 
+
+```{R filename="R"}
+padj_cutoff = 0.05
+lfc_cutoff = 1.5
+
+DEGs_aba <- res_aba_vs_control %>% 
+  as.data.frame() %>%
+  rownames_to_column("geneID") %>% 
+  filter(padj < padj_cutoff) %>%
+  filter(abs(log2FoldChange) > lfc_cutoff) %>% 
+  pull(geneID)
+
+DEGs_meja <- res_meja_vs_control %>% 
+  as.data.frame() %>%
+  rownames_to_column("geneID") %>% 
+  filter(padj < padj_cutoff) %>%
+  filter(abs(log2FoldChange) > lfc_cutoff) %>% 
+  pull(geneID)
+
+DEGs_auxin <- res_auxin_vs_control %>% 
+  as.data.frame() %>%
+  rownames_to_column("geneID") %>% 
+  filter(padj < padj_cutoff) %>%
+  filter(abs(log2FoldChange) > lfc_cutoff) %>% 
+  pull(geneID)
+
+DEGs_acc <- res_acc_vs_control %>% 
+  as.data.frame() %>%
+  rownames_to_column("geneID") %>% 
+  filter(padj < padj_cutoff) %>%
+  filter(abs(log2FoldChange) > lfc_cutoff) %>% 
+  pull(geneID)
+```
+
+Then we combine (`c()`) all four gene lists, and use the `unique()` function to make sure each gene ID occurs only once. Combining the list is absolutely necessary, using `unique()` is not, but it allows us to check how many unique DEGs we are about to plot.
+
+```{R filename="R"}
+all_DEGs <- unique(c(DEGs_aba, DEGs_auxin, DEGs_meja, DEGs_acc))
+
+length(all_DEGs)
+```
+
+Finally, we can subset the variance stabilized counts and plot the heatmap:
+
+```{R filename="R"}
+vsd_selection <- variance_stabilised_df %>% 
+                    filter(gene %in% all_DEGs) %>%
+                    merge(metadata, by = "sample")
+
+tidyheatmap(df = vsd_selection,
+            rows = gene,
+            columns = sample,
+            values = count,
+            scale = 'row',
+            annotation_col = c(condition),
+            gaps_col = condition,
+            cluster_rows = TRUE,
+            show_rownames = TRUE,
+            show_colnames = TRUE,
+            cutree_rows = 4)
+```
+:::
 
 ## What's next
 
-So far, we managed to find lists of genes that we find interesting. For example, we could be interested in *all* genes that are differentially expressed between two conditions, or choose to zoom in to only the upregulated or downregulated genes. In the next section, we will look into characterizing lists of genes using overrepresentation analysis. For example, we will look at GO-term enrichment.
+So far, we managed to find lists of differentially expressed genes. In the next section, we will look into characterizing lists of genes using overrepresentation analysis. For example, we will look at GO-term enrichment.

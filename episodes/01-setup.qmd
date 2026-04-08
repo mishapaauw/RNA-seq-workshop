@@ -48,6 +48,7 @@ BiocManager::install("enrichplot")
 BiocManager::install("clusterProfiler")
 BiocManager::install("org.At.tair.db")
 BiocManager::install("DESeq2")
+BiocManager::install("EnhancedVolcano")
 ```
 
 Test whether `DESeq2` was installed properly by loading it:
