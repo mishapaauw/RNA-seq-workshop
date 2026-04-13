@@ -726,7 +726,7 @@ Solution
 <div id="callout-13" class="callout-13-contents callout-collapse collapse">
 <div class="callout-body-container callout-body">
 <ol type="1">
-<li><code>samtools flagstat</code> shows us (just like the <code>STAR</code> log file) how many reads were mapped correctly. In addition, it tells us whether read pairs (if mapping paired-end data) mapped together as expected (are ‘properly paired’). Today, we used single-end reads so this is not relavant.</li>
+<li><code>samtools flagstat</code> shows us (just like the <code>STAR</code> log file) how many reads were mapped correctly. In addition, it tells us whether read pairs (if mapping paired-end data) mapped together as expected (are ‘properly paired’). Today, we used single-end reads so this is not relevant.</li>
 <li><code>samtools idxstats</code> shows us how many reads were mapped to each chromosome of the reference genome. This is useful to confirm whether the entire genome is evenly covered, or that there may be overrepresentation on e.g.&nbsp;the mitochondrial DNA.</li>
 </ol>
 </div>
@@ -794,7 +794,7 @@ Solution
 <span id="cb12-5"><a href="#cb12-5" aria-hidden="true" tabindex="-1"></a>  <span class="ex">software/STAR</span> <span class="dt">\</span></span>
 <span id="cb12-6"><a href="#cb12-6" aria-hidden="true" tabindex="-1"></a>    <span class="at">--runThreadN</span> 2 <span class="dt">\</span></span>
 <span id="cb12-7"><a href="#cb12-7" aria-hidden="true" tabindex="-1"></a>    <span class="at">--genomeDir</span> TAIR10_STAR_index <span class="dt">\</span></span>
-<span id="cb12-8"><a href="#cb12-8" aria-hidden="true" tabindex="-1"></a>    <span class="at">--readFilesIn</span> reads/<span class="va">${name}</span>.trimmed.fastq.gz <span class="dt">\</span></span>
+<span id="cb12-8"><a href="#cb12-8" aria-hidden="true" tabindex="-1"></a>    <span class="at">--readFilesIn</span> trimmed_reads/<span class="va">${name}</span>.trimmed.fastq.gz <span class="dt">\</span></span>
 <span id="cb12-9"><a href="#cb12-9" aria-hidden="true" tabindex="-1"></a>    <span class="at">--readFilesCommand</span> zcat <span class="dt">\</span></span>
 <span id="cb12-10"><a href="#cb12-10" aria-hidden="true" tabindex="-1"></a>    <span class="at">--outFileNamePrefix</span> mapped_reads/<span class="va">${name}</span>_ <span class="dt">\</span></span>
 <span id="cb12-11"><a href="#cb12-11" aria-hidden="true" tabindex="-1"></a>    <span class="at">--outSAMtype</span> BAM SortedByCoordinate</span>
