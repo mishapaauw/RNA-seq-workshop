@@ -4,35 +4,50 @@
     "href": "index.html",
     "title": "Welcome",
     "section": "",
-    "text": "Welcome to the RNA-seq workshop of the bioDSC. This workshop will introduce you to the basics of gene expression analysis using RNA-Seq. It is going to be fun and empowering! You will discover how the total RNA pool of an organism is converted to short sequences called “reads” that can in turn be used to get insights into gene expression. Through careful experimental design, this gene expression information can answer research questions and offer biological insights.\nThe workshop consists of two core parts:\nThe materials on this website are meant to be discussed in two four-hour trainer-led workshop sessions. However, it should also be possible to follow the materials on your own, at your own pace. Regardless of how you go through the materials, we hope that you will learn something useful!"
+    "text": "Welcome to the RNA-seq workshop of the bioDSC. This workshop will introduce you to the basics of gene expression analysis using RNA-Seq. It is going to be fun and empowering! You will discover how the total RNA pool of an organism is converted to short sequences called “reads” that can in turn be used to get insights into gene expression. Through careful experimental design, this gene expression information can answer research questions and offer biological insights.\nThe workshop consists of two core parts:\nThe materials on this website are meant to be discussed in two four-hour trainer-led workshop sessions. However, it should also be possible to follow the materials on your own, at your own pace. Regardless of how you go through the materials, we hope that you will learn something useful!",
+    "crumbs": [
+      "Welcome"
+    ]
   },
   {
     "objectID": "index.html#learning-objectives",
     "href": "index.html#learning-objectives",
     "title": "Welcome",
     "section": "Learning objectives",
-    "text": "Learning objectives\nAfter this workshop, you should be able to:\n\nIdentify good practices when designing a RNA-Seq experiment\nAssess the quality of RNA-seq sequencing data (“reads”) using the command-line instructions\nAlign RNA-seq reads to a reference genome using a splice-aware aligner (e.g. STAR).\nGenerate a count matrix from the RNA-seq data alignment\nPerform a QC of your experiment through Principal Component Analysis (PCA) and sample clustering.\nExecute a differential gene expression analysis using R and the DESeq2 package.\nBe able to create key plots: volcano plot, heatmap and clustering of differentially expressed genes."
+    "text": "Learning objectives\nAfter this workshop, you should be able to:\n\nIdentify good practices when designing a RNA-Seq experiment\nAssess the quality of RNA-seq sequencing data (“reads”) using the command-line instructions\nAlign RNA-seq reads to a reference genome using a splice-aware aligner (e.g. STAR).\nGenerate a count matrix from the RNA-seq data alignment\nPerform a QC of your experiment through Principal Component Analysis (PCA) and sample clustering.\nExecute a differential gene expression analysis using R and the DESeq2 package.\nBe able to create key plots: volcano plot, heatmap and clustering of differentially expressed genes.",
+    "crumbs": [
+      "Welcome"
+    ]
   },
   {
     "objectID": "index.html#schedule",
     "href": "index.html#schedule",
     "title": "Welcome",
     "section": "Schedule",
-    "text": "Schedule\nFor the April 2026 round of this workshop, this is the schedule:\n\n\n\n\n\n\n\n\n\nDate\nTime\nLocation\nTopics\n\n\n\n\n13-04-2026\n13:00-17:00\nAmsterdam Sciencepark, B0.202\nExperimental considarations and read mapping\n\n\n15-04-2026\n13:00-17:00\nAmsterdam Sciencepark, B0.201\nDifferential gene expression and enrichment analysis"
+    "text": "Schedule\nFor the April 2026 round of this workshop, this is the schedule:\n\n\n\n\n\n\n\n\n\nDate\nTime\nLocation\nTopics\n\n\n\n\n13-04-2026\n13:00-17:00\nAmsterdam Sciencepark, B0.202\nExperimental considarations and read mapping\n\n\n15-04-2026\n13:00-17:00\nAmsterdam Sciencepark, B0.201\nDifferential gene expression and enrichment analysis",
+    "crumbs": [
+      "Welcome"
+    ]
   },
   {
     "objectID": "index.html#maintainers",
     "href": "index.html#maintainers",
     "title": "Welcome",
     "section": "Maintainers",
-    "text": "Maintainers\nCurrent maintainers of this workshop page are members of the bioDSC (University of Amsterdam)."
+    "text": "Maintainers\nCurrent maintainers of this workshop page are members of the bioDSC (University of Amsterdam).",
+    "crumbs": [
+      "Welcome"
+    ]
   },
   {
     "objectID": "index.html#credits",
     "href": "index.html#credits",
     "title": "Welcome",
     "section": "Credits",
-    "text": "Credits\nThis workshop is in part based on other teaching materials available online. The primary source is the RNA-seq lesson designed by the Science Park Study Group, which in turn was based on Harvard Chan Bioinformatics Core (HBC) RNA-seq materials. Both are open acces materials distributed under a CC BY 4.0 license. Another great RNA-seq workshop is Omics Data Analysis from UCLouvain."
+    "text": "Credits\nThis workshop is in part based on other teaching materials available online. The primary source is the RNA-seq lesson designed by the Science Park Study Group, which in turn was based on Harvard Chan Bioinformatics Core (HBC) RNA-seq materials. Both are open acces materials distributed under a CC BY 4.0 license. Another great RNA-seq workshop is Omics Data Analysis from UCLouvain.",
+    "crumbs": [
+      "Welcome"
+    ]
   },
   {
     "objectID": "appendices/01-compute-cluster-execution.html",
