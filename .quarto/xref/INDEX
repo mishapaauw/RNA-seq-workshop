@@ -28,5 +28,29 @@
   },
   "episodes/06-practice-more.qmd": {
     "06-practice-more.html": "8ced91d9"
+  },
+  "episodes/appendices/05-pathway-enrichment.qmd": {
+    "05-pathway-enrichment.html": "f4a43f50"
+  },
+  "episodes/appendices/06-practice-more.qmd": {
+    "06-practice-more.html": "b096d558"
+  },
+  "appendices/05-pathway-enrichment.qmd": {
+    "05-pathway-enrichment.html": "e46e4faa"
+  },
+  "appendices/06-practice-more.qmd": {
+    "06-practice-more.html": "850488f6"
+  },
+  "appendices/02-compute-cluster-execution.qmd": {
+    "02-compute-cluster-execution.html": "ebec8180"
+  },
+  "appendices/01-optimal-k-clusters.qmd": {
+    "01-optimal-k-clusters.html": "54914cf7"
+  },
+  "appendices/01-compute-cluster-execution.qmd": {
+    "01-compute-cluster-execution.html": "8a7012ac"
+  },
+  "appendices/02-optimal-k-clusters.qmd": {
+    "02-optimal-k-clusters.html": "440f842b"
   }
 }

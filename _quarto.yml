@@ -16,6 +16,7 @@ website:
   site-url: index.qmd
   favicon: "images/bioDSC-without-dots-transparent.png"
   page-navigation: true
+  bread-crumbs: false
   sidebar:
     search: false
     id: main
@@ -24,7 +25,11 @@ website:
     style: "docked"
     background: primary
     foreground: light
-    contents: episodes/*
+    contents:
+      - section: "Episodes"
+        contents: episodes/*
+      - section: "Appendices"
+        contents: appendices/*
 
 format:
   html:

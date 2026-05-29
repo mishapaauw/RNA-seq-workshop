@@ -1,0 +1,21 @@
+---
+title: "Batch processing samples on Crunchomics"
+format:
+    html:
+        fig-width: 8
+        fig-height: 4
+        code-annotations: hover
+        from: markdown+emoji
+        link-external-icon: true
+        link-external-newwindow: true
+---
+
+::: {.callout-warning}
+This appendix is coming soon! Stay tuned!
+:::
+
+In the [Read Mapping](../episodes/03-mapping-reads.qmd) episode, we learned how to map reads with a few small sample datasets. In reality, you will have many more samples, that are also much bigger per sample. You will need more compute power to analyze such samples, and often, you will use your institutional compute cluster for this. At the University of Amsterdam, we use [Crunchomics](https://crunchomics-documentation.readthedocs.io/en/latest/index.html).
+
+In this appendix, you will learn how to submit several trimming and mapping jobs in parallel to the compute cluster.
+
+
